@@ -1,0 +1,22 @@
+- name: Fulfillment webhook
+  hosts: localhost
+  ## Define our source for events
+  sources:
+    - ansible.eda.webhook:
+        host: 0.0.0.0
+        port: 5000
+  ## Define the conditions we are looking for
+  rules:
+    - name: Create hosted cluster
+      condition: event.payload.message == "create_hosted_cluster"
+      action:
+        run_job_template:
+          name: "create-hosted-cluster"
+          organization: "cloudkit"
+
+    - name: Delete hosted cluster
+      condition: event.payload.message == "delete_hosted_cluster"
+      action:
+        run_job_template:
+          name: "delete-hosted-cluster"
+          organization: "cloudkit"

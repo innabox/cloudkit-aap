@@ -1,0 +1,6 @@
+---
+- name: Create a hosted control plane cluster
+  hosts: localhost
+  gather_facts: false
+
+  tasks:

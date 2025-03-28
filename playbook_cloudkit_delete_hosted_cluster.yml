@@ -1,0 +1,6 @@
+---
+- name: Delete a hosted control plane cluster
+  hosts: localhost
+  gather_facts: false
+
+  tasks:
