@@ -1,6 +1,12 @@
 ---
-- name: Create a hosted control plane cluster
+- name: Create a hosted control plane cluster from a ClusterOrder
   hosts: localhost
   gather_facts: false
 
-  tasks:
+  roles:
+    - role: hosted_cluster
+      vars:
+        hosted_cluster_name: "{{ cluster_order.metadata.name }}"
+        hosted_cluster_namespace: "{{ cluster_order.metadata.namespace }}"
+        hosted_cluster_template_id: "{{ cluster_order.spec.templateID }}"
+        hosted_cluster_state: present

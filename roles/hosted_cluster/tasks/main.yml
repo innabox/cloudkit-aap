@@ -1,0 +1,127 @@
+---
+- name: Retrieve template default parameters from template ID
+  ansible.builtin.include_vars:
+    file: "{{ hosted_cluster_template_id }}.yml"
+
+- name: Create Secret resource containning pull-secret
+  kubernetes.core.k8s:
+    state: "{{ hosted_cluster_state }}"
+    definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: "pullsecret-cluster-{{ hosted_cluster_name }}"
+        namespace: "{{ hosted_cluster_namespace }}"
+      data:
+        .dockerconfigjson: "{{ hosted_cluster_template.parameters.pull_secret }}"
+      type: kubernetes.io/dockerconfigjson
+
+- name: Create Secret resource containing ssh-key
+  kubernetes.core.k8s:
+    state: "{{ hosted_cluster_state }}"
+    definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: "sshkey-cluster-{{ hosted_cluster_name }}"
+        namespace: "{{ hosted_cluster_namespace }}"
+      stringData:
+        id_rsa.pub: "{{ hosted_cluster_template.parameters.ssh_key }}"
+
+- name: Create HostedCluster resource
+  kubernetes.core.k8s:
+    state: "{{ hosted_cluster_state }}"
+    definition:
+      apiVersion: hypershift.openshift.io/v1alpha1
+      kind: HostedCluster
+      metadata:
+        name: "{{ hosted_cluster_name }}"
+        namespace: "{{ hosted_cluster_namespace }}"
+        labels:
+          "cluster.open-cluster-management.io/clusterset": "default"
+      spec:
+        release:
+          image: "quay.io/openshift-release-dev/ocp-release:{{ hosted_cluster_template.ocp_version }}"
+        pullSecret:
+          name: "pullsecret-cluster-{{ hosted_cluster_name }}"
+        sshKey:
+          name: "sshkey-cluster-{{ hosted_cluster_name }}"
+        networking:
+          clusterNetwork:
+            - cidr: 10.132.0.0/14
+          serviceNetwork:
+            - cidr: 172.31.0.0/16
+        platform:
+          type: Agent
+          agent:
+            agentNamespace: ''
+        dns:
+          baseDomain: "{{ hosted_cluster_template.parameters.base_domain }}"
+        infraID: "{{ hosted_cluster_name }}"
+        services:
+          - service: APIServer
+            servicePublishingStrategy:
+              type: LoadBalancer
+          - service: OAuthServer
+            servicePublishingStrategy:
+              type: Route
+          - service: OIDC
+            servicePublishingStrategy:
+              type: Route
+          - service: Konnectivity
+            servicePublishingStrategy:
+              type: Route
+          - service: Ignition
+            servicePublishingStrategy:
+              type: Route
+          - service: Kubelet
+            servicePublishingStrategy:
+              type: Route
+        controllerAvailabilityPolicy: HighlyAvailable
+        infrastructureAvailabilityPolicy: HighlyAvailable
+        olmCatalogPlacement: management
+
+- name: Create NodePool resource
+  kubernetes.core.k8s:
+    state: "{{ hosted_cluster_state }}"
+    definition:
+      apiVersion: hypershift.openshift.io/v1beta1
+      kind: NodePool
+      metadata:
+        name: "nodepool-{{ hosted_cluster_name }}"
+        namespace: "{{ hosted_cluster_namespace }}"
+      spec:
+        clusterName: "{{ hosted_cluster_name }}"
+        replicas: "{{ hosted_cluster_template.parameters.number_of_nodes }}"
+        management:
+          autoRepair: false
+          upgradeType: InPlace
+        platform:
+          type: Agent
+          agent:
+            agentLabelSelector:
+              matchLabels:
+                infraenvs.agent-install.openshift.io: "{{ hosted_cluster_template.infraenv }}"
+        release:
+          image: "quay.io/openshift-release-dev/ocp-release:{{ hosted_cluster_template.ocp_version }}"
+
+- name: Create ManagedCluster resource
+  kubernetes.core.k8s:
+    state: "{{ hosted_cluster_state }}"
+    definition:
+      apiVersion: cluster.open-cluster-management.io/v1
+      kind: ManagedCluster
+      metadata:
+        name: "{{ hosted_cluster_name }}"
+        namespace: "{{ hosted_cluster_namespace }}"
+        annotations:
+          import.open-cluster-management.io/hosting-cluster-name: "{{ hosted_cluster_name }}"
+          import.open-cluster-management.io/klusterlet-deploy-mode: Hosted
+          open-cluster-management/created-via: hypershift
+        labels:
+          name: "{{ hosted_cluster_name }}"
+          cloud: BareMetal
+          vendor: OpenShift
+          cluster.open-cluster-management.io/clusterset: default
+      spec:
+        hubAcceptsClient: true
