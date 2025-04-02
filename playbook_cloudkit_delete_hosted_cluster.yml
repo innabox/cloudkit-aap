@@ -3,6 +3,9 @@
   hosts: localhost
   gather_facts: false
 
+  vars:
+    cluster_order: "{{ ansible_eda.event.payload }}"
+
   roles:
     - role: hosted_cluster
       vars:

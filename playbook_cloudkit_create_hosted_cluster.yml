@@ -4,13 +4,7 @@
   gather_facts: false
 
   vars:
-    cluster_order:
-      metadata:
-        name: "toto"
-        namespace: "toto"
-      spec:
-        templateID: "ocp.4-18.small"
-
+    cluster_order: "{{ ansible_eda.event.payload }}"
 
   roles:
     - role: hosted_cluster
