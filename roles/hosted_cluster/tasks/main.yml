@@ -57,7 +57,7 @@
             agentNamespace: ''
         dns:
           baseDomain: "{{ hosted_cluster_template.parameters.base_domain }}"
-        infraID: "{{ hosted_cluster_name }}"
+        infraID: "{{ hosted_cluster_nacloudkitNamePrefixme }}"
         services:
           - service: APIServer
             servicePublishingStrategy:
@@ -104,24 +104,3 @@
                 infraenvs.agent-install.openshift.io: "{{ hosted_cluster_template.infraenv }}"
         release:
           image: "quay.io/openshift-release-dev/ocp-release:{{ hosted_cluster_template.ocp_version }}"
-
-- name: Create ManagedCluster resource
-  kubernetes.core.k8s:
-    state: "{{ hosted_cluster_state }}"
-    definition:
-      apiVersion: cluster.open-cluster-management.io/v1
-      kind: ManagedCluster
-      metadata:
-        name: "{{ hosted_cluster_name }}"
-        namespace: "{{ hosted_cluster_namespace }}"
-        annotations:
-          import.open-cluster-management.io/hosting-cluster-name: "{{ hosted_cluster_name }}"
-          import.open-cluster-management.io/klusterlet-deploy-mode: Hosted
-          open-cluster-management/created-via: hypershift
-        labels:
-          name: "{{ hosted_cluster_name }}"
-          cloud: BareMetal
-          vendor: OpenShift
-          cluster.open-cluster-management.io/clusterset: default
-      spec:
-        hubAcceptsClient: true
