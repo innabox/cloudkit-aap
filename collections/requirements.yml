@@ -1,2 +1,4 @@
 ---
-collections: []
+collections:
+  - name: kubernetes.core
+    version: 5.2.0
