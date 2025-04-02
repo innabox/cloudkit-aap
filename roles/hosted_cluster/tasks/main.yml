@@ -1,7 +1,7 @@
 ---
-- name: Retrieve template default parameters from template ID
-  ansible.builtin.include_vars:
-    file: "{{ hosted_cluster_template_id }}.yml"
+- name: Merge default template with user-provided template parameters
+  ansible.builtin.include_tasks:
+    file: template.yml
 
 - name: Manage Secret resource containning pull-secret
   kubernetes.core.k8s:
@@ -56,7 +56,7 @@
         platform:
           type: Agent
           agent:
-            agentNamespace: "{{ hosted_cluster_template.agent_namespace }}"
+            agentNamespace: "{{ hosted_cluster_default_agent_namespace }}"
         dns:
           baseDomain: "{{ hosted_cluster_template.parameters.base_domain }}"
         infraID: "{{ hosted_cluster_name }}"
@@ -100,6 +100,6 @@
           agent:
             agentLabelSelector:
               matchLabels:
-                infraenvs.agent-install.openshift.io: "{{ hosted_cluster_template.infraenv }}"
+                infraenvs.agent-install.openshift.io: "{{ hostted_cluster_default_infraenv }}"
         release:
           image: "quay.io/openshift-release-dev/ocp-release:{{ hosted_cluster_template.ocp_version }}"
