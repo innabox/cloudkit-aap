@@ -3,7 +3,7 @@
   ansible.builtin.include_vars:
     file: "{{ hosted_cluster_template_id }}.yml"
 
-- name: Create Secret resource containning pull-secret
+- name: Manage Secret resource containning pull-secret
   kubernetes.core.k8s:
     state: "{{ hosted_cluster_state }}"
     definition:
@@ -13,10 +13,12 @@
         name: "pullsecret-cluster-{{ hosted_cluster_name }}"
         namespace: "{{ hosted_cluster_namespace }}"
       data:
-        .dockerconfigjson: "{{ hosted_cluster_template.parameters.pull_secret }}"
+        .dockerconfigjson: >
+          {{ hosted_cluster_template.parameters.pull_secret | to_json | ansible.builtin.b64encode }}
       type: kubernetes.io/dockerconfigjson
+  no_log: true
 
-- name: Create Secret resource containing ssh-key
+- name: Manage Secret resource containing ssh-key
   kubernetes.core.k8s:
     state: "{{ hosted_cluster_state }}"
     definition:
@@ -28,7 +30,7 @@
       stringData:
         id_rsa.pub: "{{ hosted_cluster_template.parameters.ssh_key }}"
 
-- name: Create HostedCluster resource
+- name: Manage HostedCluster resource
   kubernetes.core.k8s:
     state: "{{ hosted_cluster_state }}"
     definition:
@@ -57,7 +59,7 @@
             agentNamespace: "{{ hosted_cluster_template.agent_namespace }}"
         dns:
           baseDomain: "{{ hosted_cluster_template.parameters.base_domain }}"
-        infraID: "{{ hosted_cluster_nacloudkitNamePrefixme }}"
+        infraID: "{{ hosted_cluster_name }}"
         services:
           - service: APIServer
             servicePublishingStrategy:
@@ -74,14 +76,11 @@
           - service: Ignition
             servicePublishingStrategy:
               type: Route
-          - service: Kubelet
-            servicePublishingStrategy:
-              type: Route
         controllerAvailabilityPolicy: HighlyAvailable
         infrastructureAvailabilityPolicy: HighlyAvailable
         olmCatalogPlacement: management
 
-- name: Create NodePool resource
+- name: Manage NodePool resource
   kubernetes.core.k8s:
     state: "{{ hosted_cluster_state }}"
     definition:
@@ -92,7 +91,7 @@
         namespace: "{{ hosted_cluster_namespace }}"
       spec:
         clusterName: "{{ hosted_cluster_name }}"
-        replicas: "{{ hosted_cluster_template.parameters.number_of_nodes }}"
+        replicas: "{{ hosted_cluster_template.parameters.number_of_nodes | int }}"
         management:
           autoRepair: false
           upgradeType: InPlace
