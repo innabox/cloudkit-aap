@@ -54,7 +54,7 @@
         platform:
           type: Agent
           agent:
-            agentNamespace: ''
+            agentNamespace: "{{ hosted_cluster_template.agent_namespace }}"
         dns:
           baseDomain: "{{ hosted_cluster_template.parameters.base_domain }}"
         infraID: "{{ hosted_cluster_nacloudkitNamePrefixme }}"
