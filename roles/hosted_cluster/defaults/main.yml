@@ -1,3 +1,5 @@
 ---
-hosted_cluster_default_infraenv: "hardware-inventory"
 hosted_cluster_default_agent_namespace: "hardware-inventory"
+hosted_cluster_default_agent_label_selector:
+  matchLabels:
+    cloud.openshift.com/clusterorder: "{{ hosted_cluster_name }}"

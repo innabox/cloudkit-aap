@@ -94,8 +94,6 @@
         platform:
           type: Agent
           agent:
-            agentLabelSelector:
-              matchLabels:
-                infraenvs.agent-install.openshift.io: "{{ hosted_cluster_default_infraenv }}"
+            agentLabelSelector: "{{ hosted_cluster_default_agent_label_selector }}"
         release:
           image: "quay.io/openshift-release-dev/ocp-release:{{ hosted_cluster_settings.ocp_version }}"

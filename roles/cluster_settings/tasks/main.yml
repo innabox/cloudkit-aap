@@ -11,7 +11,7 @@
     namespace: "{{ cluster_settings_default_credentials_secret_namespace }}"
   register: default_cluster_credentials
   when: cluster_settings_template_parameters.ssh_key is not defined or cluster_settings_template_parameters.pull_secret is not defined
-  no_log: false
+  no_log: true
 
 - name: Set default pull-secret and ssh-key as template default parameters
   ansible.builtin.set_fact:
@@ -28,7 +28,7 @@
   ansible.builtin.set_fact:
     cluster_settings_template_defaults: >
       {{ cluster_settings_template_defaults | combine(cluster_settings_template_parameters) }}
-  no_log: false
+  no_log: true
 
 - name: Merge template parameters with read-only settings
   ansible.builtin.set_fact:

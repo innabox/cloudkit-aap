@@ -11,9 +11,3 @@ cluster_order:
 cluster_settings_default_credentials_secret_namespace: "default"
 hosted_cluster_default_infraenv: "test"
 hosted_cluster_default_agent_namespace: "test"
-
-
-
-
-
-
