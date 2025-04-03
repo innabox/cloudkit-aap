@@ -1,0 +1,7 @@
+---
+cluster_settings_result:
+  ocp_version: 4.17.0-multi
+
+cluster_settings_template_defaults:
+  number_of_nodes: 2
+  base_domain: "svc.massopen.cloud"

@@ -1,0 +1,3 @@
+---
+cluster_settings_default_credentials_secret_name: "default-cluster-credentials"
+cluster_settings_default_credentials_secret_namespace: "fulfillment-aap"

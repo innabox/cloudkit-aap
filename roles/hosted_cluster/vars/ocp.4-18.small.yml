@@ -1,6 +1,0 @@
----
-hosted_cluster_template_defaults:
-  ocp_version: 4.17.0-multi
-  parameters:
-    number_of_nodes: 2
-    base_domain: "svc.massopen.cloud"
