@@ -28,6 +28,7 @@
   ansible.builtin.set_fact:
     cluster_settings_template_defaults: >
       {{ cluster_settings_template_defaults | combine(cluster_settings_template_parameters) }}
+  when: cluster_settings_template_parameters is defined
   no_log: true
 
 - name: Merge template parameters with read-only settings
