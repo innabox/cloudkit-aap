@@ -8,8 +8,7 @@
       metadata:
         name: "pullsecret-cluster-{{ hosted_cluster_name }}"
         namespace: "{{ hosted_cluster_namespace }}"
-        labels:
-          "{{ hosted_cluster_default_cluster_order_label }}"
+        labels: "{{ hosted_cluster_default_cluster_order_label }}"
       data:
         .dockerconfigjson: >
           {{ hosted_cluster_settings.pull_secret }}
@@ -25,8 +24,7 @@
       metadata:
         name: "sshkey-cluster-{{ hosted_cluster_name }}"
         namespace: "{{ hosted_cluster_namespace }}"
-        labels:
-          "{{ hosted_cluster_default_cluster_order_label }}"
+        labels: "{{ hosted_cluster_default_cluster_order_label }}"
       data:
         id_rsa.pub: "{{ hosted_cluster_settings.ssh_key }}"
 
@@ -39,9 +37,7 @@
       metadata:
         name: "{{ hosted_cluster_name }}"
         namespace: "{{ hosted_cluster_namespace }}"
-        labels:
-          "cluster.open-cluster-management.io/clusterset": "default"
-          "{{ hosted_cluster_default_cluster_order_label }}"
+        labels: "{{ {'cluster.open-cluster-management.io/clusterset': 'default'} | combine(hosted_cluster_default_cluster_order_label) }}"
       spec:
         release:
           image: "quay.io/openshift-release-dev/ocp-release:{{ hosted_cluster_settings.ocp_version }}"
@@ -90,8 +86,7 @@
       metadata:
         name: "nodepool-{{ hosted_cluster_name }}"
         namespace: "{{ hosted_cluster_namespace }}"
-        labels:
-          "{{ hosted_cluster_default_cluster_order_label }}"
+        labels: "{{ hosted_cluster_default_cluster_order_label }}"
       spec:
         clusterName: "{{ hosted_cluster_name }}"
         replicas: "{{ hosted_cluster_settings.number_of_nodes | int }}"
@@ -102,7 +97,6 @@
           type: Agent
           agent:
             agentLabelSelector:
-              matchLabels:
-                "{{ hosted_cluster_default_cluster_order_label }}"
+              matchLabels: "{{ hosted_cluster_default_cluster_order_label }}"
         release:
           image: "quay.io/openshift-release-dev/ocp-release:{{ hosted_cluster_settings.ocp_version }}"

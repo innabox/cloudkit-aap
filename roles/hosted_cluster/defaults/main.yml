@@ -1,3 +1,4 @@
 ---
 hosted_cluster_default_agent_namespace: "hardware-inventory"
-hosted_cluster_default_cluster_order_label: "cloudkit.openshift.io/clusterorder: {{ hosted_cluster_name }}"
+hosted_cluster_default_cluster_order_label:
+  "cloudkit.openshift.io/clusterorder": "{{ hosted_cluster_name }}"
