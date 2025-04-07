@@ -10,7 +10,6 @@
     - role: cluster_working_namespace
       vars:
         cluster_working_namespace_cluster_order_name: "{{ cluster_order.metadata.name }}"
-        cluster_working_namespace_cluster_order_namespace: "{{ cluster_order.metadata.namespace }}"
 
     - role: cluster_settings
       vars:
