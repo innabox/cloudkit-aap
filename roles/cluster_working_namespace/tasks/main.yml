@@ -4,7 +4,6 @@
     kind: Namespace
     label_selectors:
       - "{{ cluster_working_namespace_cluster_order_name_label }}={{ cluster_working_namespace_cluster_order_name }}"
-      - "{{ cluster_working_namespace_cluster_order_namespace_label }}={{ cluster_working_namespace_cluster_order_namespace }}"
   register: cluster_working_namespace_list
 
 - name: Check if the working cluster namespace is found

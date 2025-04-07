@@ -1,3 +1,2 @@
 ---
 cluster_working_namespace_cluster_order_name_label: "cloudkit.openshift.io/clusterorder"
-cluster_working_namespace_cluster_order_namespace_label: "cloudkit.openshift.io/clusterordernamespace"
