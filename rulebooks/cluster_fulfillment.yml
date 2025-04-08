@@ -1,6 +1,7 @@
 ---
 - name: Fulfillment webhook
   hosts: localhost
+  execution_strategy: parallel
   sources:
     - ansible.eda.webhook:
         host: 0.0.0.0
