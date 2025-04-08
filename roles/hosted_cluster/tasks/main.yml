@@ -100,3 +100,15 @@
               matchLabels: "{{ hosted_cluster_default_cluster_order_label }}"
         release:
           image: "quay.io/openshift-release-dev/ocp-release:{{ hosted_cluster_settings.ocp_version }}"
+
+- name: Wait for HostedCluster infrastructure to be ready
+  kubernetes.core.k8s_info:
+    kind: HostedCluster
+    namespace: "{{ hosted_cluster_namespace }}"
+    name: "{{ hosted_cluster_name }}"
+    wait_condition:
+      reason: "AsExpected"
+      status: "True"
+      type: "InfrastructureReady"
+    wait_timeout: 600
+  register: hosted_cluster_result
