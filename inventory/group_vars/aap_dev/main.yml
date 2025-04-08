@@ -1,0 +1,6 @@
+---
+aap_projects:
+  - aap_project_name: cloudkit-aap
+    aap_project_git_uri: https://github.com/innabox/cloudkit-aap.git
+    aap_project_git_branch: main
+    aap_organization_name: "cloudkit"

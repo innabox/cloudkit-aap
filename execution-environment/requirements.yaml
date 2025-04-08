@@ -9,3 +9,6 @@ collections:
     version: 10.5.0
   - name: ansible.utils
     version: 5.1.2
+  - name: "cloudkit.config_as_code"
+    source: "collections/ansible_collections/cloudkit/config_as_code"
+    type: dir
