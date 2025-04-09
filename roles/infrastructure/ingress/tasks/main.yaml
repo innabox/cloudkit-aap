@@ -1,0 +1,7 @@
+- name: Create ingress infrastructure
+  when: hosted_cluster_state == "present"
+  ansible.builtin.include_tasks: create_ingress_infra.yaml
+
+- name: Destroy ingress infrastructure
+  when: hosted_cluster_state == "absent"
+  ansible.builtin.include_tasks: destroy_ingress_infra.yaml

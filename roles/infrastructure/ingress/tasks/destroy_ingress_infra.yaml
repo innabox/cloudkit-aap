@@ -1,0 +1,14 @@
+- name: Destroy ingress floating ip
+  ansible.builtin.include_role:
+    name: infrastructure
+    tasks_from: destroy_floating_ip.yaml
+  vars:
+    floating_ip_name: "{{ hosted_cluster_name }}-ingress"  # noqa:var-naming[no-role-prefix]
+
+- name: Delete ingress dns record
+  amazon.aws.route53:
+    state: absent
+    zone: "{{ hosted_cluster_settings.base_domain }}"
+    record: "*.apps.{{ hosted_cluster_name }}.{{ hosted_cluster_settings.base_domain }}"
+    type: A
+    wait: true

@@ -1,0 +1,3 @@
+infrastructure_dns_ttl: 1800
+infrastructure_resource_wait_retries: 360
+infrastructure_resource_wait_delay: 5

@@ -1,0 +1,2 @@
+playbook_cloudkit_delete_hosted_cluster.yml var-naming[no-role-prefix]
+playbook_cloudkit_create_hosted_cluster.yml var-naming[no-role-prefix]

@@ -2,6 +2,8 @@
 - name: Teardown a hosted control plane cluster from a ClusterOrder
   hosts: localhost
   gather_facts: false
+  environment:
+    OS_CLOUD: "{{ openstack_cloud_name|default('devstack') }}"
 
   vars:
     cluster_order: "{{ ansible_eda.event.payload }}"
@@ -17,6 +19,20 @@
         cluster_settings_template_parameters: "{{ cluster_order.spec.templateParameters }}"
 
     - role: hosted_cluster
+      vars:
+        hosted_cluster_name: "{{ cluster_order.metadata.name }}"
+        hosted_cluster_namespace: "{{ cluster_working_namespace_result }}"
+        hosted_cluster_settings: "{{ cluster_settings_result }}"
+        hosted_cluster_state: absent
+
+    - role: infrastructure/api
+      vars:
+        hosted_cluster_name: "{{ cluster_order.metadata.name }}"
+        hosted_cluster_namespace: "{{ cluster_working_namespace_result }}"
+        hosted_cluster_settings: "{{ cluster_settings_result }}"
+        hosted_cluster_state: absent
+
+    - role: infrastructure/ingress
       vars:
         hosted_cluster_name: "{{ cluster_order.metadata.name }}"
         hosted_cluster_namespace: "{{ cluster_working_namespace_result }}"

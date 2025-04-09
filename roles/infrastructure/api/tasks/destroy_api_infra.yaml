@@ -1,0 +1,25 @@
+- name: Wait for hostedcluster to finish deleting
+  kubernetes.core.k8s_info:
+    api_version: hypershift.openshift.io/v1beta1
+    kind: HostedCluster
+    namespace: "{{ hosted_cluster_namespace }}"
+    name: "{{ hosted_cluster_name }}"
+  register: hosted_cluster_check
+  until: not hosted_cluster_check.resources
+  retries: 360
+  delay: 5
+
+- name: Destroy api floating ip
+  ansible.builtin.include_role:
+    name: infrastructure
+    tasks_from: destroy_floating_ip.yaml
+  vars:
+    floating_ip_name: "{{ hosted_cluster_name }}-api"  # noqa:var-naming[no-role-prefix]
+
+- name: Delete api dns record
+  amazon.aws.route53:
+    state: absent
+    zone: "{{ hosted_cluster_settings.base_domain }}"
+    record: "api.{{ hosted_cluster_name }}.{{ hosted_cluster_settings.base_domain }}"
+    type: A
+    wait: true
