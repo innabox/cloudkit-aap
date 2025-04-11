@@ -61,6 +61,8 @@
           - service: APIServer
             servicePublishingStrategy:
               type: LoadBalancer
+              loadBalancer:
+                hostname: "api.{{ hosted_cluster_name }}.{{ hosted_cluster_settings.base_domain }}"
           - service: OAuthServer
             servicePublishingStrategy:
               type: Route
