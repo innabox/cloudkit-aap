@@ -9,8 +9,8 @@
 
   # wait until agents are assigned to the cluster
   until: agents.resources
-  retries: "{{ agent_wait_retries | default(infrastructure_resource_wait_retries) }}"
-  delay: "{{ agent_wait_delay | default(infrastructure_resource_wait_delay) }}"
+  retries: "{{ infrastructure_ingress_resource_wait_retries }}"
+  delay: "{{ infrastructure_ingress_resource_wait_delay }}"
 
 - name: Set worker_node_ip
   ansible.builtin.set_fact:
@@ -48,7 +48,7 @@
     zone: "{{ hosted_cluster_settings.base_domain }}"
     record: "*.apps.{{ hosted_cluster_name }}.{{ hosted_cluster_settings.base_domain }}"
     type: A
-    ttl: "{{ infrastructure_dns_ttl }}"
+    ttl: "{{ ingress_dns_ttl }}"
     value: "{{ ingress_floating_ip }}"
     wait: true
     overwrite: true

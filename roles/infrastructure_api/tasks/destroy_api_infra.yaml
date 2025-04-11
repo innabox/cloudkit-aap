@@ -11,7 +11,7 @@
 
 - name: Destroy api floating ip
   ansible.builtin.include_role:
-    name: massopen.cloud.floating_ip
+    name: massopencloud.esi.floating_ip
     tasks_from: destroy_floating_ip.yaml
   vars:
     floating_ip_name: "{{ hosted_cluster_name }}-api"  # noqa:var-naming[no-role-prefix]

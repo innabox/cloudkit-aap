@@ -10,31 +10,28 @@
 
   roles:
     - role: cluster_working_namespace
-      vars:
-        cluster_working_namespace_cluster_order_name: "{{ cluster_order.metadata.name }}"
+      cluster_working_namespace_cluster_order_name: "{{ cluster_order.metadata.name }}"
 
     - role: cluster_settings
-      vars:
-        cluster_settings_template_id: "{{ cluster_order.spec.templateID }}"
-        cluster_settings_template_parameters: "{{ cluster_order.spec.templateParameters | from_json }}"
+      cluster_settings_template_id: "{{ cluster_order.spec.templateID }}"
+      cluster_settings_template_parameters: "{{ cluster_order.spec.templateParameters | from_json }}"
 
     - role: hosted_cluster
-      vars:
-        hosted_cluster_name: "{{ cluster_order.metadata.name }}"
-        hosted_cluster_namespace: "{{ cluster_working_namespace_result }}"
-        hosted_cluster_settings: "{{ cluster_settings_result }}"
-        hosted_cluster_state: present
+      hosted_cluster_name: "{{ cluster_order.metadata.name }}"
+      hosted_cluster_namespace: "{{ cluster_working_namespace_result }}"
+      hosted_cluster_settings: "{{ cluster_settings_result }}"
+      hosted_cluster_state: present
 
-    - role: infrastructure/api
-      vars:
-        hosted_cluster_name: "{{ cluster_order.metadata.name }}"
-        hosted_cluster_namespace: "{{ cluster_working_namespace_result }}"
-        hosted_cluster_settings: "{{ cluster_settings_result }}"
-        hosted_cluster_state: present
+    - role: infrastructure_api
+      hosted_cluster_name: "{{ cluster_order.metadata.name }}"
+      hosted_cluster_namespace: "{{ cluster_working_namespace_result }}"
+      hosted_cluster_settings: "{{ cluster_settings_result }}"
+      hosted_cluster_state: present
+      infrastructure_api_dns_ttl: "{{ dns_ttl }}"
 
-    - role: infrastructure/ingress
-      vars:
-        hosted_cluster_name: "{{ cluster_order.metadata.name }}"
-        hosted_cluster_namespace: "{{ cluster_working_namespace_result }}"
-        hosted_cluster_settings: "{{ cluster_settings_result }}"
-        hosted_cluster_state: present
+    - role: infrastructure_ingress
+      hosted_cluster_name: "{{ cluster_order.metadata.name }}"
+      hosted_cluster_namespace: "{{ cluster_working_namespace_result }}"
+      hosted_cluster_settings: "{{ cluster_settings_result }}"
+      hosted_cluster_state: present
+      infrastructure_ingress_dns_ttl: "{{ dns_ttl }}"

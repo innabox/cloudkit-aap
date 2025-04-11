@@ -1,0 +1,2 @@
+infrastructure_ingress_resource_wait_retries: 1800
+infrastructure_ingress_resource_wait_delay: 5

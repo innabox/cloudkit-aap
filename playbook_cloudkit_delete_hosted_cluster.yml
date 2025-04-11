@@ -25,14 +25,14 @@
         hosted_cluster_settings: "{{ cluster_settings_result }}"
         hosted_cluster_state: absent
 
-    - role: infrastructure/api
+    - role: infrastructure_api
       vars:
         hosted_cluster_name: "{{ cluster_order.metadata.name }}"
         hosted_cluster_namespace: "{{ cluster_working_namespace_result }}"
         hosted_cluster_settings: "{{ cluster_settings_result }}"
         hosted_cluster_state: absent
 
-    - role: infrastructure/ingress
+    - role: infrastructure_ingress
       vars:
         hosted_cluster_name: "{{ cluster_order.metadata.name }}"
         hosted_cluster_namespace: "{{ cluster_working_namespace_result }}"
