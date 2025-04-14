@@ -5,14 +5,27 @@ inventories that are used in the scope of cloudkit.
 
 ## Pre-requisites
 
-This project uses uv to install Ansible and other Python dependencies:
+This project uses uv to install Ansible and other Python dependencies.
+
+Install all the necessary dependencies by running:
 
 ```
-$ uv sync
-$ source .venv/bin/activate
+uv sync --all-groups
 ```
 
-Then install the Ansible collections required by the Ansible playbooks:
+Then you can run commands like this:
+
+```
+uv run ansible-playbook ...
+```
+
+Or you can activate the virtual environment so all commands are in your `$PATH` by default:
+
+```
+source .venv/bin/activate
+```
+
+To install the Ansible collections required by the Ansible playbooks:
 
 ```
 $ ansible-galaxy collection install -r collections/requirements.yml

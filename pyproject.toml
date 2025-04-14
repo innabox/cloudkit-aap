@@ -15,3 +15,8 @@ dependencies = [
     "python-ironicclient>=5.10.0",
     "python-openstackclient>=7.4.0",
 ]
+
+[dependency-groups]
+development = [
+    "ansible-lint>=25.2.1",
+]
