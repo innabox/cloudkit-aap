@@ -1,0 +1,4 @@
+external_access_base_domain: box.massopen.cloud
+external_access_supported_base_domains:
+- box.massopen.cloud
+external_access_api_internal_network: "hypershift"

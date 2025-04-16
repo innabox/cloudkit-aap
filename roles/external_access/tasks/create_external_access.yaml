@@ -1,0 +1,117 @@
+- name: Get kube-apiserver service
+  kubernetes.core.k8s_info:
+    api_version: v1
+    kind: Service
+    namespace: "{{ external_access_namespace }}-{{ external_access_name }}"
+    name: kube-apiserver
+  register: kube_apiserver_service
+
+  # wait until the service exists and has a loadbalancer ip
+  until: >-
+    kube_apiserver_service.resources and
+    kube_apiserver_service.resources[0].status.loadBalancer.ingress | default(false)
+  retries: "{{ external_access_resource_wait_retries }}"
+  delay: "{{ external_access_resource_wait_delay }}"
+
+- name: Set api_internal_ip
+  ansible.builtin.set_fact:
+    external_access_api_internal_ip: "{{ kube_apiserver_service.resources[0].status.loadBalancer.ingress[0].ip }}"
+    external_access_kube_apiserver_port: "{{ kube_apiserver_service.resources[0].spec.ports[0].port }}"
+
+- name: Allocate api floating ip
+  ansible.builtin.include_role:
+    name: massopencloud.esi.floating_ip
+  vars:
+    floating_ip_state: present
+    floating_ip_name: "{{ external_access_name }}-api"  # noqa:var-naming[no-role-prefix]
+
+- name: Set api_floating_ip
+  ansible.builtin.set_fact:
+    external_access_api_floating_ip: "{{ allocate_floating_ip_result }}"
+
+# FIXME: This will fail erroneously because the command is not idempotent;
+# see https://github.com/CCI-MOC/python-esiclient/issues/82. Unfortunately,
+# it will also fail legitimately if we failed to clean up from a previous
+# cluster and there exists a port forwarding to the same internal ip
+# address.
+- name: Create port forwarding  # noqa:no-changed-when
+  ansible.builtin.command: >-
+    openstack esi port forwarding create {{ external_access_api_internal_ip }} {{ external_access_api_floating_ip }}
+      --internal-ip-network "{{ external_access_api_internal_network }}"
+      -p {{ external_access_kube_apiserver_port }} -d "{{ external_access_name }}" -f json
+  register: create_forwarding
+  failed_when: >-
+    create_forwarding.rc != 0 and "duplicate port forwarding" not in create_forwarding.stderr
+
+- name: Create api dns records
+  when: >-
+    external_access_base_domain in external_access_supported_base_domains|default([])
+  amazon.aws.route53:
+    state: present
+    zone: "{{ external_access_base_domain }}"
+    record: "{{ item }}"
+    type: A
+    ttl: "{{ external_access_dns_ttl }}"
+    value: "{{ external_access_api_floating_ip }}"
+    wait: true
+    overwrite: true
+  loop:
+  - "api.{{ external_access_name }}.{{ external_access_base_domain }}"
+  - "api-int.{{ external_access_name }}.{{ external_access_base_domain }}"
+
+- name: Wait until agents are available
+  kubernetes.core.k8s_info:
+    api_version: agent-install.openshift.io/v1beta1
+    kind: Agent
+
+    # FIXME: This should not be hardcoded
+    namespace: "hardware-inventory"
+    label_selectors:
+    - "cloudkit.openshift.io/clusterorder={{ external_access_name }}"
+  register: agents
+
+  # wait until agents are assigned to the cluster
+  until: agents.resources
+  retries: "{{ external_access_resource_wait_retries }}"
+  delay: "{{ external_access_resource_wait_delay }}"
+
+- name: Set external_access_worker_node_ip
+  ansible.builtin.set_fact:
+    external_access_worker_node_ip: >-
+      {{
+      agents |
+      json_query('resources[*].status.inventory.interfaces[?ipV4Addresses][].ipV4Addresses[]') |
+      shuffle |
+      first |
+      ansible.utils.ipaddr('address')
+      }}
+
+- name: Allocate ingress floating ip
+  ansible.builtin.include_role:
+    name: massopencloud.esi.floating_ip
+  vars:
+    floating_ip_state: present
+    floating_ip_name: "{{ external_access_name }}-ingress"  # noqa:var-naming[no-role-prefix]
+
+- name: Set external_access_ingress_floating_ip
+  ansible.builtin.set_fact:
+    external_access_ingress_floating_ip: "{{ allocate_floating_ip_result }}"
+
+- name: Create port forwarding for ingress  # noqa:no-changed-when
+  ansible.builtin.command: >-
+    openstack esi port forwarding create {{ external_access_worker_node_ip }} {{ external_access_ingress_floating_ip }}
+      -p 80 -p 443 -d "{{ external_access_name }}-ingress" -f json
+  register: create_forwarding
+  failed_when: >-
+    create_forwarding.rc != 0 and "duplicate port forwarding" not in create_forwarding.stderr
+
+- name: Create ingress dns record
+  amazon.aws.route53:
+    state: present
+    zone: "{{ external_access_base_domain }}"
+    record: "*.apps.{{ external_access_name }}.{{ external_access_base_domain }}"
+    type: A
+    ttl: "{{ external_access_dns_ttl }}"
+    value: "{{ external_access_ingress_floating_ip }}"
+    wait: true
+    overwrite: true

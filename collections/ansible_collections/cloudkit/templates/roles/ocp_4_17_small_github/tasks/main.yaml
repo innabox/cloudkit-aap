@@ -1,0 +1,7 @@
+- name: Create a new instance of this template
+  when: cluster_template_state == 'present'
+  ansible.builtin.include_tasks: create_template.yaml
+
+- name: Destroy an instance of this template
+  when: cluster_template_state == 'absent'
+  ansible.builtin.include_tasks: delete_template.yaml

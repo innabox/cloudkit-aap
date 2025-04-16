@@ -8,33 +8,18 @@
   vars:
     cluster_order: "{{ ansible_eda.event.payload }}"
 
-  roles:
-    - role: cluster_working_namespace
-      vars:
-        cluster_working_namespace_cluster_order_name: "{{ cluster_order.metadata.name }}"
+  pre_tasks:
+    - name: Extract template info
+      ansible.builtin.include_role:
+        name: extract_template_info
 
-    - role: cluster_settings
-      vars:
-        cluster_settings_template_id: "{{ cluster_order.spec.templateID }}"
-        cluster_settings_template_parameters: "{{ cluster_order.spec.templateParameters }}"
+  tasks:
+    - name: Determine working namespace
+      ansible.builtin.include_role:
+        name: cluster_working_namespace
 
-    - role: hosted_cluster
+    - name: Call the selected template
+      ansible.builtin.include_role:
+        name: "{{ template_id }}"
       vars:
-        hosted_cluster_name: "{{ cluster_order.metadata.name }}"
-        hosted_cluster_namespace: "{{ cluster_working_namespace_result }}"
-        hosted_cluster_settings: "{{ cluster_settings_result }}"
-        hosted_cluster_state: absent
-
-    - role: infrastructure_api
-      vars:
-        hosted_cluster_name: "{{ cluster_order.metadata.name }}"
-        hosted_cluster_namespace: "{{ cluster_working_namespace_result }}"
-        hosted_cluster_settings: "{{ cluster_settings_result }}"
-        hosted_cluster_state: absent
-
-    - role: infrastructure_ingress
-      vars:
-        hosted_cluster_name: "{{ cluster_order.metadata.name }}"
-        hosted_cluster_namespace: "{{ cluster_working_namespace_result }}"
-        hosted_cluster_settings: "{{ cluster_settings_result }}"
-        hosted_cluster_state: absent
+        cluster_template_state: absent

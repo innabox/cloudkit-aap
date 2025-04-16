@@ -8,30 +8,18 @@
   vars:
     cluster_order: "{{ ansible_eda.event.payload }}"
 
-  roles:
-    - role: cluster_working_namespace
-      cluster_working_namespace_cluster_order_name: "{{ cluster_order.metadata.name }}"
+  pre_tasks:
+    - name: Extract template info
+      ansible.builtin.include_role:
+        name: extract_template_info
 
-    - role: cluster_settings
-      cluster_settings_template_id: "{{ cluster_order.spec.templateID }}"
-      cluster_settings_template_parameters: "{{ cluster_order.spec.templateParameters | from_json }}"
+  tasks:
+    - name: Determine working namespace
+      ansible.builtin.include_role:
+        name: cluster_working_namespace
 
-    - role: hosted_cluster
-      hosted_cluster_name: "{{ cluster_order.metadata.name }}"
-      hosted_cluster_namespace: "{{ cluster_working_namespace_result }}"
-      hosted_cluster_settings: "{{ cluster_settings_result }}"
-      hosted_cluster_state: present
-
-    - role: infrastructure_api
-      hosted_cluster_name: "{{ cluster_order.metadata.name }}"
-      hosted_cluster_namespace: "{{ cluster_working_namespace_result }}"
-      hosted_cluster_settings: "{{ cluster_settings_result }}"
-      hosted_cluster_state: present
-      infrastructure_api_dns_ttl: "{{ dns_ttl }}"
-
-    - role: infrastructure_ingress
-      hosted_cluster_name: "{{ cluster_order.metadata.name }}"
-      hosted_cluster_namespace: "{{ cluster_working_namespace_result }}"
-      hosted_cluster_settings: "{{ cluster_settings_result }}"
-      hosted_cluster_state: present
-      infrastructure_ingress_dns_ttl: "{{ dns_ttl }}"
+    - name: Call the selected template
+      ansible.builtin.include_role:
+        name: "{{ template_id }}"
+      vars:
+        cluster_template_state: present

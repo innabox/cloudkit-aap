@@ -1,0 +1,20 @@
+argument_specs:
+  main:
+    options:
+      external_access_state:
+        type: str
+        choices:
+        - present
+        - absent
+      external_access_base_domain:
+        type: str
+        required: true
+      external_access_namespace:
+        type: str
+        required: true
+      external_access_name:
+        type: str
+        required: true
+      external_access_api_internal_network:
+        type: str
+        required: true

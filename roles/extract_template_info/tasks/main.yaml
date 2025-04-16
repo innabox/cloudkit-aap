@@ -1,0 +1,9 @@
+- name: Extract template id
+  when: template_id is not defined
+  ansible.builtin.set_fact:
+    template_id: "{{ cluster_order.spec.templateId }}"
+
+- name: Extract template parameters
+  when: template_parameters is not defined
+  ansible.builtin.set_fact:
+    template_parameters: "{{ cluster_order.spec.templateParameters | from_json }}"

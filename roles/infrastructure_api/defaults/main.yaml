@@ -1,4 +1,0 @@
-api_kube_apiserver_port: 6443         # noqa:var-naming[no-role-prefix]
-api_internal_ip_network: hypershift   # noqa:var-naming[no-role-prefix]
-infrastructure_api_resource_wait_retries: 1800
-infrastructure_api_resource_wait_delay: 5

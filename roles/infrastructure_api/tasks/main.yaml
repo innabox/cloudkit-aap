@@ -1,7 +1,0 @@
-- name: Create api infrastructure
-  when: hosted_cluster_state == "present"
-  ansible.builtin.include_tasks: create_api_infra.yaml
-
-- name: Destroy api infrastructure
-  when: hosted_cluster_state == "absent"
-  ansible.builtin.include_tasks: destroy_api_infra.yaml

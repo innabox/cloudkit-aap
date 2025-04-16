@@ -1,0 +1,52 @@
+- name: Create cluster
+  ansible.builtin.import_role:
+    name: cloudkit.templates.ocp_4_17_small
+
+- name: Get admin kubeconfig secret
+  kubernetes.core.k8s_info:
+    api_version: v1
+    kind: Secret
+    namespace: "{{ cluster_working_namespace }}"
+    name: "{{ cluster_order.metadata.name }}-admin-kubeconfig"
+  register: admin_kubeconfig_secret
+
+- debug:
+    var: admin_kubeconfig_secret
+
+- name: Extract kubeconfig
+  ansible.builtin.set_fact:
+    admin_kubeconfig: "{{ admin_kubeconfig_secret.resources[0].data.kubeconfig | b64decode | from_yaml }}"
+
+- name: Create github oauth secret
+  kubernetes.core.k8s:
+    state: present
+    kubeconfig: "{{ admin_kubeconfig }}"
+    definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: github-oauth-secret
+        namespace: openshift-config
+      data:
+        clientSecret: "{{ template_parameters.github_client_secret | b64encode }}"
+
+- name: Patch oauth
+  kubernetes.core.k8s:
+    state: present
+    kubeconfig: "{{ admin_kubeconfig }}"
+    definition:
+      apiVersion: config.openshift.io/v1
+      kind: OAuth
+      metadata:
+        name: cluster
+      spec:
+        identityProviders:
+        - name: github
+          type: GitHub
+          mappingMethod: "{{ template_parameters.github_mapping_method|default(default_github_mapping_method) }}"
+          github:
+            clientID: "{{ template_parameters.github_client_id }}"
+            clientSecret:
+              name: "github-oauth-secret"
+            teams: "{{ template_parameters.github_teams|default([]) }}"
+            organizations: "{{ template_parameters.github_organizations|default([]) }}"
