@@ -1,6 +1,6 @@
 - name: Destroy ingress floating ip
   ansible.builtin.include_role:
-    name: infrastructure
+    name: massopencloud.esi.floating_ip
     tasks_from: destroy_floating_ip.yaml
   vars:
     floating_ip_name: "{{ hosted_cluster_name }}-ingress"  # noqa:var-naming[no-role-prefix]

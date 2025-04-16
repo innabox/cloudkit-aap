@@ -8,6 +8,7 @@ collections/ansible_collections/*
 !collections/ansible_collections/cloudkit
 collections/ansible_collections/cloudkit/*
 !collections/ansible_collections/cloudkit/global_config
+!collections/ansible_collections/massopencloud
 # https://raw.githubusercontent.com/github/gitignore/main/Python.gitignore
 # Byte-compiled / optimized / DLL files
 __pycache__/
