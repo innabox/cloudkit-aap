@@ -1,0 +1,182 @@
+---
+controller_projects:
+  - name: "{{ aap_prefix }}"
+    description: "{{ aap_project_name }}'s project"
+    organization: "{{ aap_organization_name }}"
+    scm_type: git
+    scm_url: "{{ aap_project_git_uri }}"
+    scm_branch: "{{ aap_project_git_branch }}"
+    scm_clean: true
+    scm_update_on_launch: true
+    scm_credential: ""
+    update_project: true
+    wait: true
+
+controller_templates:
+  - name: "{{ aap_prefix }}-create-hosted-cluster"
+    project: "{{ aap_prefix }}"
+    organization: "{{ aap_organization_name }}"
+    job_type: run
+    playbook: "playbook_cloudkit_create_hosted_cluster.yml"
+    inventory: "{{ aap_prefix }}-localhost"
+    execution_environment: "{{ aap_prefix }}-ee"
+    instance_groups:
+      - "{{ aap_prefix }}-cluster-fulfillment-ig"
+    concurrent_jobs_enabled: true
+    ask_variables_on_launch: true
+    verbosity: 0
+  - name: "{{ aap_prefix }}-delete-hosted-cluster"
+    project: "{{ aap_prefix }}"
+    organization: "{{ aap_organization_name }}"
+    job_type: run
+    playbook: "playbook_cloudkit_delete_hosted_cluster.yml"
+    inventory: "{{ aap_prefix }}-localhost"
+    execution_environment: "{{ aap_prefix }}-ee"
+    instance_groups:
+      - "{{ aap_prefix }}-cluster-fulfillment-ig"
+    concurrent_jobs_enabled: true
+    ask_variables_on_launch: true
+    verbosity: 0
+  - name: "{{ aap_prefix }}-config-as-code"
+    project: "{{ aap_prefix }}"
+    organization: "{{ aap_organization_name }}"
+    job_type: run
+    playbook: "playbook_cloudkit_config_as_code.yml"
+    inventory: "{{ aap_prefix }}-localhost"
+    execution_environment: "{{ aap_prefix }}-ee"
+    instance_groups:
+      - "{{ aap_prefix }}-config-as-code-ig"
+    concurrent_jobs_enabled: false
+    ask_variables_on_launch: false
+    verbosity: 0
+
+controller_inventories:
+  - name: "{{ aap_prefix }}-localhost"
+    description: "localhost config inventory"
+    organization: "{{ aap_organization_name }}"
+
+controller_inventory_sources:
+  - name: "{{ aap_prefix }}-localhost-is"
+    organization: "{{ aap_organization_name }}"
+    source: scm
+    source_project: "{{ aap_prefix }}"
+    source_path: "inventory/localhost.yml"
+    inventory: "{{ aap_prefix }}-localhost"
+    overwrite: true
+    overwrite_vars: true
+    update_cache_timeout: 0
+
+controller_schedules:
+  # Sync job for the project every 10 minutes
+  - name: "{{ aap_prefix }}-sync"
+    description: "Periodic sync job for {{ aap_project_name }} project"
+    organization: "{{ aap_organization_name }}"
+    unified_job_template: "{{ aap_prefix }}"
+    rrule: "DTSTART:20250331T144500Z RRULE:FREQ=MINUTELY;INTERVAL=10"
+
+controller_execution_environments:
+  - name: "{{ aap_prefix }}-ee"
+    organization: "{{ aap_organization_name }}"
+    image: "ghcr.io/innabox/cloudkit-aap-ee:latest"
+    pull: always
+
+controller_instance_groups:
+  - name: "{{ aap_prefix }}-config-as-code-ig"
+    is_container_group: true
+    pod_spec_override: |
+      apiVersion: v1
+      kind: Pod
+      metadata:
+        namespace: fulfillment-aap
+        labels:
+          ansible_job: ''
+      spec:
+        serviceAccountName: default
+        automountServiceAccountToken: false
+        affinity:
+          podAntiAffinity:
+            preferredDuringSchedulingIgnoredDuringExecution:
+              - weight: 100
+                podAffinityTerm:
+                  labelSelector:
+                    matchExpressions:
+                      - key: ansible_job
+                        operator: Exists
+                  topologyKey: kubernetes.io/hostname
+        containers:
+          - image: >-
+              registry.redhat.io/ansible-automation-platform-25/ee-supported-rhel8@sha256:d8400a472e769d0f3d591dafaad318522009c583b08e881c23b6d57a27cc10ed
+            name: worker
+            args:
+              - ansible-runner
+              - worker
+              - '--private-data-dir=/runner'
+            envFrom:
+              - secretRef:
+                  name: {{ aap_prefix }}-config-as-code-ig
+            env:
+              - name: AAP_PASSWORD
+                valueFrom:
+                  secretKeyRef:
+                    name: fulfillment-admin-password
+                    key: password
+  - name: "{{ aap_prefix }}-cluster-fulfillment-ig"
+    is_container_group: true
+    pod_spec_override: |
+      apiVersion: v1
+      kind: Pod
+      metadata:
+        namespace: fulfillment-aap
+        labels:
+          ansible_job: ''
+      spec:
+        serviceAccountName: cloudkit-sa
+        affinity:
+          podAntiAffinity:
+            preferredDuringSchedulingIgnoredDuringExecution:
+              - weight: 100
+                podAffinityTerm:
+                  labelSelector:
+                    matchExpressions:
+                      - key: ansible_job
+                        operator: Exists
+                  topologyKey: kubernetes.io/hostname
+        containers:
+          - image: >-
+              registry.redhat.io/ansible-automation-platform-25/ee-supported-rhel8@sha256:d8400a472e769d0f3d591dafaad318522009c583b08e881c23b6d57a27cc10ed
+            name: worker
+            args:
+              - ansible-runner
+              - worker
+              - '--private-data-dir=/runner'
+            volumeMounts:
+              - name: kube-api-access
+                mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+                readOnly: true
+            envFrom:
+              - secretRef:
+                  name: {{ aap_prefix }}-cluster-fulfillment-ig
+        volumes:
+        - name: kube-api-access
+          projected:
+            sources:
+              - serviceAccountToken:
+                  path: token
+                  expirationSeconds: 3600
+              - configMap:
+                  name: kube-root-ca.crt
+                  items:
+                    - key: ca.crt
+                      path: ca.crt
+              - downwardAPI:
+                  items:
+                    - path: namespace
+                      fieldRef:
+                        apiVersion: v1
+                        fieldPath: metadata.namespace
+              - configMap:
+                  name: openshift-service-ca.crt
+                  items:
+                    - key: service-ca.crt
+                      path: service-ca.crt
+            defaultMode: 420

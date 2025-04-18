@@ -1,0 +1,13 @@
+---
+- name: Cloudkit's AAP configuration
+  hosts: localhost
+  gather_facts: false
+
+  vars:
+    aap_hostname: "{{ lookup('env', 'AAP_HOSTNAME') }}"
+    aap_username: "{{ lookup('env', 'AAP_USERNAME') }}"
+    aap_password: "{{ lookup('env', 'AAP_PASSWORD') }}"
+    aap_validate_certs: "{{ lookup('env', 'AAP_VALIDATE_CERTS') | bool }}"
+
+  roles:
+    - role: cloudkit.config_as_code.aap

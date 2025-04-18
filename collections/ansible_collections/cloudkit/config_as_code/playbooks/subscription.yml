@@ -1,0 +1,33 @@
+- name: Setup subscription
+  hosts: localhost
+  connection: local
+
+  vars:
+    rh_username: "{{ lookup('env', 'RH_USERNAME') }}"
+    rh_password: "{{ lookup('env', 'RH_PASSWORD') }}"
+    aap_hostname: "{{ lookup('env', 'AAP_HOSTNAME') }}"
+    aap_username: "{{ lookup('env', 'AAP_USERNAME') }}"
+    aap_password: "{{ lookup('env', 'AAP_PASSWORD') }}"
+    aap_validate_certs: "{{ lookup('env', 'AAP_VALIDATE_CERTS') | bool }}"
+
+  tasks:
+    - name: Get subscriptions with a filter
+      ansible.controller.subscriptions:
+        username: "{{ rh_username }}"
+        password: "{{ rh_password }}"
+        controller_host: "{{ aap_hostname }}"
+        controller_username: "{{ aap_username }}"
+        controller_password: "{{ aap_password }}"
+        validate_certs: "{{ aap_validate_certs }}"
+        filters:
+          product_name: Red Hat Ansible Automation Platform
+          support_level: Self-Support
+      register: subscription
+
+    - name: Attach to a pool
+      ansible.controller.license:
+        controller_host: "{{ aap_hostname }}"
+        controller_username: "{{ aap_username }}"
+        controller_password: "{{ aap_password }}"
+        validate_certs: "{{ aap_validate_certs }}"
+        pool_id: "{{ subscription.subscriptions[0].pool_id }}"

@@ -1,0 +1,8 @@
+---
+- name: Load configuration variables
+  ansible.builtin.include_vars:
+    dir: vars/
+
+- name: Cloudkit AAP
+  ansible.builtin.include_role:
+    name: infra.aap_configuration.dispatch
