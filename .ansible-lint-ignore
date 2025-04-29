@@ -1,2 +1,5 @@
 playbook_cloudkit_delete_hosted_cluster.yml var-naming[no-role-prefix]
 playbook_cloudkit_create_hosted_cluster.yml var-naming[no-role-prefix]
+collections/ansible_collections/cloudkit/config_as_code/roles/aap/vars/aap.yml var-naming[no-role-prefix]
+collections/ansible_collections/cloudkit/config_as_code/roles/aap/vars/controller.yml var-naming[no-role-prefix]
+collections/ansible_collections/cloudkit/config_as_code/roles/aap/vars/eda.yml var-naming[no-role-prefix]
