@@ -5,7 +5,7 @@ images:
     name: registry.redhat.io/ansible-automation-platform-25/ee-minimal-rhel9@sha256:9e94b335b66993881a6fd8331050178049eec92475b68dfad8379d2168bcbf77
 
 dependencies:
-  galaxy: requirements.yaml
+  galaxy: ../collections/requirements.yml
   python: requirements.txt
   ansible_core:
     package_pip: ansible-core
@@ -18,9 +18,21 @@ options:
 additional_build_files:
   - src: openshift-clients.rpm
     dest: rpms
+  - src: ../collections
+    dest: collections
 
 additional_build_steps:
   prepend_base:
-    - RUN $PKGMGR -y install bash-completion python3-netifaces
-    # COPY _build/rpms/*.rpm /tmp/
-    # RUN rpm -ivh /tmp/openshift-clients.rpm
+    - RUN $PKGMGR -y install bash-completion systemd-libs systemd-devel gcc python3.11-devel
+    - COPY _build/rpms/openshift-clients.rpm /tmp
+    - RUN rpm -ivh /tmp/openshift-clients.rpm
+    - ENV PIP_IGNORE_INSTALLED=1  # allow pip to override packages installed with RPM
+  prepend_galaxy:
+    # Environment variables used for Galaxy client configurations
+    - ENV ANSIBLE_GALAXY_SERVER_LIST=automation_hub,default
+    - ENV ANSIBLE_GALAXY_SERVER_AUTOMATION_HUB_URL=https://console.redhat.com/api/automation-hub/content/published/
+    - ENV ANSIBLE_GALAXY_SERVER_AUTOMATION_HUB_AUTH_URL=https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token
+    - ENV ANSIBLE_GALAXY_SERVER_DEFAULT_URL=https://galaxy.ansible.com/
+    # define a custom build arg env passthru - we still also have to pass
+    # `--build-arg ANSIBLE_GALAXY_SERVER_AUTOMATION_HUB_TOKEN` to get it to pick it up from the env
+    - ARG ANSIBLE_GALAXY_SERVER_AUTOMATION_HUB_TOKEN

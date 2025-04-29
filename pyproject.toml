@@ -5,18 +5,21 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "aiobotocore>=2.21.1",
     "ansible>=11.4.0",
-    "boto3>=1.37.29",
-    "botocore>=1.37.29",
+    "boto3>=1.37.0",
+    "botocore>=1.37.0",
     "jmespath>=1.0.1",
     "kubernetes>=32.0.1",
     "python-esiclient>=1.1.0",
     "python-esileapclient>=1.0.0",
     "python-ironicclient>=5.10.0",
     "python-openstackclient>=7.4.0",
+    "urllib3>=2.4.0",
 ]
 
 [dependency-groups]
 development = [
     "ansible-lint>=25.2.1",
+    "antsibull-changelog>=0.33.0",
 ]
