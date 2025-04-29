@@ -1,0 +1,41 @@
+---
+# Create the controller credential so EDA can trigger job templates
+eda_credentials:
+  - name: "{{ aap_eda_service_user_name }}"
+    organization: "{{ aap_organization_name }}"
+    credential_type: 'Red Hat Ansible Automation Platform'
+    inputs:
+      username: "{{ aap_eda_service_user_name }}"
+      password: "{{ aap_eda_service_user_password }}"
+      host: "{{ aap_hostname }}/api/controller/"
+
+# Create EDA project from the Git repo
+eda_projects:
+  - name: "{{ aap_prefix }}-eda"
+    organization: "{{ aap_organization_name }}"
+    url: "{{ aap_project_git_uri }}"
+    wait: true
+    interval: 10
+    sync: true
+
+# Create decision environment
+eda_decision_environments:
+  - name: "{{ aap_prefix }}-de"
+    organization: "{{ aap_organization_name }}"
+    image_url: "registry.redhat.io/ansible-automation-platform-25/de-supported-rhel9:latest"
+
+# Create rulebook activation
+eda_rulebook_activations:
+  - name: "{{ aap_prefix }}-cluster-fulfillment"
+    organization: "{{ aap_organization_name }}"
+    eda_credentials:
+      - "{{ aap_eda_service_user_name }}"
+    project: "{{ aap_prefix }}-eda"
+    rulebook: "cluster_fulfillment.yml"
+    decision_environment: "{{ aap_prefix }}-de"
+    log_level: info
+    k8s_service_name: "{{ aap_prefix }}-eda-service"
+    extra_vars:
+      job_template_organization: "{{ aap_organization_name }}"
+      job_template_prefix: "{{ aap_prefix }}"
+    enabled: true

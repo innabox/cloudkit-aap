@@ -1,0 +1,11 @@
+---
+aap_organization_name: "cloudkit"
+
+aap_project_name: "aap"
+aap_project_git_uri: "https://github.com/innabox/cloudkit-aap.git"
+aap_project_git_branch: "main"
+aap_ee_image: "ghcr.io/innabox/cloudkit-aap-ee:latest"
+
+aap_prefix: "{{ aap_organization_name }}-{{ aap_project_name }}"
+aap_eda_service_user_name: "{{ aap_prefix }}-eda-sa"
+aap_eda_service_user_password: "{{ lookup('ansible.builtin.password', '/dev/null', seed=aap_prefix) }}"

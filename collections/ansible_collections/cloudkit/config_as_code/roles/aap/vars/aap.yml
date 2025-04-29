@@ -1,0 +1,19 @@
+---
+aap_organizations:
+  - name: "{{ aap_organization_name }}"
+
+aap_user_accounts:
+  # create a user for EDA
+  - username: "{{ aap_eda_service_user_name }}"
+    is_superuser: false
+    password: "{{ aap_eda_service_user_password }}"
+    update_secrets: false
+
+controller_roles:
+  # Here we allow EDA to trigger the job templates we want
+  - user: "{{ aap_eda_service_user_name }}"
+    lookup_organization: "{{ aap_organization_name }}"
+    role: "execute"
+    job_templates:
+      - "{{ aap_prefix }}-create-hosted-cluster"
+      - "{{ aap_prefix }}-delete-hosted-cluster"

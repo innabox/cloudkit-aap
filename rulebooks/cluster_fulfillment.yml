@@ -11,12 +11,12 @@
       condition: event.meta.endpoint == "create-hosted-cluster"
       action:
         run_job_template:
-          name: "create-hosted-cluster"
-          organization: "cloudkit"
+          name: "{{ job_template_prefix }}-create-hosted-cluster"
+          organization: "{{ job_template_organization }}"
 
     - name: Delete hosted cluster
       condition: event.meta.endpoint == "delete-hosted-cluster"
       action:
         run_job_template:
-          name: "delete-hosted-cluster"
-          organization: "cloudkit"
+          name: "{{ job_template_prefix }}-delete-hosted-cluster"
+          organization: "{{ job_template_organization }}"
