@@ -1,5 +1,5 @@
 ---
-- name: Manage Secret resource containing pull-secret
+- name: Manage Secret resource containning pull-secret
   kubernetes.core.k8s:
     state: "{{ hosted_cluster_state }}"
     definition:
@@ -25,7 +25,7 @@
         namespace: "{{ hosted_cluster_namespace }}"
         labels: "{{ hosted_cluster_default_cluster_order_label }}"
       data:
-        id_rsa.pub: "{{ hosted_cluster_settings.ssh_public_key | b64encode }}"
+        id_rsa.pub: "{{ hosted_cluster_settings.ssh_key }}"
 
 - name: Manage HostedCluster resource
   kubernetes.core.k8s:
@@ -39,7 +39,7 @@
         labels: "{{ {'cluster.open-cluster-management.io/clusterset': 'default'} | combine(hosted_cluster_default_cluster_order_label) }}"
       spec:
         release:
-          image: "{{ ocp_release_image }}"
+          image: "quay.io/openshift-release-dev/ocp-release:{{ hosted_cluster_settings.ocp_version }}"
         pullSecret:
           name: "pullsecret-cluster-{{ hosted_cluster_name }}"
         sshKey:
@@ -54,14 +54,14 @@
           agent:
             agentNamespace: "{{ hosted_cluster_default_agent_namespace }}"
         dns:
-          baseDomain: "{{ hosted_cluster_base_domain }}"
+          baseDomain: "{{ hosted_cluster_settings.base_domain }}"
         infraID: "{{ hosted_cluster_name }}"
         services:
           - service: APIServer
             servicePublishingStrategy:
               type: LoadBalancer
               loadBalancer:
-                hostname: "api.{{ hosted_cluster_name }}.{{ hosted_cluster_base_domain }}"
+                hostname: "api.{{ hosted_cluster_name }}.{{ hosted_cluster_settings.base_domain }}"
           - service: OAuthServer
             servicePublishingStrategy:
               type: Route
@@ -90,7 +90,7 @@
         labels: "{{ hosted_cluster_default_cluster_order_label }}"
       spec:
         clusterName: "{{ hosted_cluster_name }}"
-        replicas: "{{ hosted_cluster_node_count | int }}"
+        replicas: "{{ hosted_cluster_settings.number_of_nodes | int }}"
         management:
           autoRepair: false
           upgradeType: InPlace
@@ -100,4 +100,5 @@
             agentLabelSelector:
               matchLabels: "{{ hosted_cluster_default_cluster_order_label }}"
         release:
-          image: "{{ ocp_release_image }}"
+          image: "quay.io/openshift-release-dev/ocp-release:{{ hosted_cluster_settings.ocp_version }}"
+
