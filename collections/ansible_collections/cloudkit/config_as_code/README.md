@@ -5,9 +5,9 @@ that are part of CloudKit.
 
 ## Credentials
 
-Since AAP runs in an Openshift cluster, we expect the required credentials to
+Since AAP runs in an OpenShift cluster, we expect the required credentials to
 be passed as environment variables. These environment variables are defined as
-`Secrets` in Openshift, and used by a container group.
+`Secrets` in OpenShift, and used by a container group.
 
 We define 2 container groups in AAP, one used to reconcile the configuration of
 AAP itself, and one used for cluster fulfillment operations.
@@ -56,7 +56,7 @@ so we expect a service account `cloudkit-sa` to exists with enough rights (TBD).
 
 ### Download and deploy CRC
 
-CRC basically Openshift in a VM, you can download it from Red Hat Console:
+CRC basically OpenShift in a VM, you can download it from Red Hat Console:
 https://console.redhat.com/openshift/downloads. You will need `oc` which is
 downloadable from the same place.
 
@@ -104,7 +104,7 @@ oc apply -f aap.yml
 
 ### Apply CloudKit configuration on AAP instance
 
-#### Prepare Openshift environment
+#### Prepare OpenShift environment
 
 Create service account and secrets:
 
