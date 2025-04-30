@@ -1,0 +1,15 @@
+argument_specs:
+  main:
+    options:
+      manage_agents_cluster_working_namespace:
+        type: str
+        required: true
+      manage_agents_desired_count:
+        type: int
+        required: true
+      manage_agents_resource_class:
+        type: str
+        required: true
+      manage_agents_cluster_order_name:
+        type: str
+        required: true

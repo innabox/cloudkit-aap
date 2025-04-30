@@ -1,0 +1,20 @@
+---
+- name: List agents currently labeled with the cluster order label
+  kubernetes.core.k8s_info:
+    kind: Agent
+    api_version: agent-install.openshift.io/v1beta1
+    namespace: "{{ default_agent_namespace }}"
+    label_selectors:
+      - "{{ cluster_order_label }}={{ manage_agents_cluster_order_name }}"
+      - "{{ esi_agent_resource_class_label }}={{ manage_agents_resource_class }}"
+  register: manage_agents_allocated
+
+- name: Remove agents from the cluster
+  ansible.builtin.include_tasks:
+    file: remove_agents.yml
+  when: (manage_agents_desired_count | int) < (manage_agents_allocated.resources | length)
+
+- name: Add agents to the cluster
+  ansible.builtin.include_tasks:
+    file: add_agents.yml
+  when: (manage_agents_desired_count | int) > (manage_agents_allocated.resources | length)
