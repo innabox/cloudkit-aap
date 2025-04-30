@@ -14,7 +14,7 @@ AAP itself, and one used for cluster fulfillment operations.
 
 ### Config-as-code environment variables
 
-In order to reconcile the configuration of AAP, we require we following
+In order to reconcile the configuration of AAP, we require the following
 variables:
 
 - `RH_USERNAME` and `RH_PASSWORD`: your Red Hat console username and password,
@@ -46,7 +46,7 @@ use case, e.g.:
 - ...whatever in needed
 
 These variables must be defined in a secret named:
-`${AAP_ORGANIZATION_NAME}-${AAP_PROJECT_NAME}-cluster-fulfillment-ig`. in the
+`${AAP_ORGANIZATION_NAME}-${AAP_PROJECT_NAME}-cluster-fulfillment-ig` in the
 namespace where AAP is deployed.
 
 The cluster fulfillment needs to access the Kube API of the cluster it runs on,
@@ -186,9 +186,9 @@ ansible-playbook cloudkit.config_as_code.configure
 
 #### Option 2: as a job running in Kubernetes
 
-If this collection is contained in a container image (e.g.: in the custom
+If this collection is backed in a container image (e.g.: in the custom
 execution environment used in AAP), there is the possibility to run the
-configuration in the k8s job:
+configuration in a k8s job:
 
 ```
 cat << EOF > job.yml
