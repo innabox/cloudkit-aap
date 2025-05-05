@@ -56,7 +56,7 @@ so we expect a service account `cloudkit-sa` to exists with enough rights (TBD).
 
 ### Download and deploy CRC
 
-CRC basically OpenShift in a VM, you can download it from Red Hat Console:
+CRC is basically OpenShift in a VM, you can download it from Red Hat Console:
 https://console.redhat.com/openshift/downloads. You will need `oc` which is
 downloadable from the same place.
 
