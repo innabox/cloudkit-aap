@@ -68,6 +68,46 @@ crc start
 oc login -u kubeadmin  https://api.crc.testing:6443
 ```
 
+## Install AAP
+
+Install the AAP operator (more information
+[here](https://docs.redhat.com/en/documentation/red_hat_ansible_automation_platform/2.5/html/installing_on_openshift_container_platform/installing-aap-operator-cli_operator-platform-doc#install-cli-aap-operator_installing-aap-operator-cli)):
+
+```
+cat << EOF > aap_install.yml
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    openshift.io/cluster-monitoring: "true"
+  name: aap
+---
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  name: ansible-automation-platform-operator
+  namespace: aap
+spec:
+  targetNamespaces:
+    - aap
+---
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: ansible-automation-platform
+  namespace: aap
+spec:
+  channel: 'stable-2.5-cluster-scoped'
+  installPlanApproval: Automatic
+  name: ansible-automation-platform-operator
+  source: redhat-operators
+  sourceNamespace: openshift-marketplace
+EOF
+
+oc apply -f aap_install.yml
+```
+
 ### Deploy AAP
 
 Create a new namespace and deploy an AAP instance using these manifests:
