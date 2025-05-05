@@ -186,7 +186,7 @@ ansible-playbook cloudkit.config_as_code.configure
 
 #### Option 2: as a job running in Kubernetes
 
-If this collection is backed in a container image (e.g.: in the custom
+If this collection is being used in a container image (e.g.: in the custom
 execution environment used in AAP), there is the possibility to run the
 configuration in a k8s job:
 
