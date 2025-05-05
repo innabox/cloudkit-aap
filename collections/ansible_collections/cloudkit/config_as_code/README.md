@@ -201,7 +201,7 @@ spec:
     spec:
       containers:
         - image: <your container image with cloudkit.config_as_code collection in it>
-          name: boostrap
+          name: bootstrap
           args:
             - ansible-playbook
             - "cloudkit.config_as_code.subscription"
