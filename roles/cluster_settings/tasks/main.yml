@@ -1,0 +1,63 @@
+---
+- name: Get template parameters from cluster order
+  ansible.builtin.set_fact:
+    cluster_settings_template_parameters: "{{ cluster_order.spec.templateParameters | from_json }}"
+
+- name: Get default pull-secret and ssh-key
+  kubernetes.core.k8s_info:
+    api_version: v1
+    kind: Secret
+    name: "{{ cluster_settings_default_credentials_secret_name }}"
+    namespace: "{{ cluster_settings_default_credentials_secret_namespace }}"
+  register: default_cluster_credentials
+  when: >-
+    cluster_settings_template_parameters.ssh_public_key is not defined
+    or cluster_settings_template_parameters.pull_secret is not defined
+  no_log: true
+
+- name: Set default pull-secret and ssh-key as template default parameters
+  ansible.builtin.set_fact:
+    cluster_settings_template_defaults: >
+      {{ cluster_settings_template_defaults | combine({
+          'pull_secret': '{{ default_cluster_credentials.resources[0].data.pull_secret | b64decode }}',
+          'ssh_public_key': '{{ default_cluster_credentials.resources[0].data.ssh_public_key | b64decode }}'
+          })
+      }}
+  when: >-
+    cluster_settings_template_parameters.ssh_public_key is not defined
+    or cluster_settings_template_parameters.pull_secret is not defined
+  no_log: true
+
+- name: Merge default template parameters with user-provided template parameters
+  ansible.builtin.set_fact:
+    cluster_settings_template_defaults: >-
+      {{ cluster_settings_template_defaults | combine(cluster_settings_template_parameters) }}
+  no_log: true
+
+- name: Merge update template parameters into cluster order
+  ansible.builtin.set_fact:
+    cluster_order: >-
+      {{
+      cluster_order | combine({
+        "spec": {
+          "templateParameters": cluster_settings_template_defaults|to_json,
+        }
+      }, recursive=true)
+      }}
+  no_log: true
+
+- name: Set default nodeRequests
+  when: >-
+    not cluster_order.spec.nodeRequests|default([])
+  ansible.builtin.set_fact:
+    cluster_order: >-
+      {{
+      cluster_order | combine({
+        "spec": {
+          "nodeRequests": [
+            {"numberOfNodes": 2, "resourceClass": "fc430"}
+          ]
+        }
+      }, recursive=true)
+      }}
+  no_log: true

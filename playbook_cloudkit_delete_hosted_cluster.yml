@@ -9,17 +9,23 @@
     cluster_order: "{{ ansible_eda.event.payload }}"
 
   pre_tasks:
+    - name: Apply default settings
+      ansible.builtin.include_role:
+        name: cluster_settings
+
     - name: Extract template info
       ansible.builtin.include_role:
         name: extract_template_info
       vars:
         cluster_working_namespace_cluster_order_name: "{{ cluster_order.metadata.name }}"
 
-  tasks:
     - name: Determine working namespace
       ansible.builtin.include_role:
         name: cluster_working_namespace
+      vars:
+        cluster_working_namespace_cluster_order_name: "{{ cluster_order.metadata.name }}"
 
+  tasks:
     - name: Call the selected template
       ansible.builtin.include_role:
         name: "{{ template_id }}"

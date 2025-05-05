@@ -9,19 +9,93 @@
     cluster_order: "{{ ansible_eda.event.payload }}"
 
   pre_tasks:
+    - name: Set cluster order name
+      ansible.builtin.set_fact:
+        cluster_order_name: "{{ cluster_order.metadata.name }}"
+
+    - name: Set lock name and holder identity
+      ansible.builtin.set_fact:
+        cluster_order_lock_name: "{{ cluster_order_name }}-lock"
+        cluster_order_holder_id: >-
+          {{ cluster_order_name }}-{{ awx_job_id | default("unknown") }}-{{
+            lookup('community.general.random_string', special=false, numbers=false, upper=false)
+          }}
+
+    - name: Apply default settings
+      ansible.builtin.include_role:
+        name: cluster_settings
+
     - name: Extract template info
       ansible.builtin.include_role:
         name: extract_template_info
 
-  tasks:
     - name: Determine working namespace
       ansible.builtin.include_role:
         name: cluster_working_namespace
       vars:
-        cluster_working_namespace_cluster_order_name: "{{ cluster_order.metadata.name }}"
+        cluster_working_namespace_cluster_order_name: "{{ cluster_order_name }}"
 
-    - name: Call the selected template
-      ansible.builtin.include_role:
-        name: "{{ template_id }}"
-      vars:
-        cluster_template_state: present
+  tasks:
+    - name: Create cluster
+      block:
+
+        # By using service_side_apply and registering this job run as the
+        # field manager, we ensure that future attempts to create/modify
+        # this lock will fail (because of the conflict setting
+        # spec.holderIdentity).
+        - name: Acquire lock
+          kubernetes.core.k8s:
+            state: present
+            apply: true
+            server_side_apply:
+              field_manager: "{{ cluster_order_holder_id }}"
+            definition:
+              apiVersion: coordination.k8s.io/v1
+              kind: Lease
+              metadata:
+                name: "{{ cluster_order_lock_name }}"
+                namespace: "{{ cluster_working_namespace }}"
+              spec:
+                holderIdentity: "{{ cluster_order_holder_id }}"
+
+        - name: Set lock_acquired
+          ansible.builtin.set_fact:
+            lock_acquired: true
+
+        - name: Display cluster order information
+          ansible.builtin.debug:
+            msg:
+              - "Cluster order: {{ cluster_order_name }}"
+              - "Cluster working namespace: {{ cluster_working_namespace }}"
+              - "Template ID: {{ template_id }}"
+
+        - name: Call the selected template
+          ansible.builtin.include_role:
+            name: "{{ template_id }}"
+          vars:
+            cluster_template_state: present
+
+      rescue:
+
+        - name: Exit due to lock failure
+          when: not lock_acquired | default(false)
+          ansible.builtin.meta: end_play
+
+        # Without this, a failure in the template would show up as
+        # a successful job run.
+        - name: Propogate failure
+          ansible.builtin.fail:
+            msg: Propogating earlier failure from rescue block
+
+      always:
+
+        - name: Delete lock
+          when: lock_acquired | default(false)
+          kubernetes.core.k8s:
+            state: absent
+            definition:
+              apiVersion: coordination.k8s.io/v1
+              kind: Lease
+              metadata:
+                name: "{{ cluster_order_lock_name }}"
+                namespace: "{{ cluster_working_namespace }}"
