@@ -70,7 +70,7 @@ oc login -u kubeadmin  https://api.crc.testing:6443
 
 ### Deploy AAP
 
-Create a new namespace and deploy an AAP instance using the Ansible:
+Create a new namespace and deploy an AAP instance using these manifests:
 
 ```
 cat << EOF > aap.yml
