@@ -1,5 +1,4 @@
 version = 1
-revision = 1
 requires-python = ">=3.13"
 
 [[package]]
@@ -423,6 +422,7 @@ dependencies = [
     { name = "botocore" },
     { name = "jmespath" },
     { name = "kubernetes" },
+    { name = "pydantic" },
     { name = "python-esiclient" },
     { name = "python-esileapclient" },
     { name = "python-ironicclient" },
@@ -444,6 +444,7 @@ requires-dist = [
     { name = "botocore", specifier = ">=1.37.0" },
     { name = "jmespath", specifier = ">=1.0.1" },
     { name = "kubernetes", specifier = ">=32.0.1" },
+    { name = "pydantic", specifier = ">=2.11.3" },
     { name = "python-esiclient", specifier = ">=1.1.0" },
     { name = "python-esileapclient", specifier = ">=1.0.0" },
     { name = "python-ironicclient", specifier = ">=5.10.0" },

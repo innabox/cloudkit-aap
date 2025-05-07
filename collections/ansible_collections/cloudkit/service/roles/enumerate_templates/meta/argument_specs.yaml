@@ -1,0 +1,9 @@
+argument_specs:
+  main:
+    options:
+      cloudkit_template_collections:
+        type: list
+        required: true
+      cloudkit_fulfillment_service_uri:
+        type: str
+        required: true
