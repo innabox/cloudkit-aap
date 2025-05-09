@@ -10,10 +10,9 @@
         namespace: "{{ hosted_cluster_namespace }}"
         labels: "{{ hosted_cluster_default_cluster_order_label }}"
       data:
-        .dockerconfigjson: >-
-          {{ hosted_cluster_settings.pull_secret }}
+        .dockerconfigjson: "{{ hosted_cluster_settings.pull_secret | to_json | b64encode }}"
       type: kubernetes.io/dockerconfigjson
-  no_log: true
+# no_log: true
 
 - name: Manage Secret resource containing ssh-key
   kubernetes.core.k8s:

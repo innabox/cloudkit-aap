@@ -19,6 +19,11 @@ argument_specs:
             required: true
             choices:
             - fc430
+      cluster_template_state:
+        type: str
+        choices:
+        - absent
+        - present
       template_parameters:
         type: dict
         options:
