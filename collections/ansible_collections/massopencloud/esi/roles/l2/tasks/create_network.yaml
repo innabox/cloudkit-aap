@@ -1,0 +1,21 @@
+- name: Check if network exists
+  openstack.cloud.networks_info:
+    name: "{{ network_name_or_id }}"
+  register: networks
+
+- name: Set create_network_result to found network
+  when: networks.networks
+  ansible.builtin.set_fact:
+    create_network_result: "{{ networks.networks[0].id }}"
+
+- name: Create a new network
+  when: not networks.networks
+  block:
+  - name: Create network
+    openstack.cloud.network:
+      name: "{{ network_name_or_id }}"
+    register: network_cmd_result
+
+  - name: Set create_network_result to new network
+    ansible.builtin.set_fact:
+      create_network_result: "{{ network_cmd_result.network.id }}"

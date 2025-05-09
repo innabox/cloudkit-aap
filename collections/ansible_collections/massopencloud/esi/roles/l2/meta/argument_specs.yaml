@@ -7,7 +7,7 @@ argument_specs:
         choices:
         - present
         - absent
-      l2_network_name_or_id:
+      network_name_or_id:
         description: |
           Name of the network when state is `present`.
           Name or ID of network to be deleted when state is `absent`; the deletion will fail if the network name is not unique.

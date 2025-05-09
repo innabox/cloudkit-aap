@@ -1,7 +1,0 @@
-- name: Create a new subnet
-  when: subnet_state == 'present'
-  ansible.builtin.include_tasks: create_subnet.yaml
-
-- name: Destroy a subnet
-  when: subnet_state == 'absent'
-  ansible.builtin.include_tasks: destroy_subnet.yaml

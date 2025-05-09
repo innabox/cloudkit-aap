@@ -1,21 +1,29 @@
-- name: Check if network exists
-  openstack.cloud.networks_info:
-    name: "{{ network_name_or_id }}"
-  register: networks
+- name: Create network
+  ansible.builtin.include_role:
+    name: massopencloud.esi.l2
+  vars:
+    network_state: "present"
+    network_name_or_id: "{{ l2_network_name_or_id }}"
 
-- name: Set create_network_result to found network
-  when: networks.networks
-  ansible.builtin.set_fact:
-    create_network_result: "{{ networks.networks[0].id }}"
+- name: Create subnet
+  ansible.builtin.include_role:
+    name: massopencloud.esi.l3
+    tasks_from: create_subnet
+  vars:
+    subnet_name_or_id: "{{ 'subnet-' + create_network_result }}"
+    network_id: "{{ create_network_result }}"
+    l3_subnet_cidr: "{{ network_l3_subnet_cidr }}"
+    l3_subnet_gateway_ip: "{{ network_l3_subnet_gateway_ip }}"
+    l3_subnet_allocation_pool_start: "{{ network_l3_subnet_allocation_pool_start }}"
+    l3_subnet_allocation_pool_end: "{{ network_l3_subnet_allocation_pool_end }}"
+    l3_subnet_dns_nameservers: "{{ network_l3_subnet_dns_nameservers }}"
 
-- name: Create a new network
-  when: not networks.networks
-  block:
-  - name: Create network
-    openstack.cloud.network:
-      name: "{{ network_name_or_id }}"
-    register: network_cmd_result
-
-  - name: Set create_network_result to new network
-    ansible.builtin.set_fact:
-      create_network_result: "{{ network_cmd_result.network.id }}"
+- name: Create router
+  ansible.builtin.include_role:
+    name: massopencloud.esi.l3
+    tasks_from: create_router
+  vars:
+    router_name_or_id: "{{ 'router-' + create_network_result }}"
+    router_subnets:
+      - "{{ create_subnet_result }}"
+    l3_router_external_network: "{{ network_l3_router_external_network }}"

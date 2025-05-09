@@ -14,7 +14,7 @@
   - name: Create router
     openstack.cloud.router:
       name: "{{ router_name_or_id }}"
-      network: "{{ router_external_network }}"
+      network: "{{ l3_router_external_network }}"
       interfaces: "{{ router_subnets }}"
     register: router_cmd_result
 
