@@ -1,0 +1,62 @@
+---
+- name: Add agents to the cluster
+  block:
+    # Since there is only one global pool of agents, we need to make sure that
+    # the selection of new agents is serialized by resource class
+    - name: Acquire agent lock
+      kubernetes.core.k8s:
+        state: present
+        apply: true
+        server_side_apply:
+          field_manager: "{{ cluster_order_holder_id }}"
+        definition:
+          apiVersion: coordination.k8s.io/v1
+          kind: Lease
+          metadata:
+            name: "agent-{{ manage_agents_resource_class }}-lock"
+            namespace: "{{ default_agent_namespace }}"
+          spec:
+            holderIdentity: "{{ cluster_order_holder_id }}"
+      register: manage_agents_lease
+      until: manage_agents_lease is successful
+      retries: 20
+      delay: 5
+
+    - name: Retrieve the list of available agents with a matching machine resource class
+      kubernetes.core.k8s_info:
+        kind: Agent
+        api_version: agent-install.openshift.io/v1beta1
+        namespace: "{{ default_agent_namespace }}"
+        label_selectors:
+          - "!{{ cluster_order_label }}"
+          - "{{ esi_agent_resource_class_label }}={{ manage_agents_resource_class }}"
+      register: managed_agents_available
+
+    - name: Count the number of agents to add to the cluster
+      ansible.builtin.set_fact:
+        managed_agents_selected_count: >
+          {{ manage_agents_desired_count | int - manage_agents_allocated.resources | length }}
+
+    - name: Add selected agents to the cluster
+      kubernetes.core.k8s_json_patch:
+        api_version: agent-install.openshift.io/v1beta1
+        kind: Agent
+        name: "{{ item.metadata.name }}"
+        namespace: "{{ item.metadata.namespace }}"
+        patch:
+          - op: replace
+            path: /metadata/labels/{{ cluster_order_label | json_pointer_escape }}
+            value: "{{ manage_agents_cluster_order_name }}"
+      with_items: "{{ managed_agents_available.resources[: (managed_agents_selected_count | int)] }}"
+
+  always:
+
+    - name: Delete agent lock
+      kubernetes.core.k8s:
+        state: absent
+        definition:
+          apiVersion: coordination.k8s.io/v1
+          kind: Lease
+          metadata:
+            name: "agent-{{ manage_agents_resource_class }}-lock"
+            namespace: "{{ default_agent_namespace }}"
