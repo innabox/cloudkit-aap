@@ -30,11 +30,11 @@
         label_selectors:
           - "!{{ cluster_order_label }}"
           - "{{ esi_agent_resource_class_label }}={{ manage_agents_resource_class }}"
-      register: managed_agents_available
+      register: manage_agents_available
 
     - name: Count the number of agents to add to the cluster
       ansible.builtin.set_fact:
-        managed_agents_selected_count: >
+        manage_agents_selected_count: >
           {{ manage_agents_desired_count | int - manage_agents_allocated.resources | length }}
 
     - name: Add selected agents to the cluster
@@ -47,7 +47,7 @@
           - op: add
             path: /metadata/labels/{{ cluster_order_label | cloudkit.service.json_pointer_escape }}
             value: "{{ manage_agents_cluster_order_name }}"
-      loop: "{{ managed_agents_available.resources[: (managed_agents_selected_count | int)] }}"
+      loop: "{{ manage_agents_available.resources[: (manage_agents_selected_count | int)] }}"
 
   always:
 

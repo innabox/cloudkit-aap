@@ -1,7 +1,7 @@
 ---
 - name: Number of agents being removed
   ansible.builtin.set_fact:
-    managed_agents_removed_count: >
+    manage_agents_removed_count: >
       {{ manage_agents_allocated.resources | length - manage_agents_desired_count | int }}
 
 - name: Wait for all expected agents to be removed to be removed from the cluster
@@ -16,13 +16,13 @@
   until: >
     (manage_agents_allocated.resources
     | selectattr('spec.clusterDeploymentName.name', 'undefined')
-    | length) >= managed_agents_removed_count | int
+    | length) >= manage_agents_removed_count | int
   retries: 10
   delay: 30
 
 - name: List agents removed from the cluster
   ansible.builtin.set_fact:
-    managed_agents_removed: >
+    manage_agents_removed: >
       {{ manage_agents_allocated.resources | selectattr('spec.clusterDeploymentName.name', 'undefined') }}
 
 - name: Cleanup removed agents
@@ -34,4 +34,4 @@
     patch:
       - op: remove
         path: /metadata/labels/{{ cluster_order_label | cloudkit.service.json_pointer_escape }}
-  loop: "{{ managed_agents_removed[: (managed_agents_removed_count | int)] }}"
+  loop: "{{ manage_agents_removed[: (manage_agents_removed_count | int)] }}"
