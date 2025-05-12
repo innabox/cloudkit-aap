@@ -33,5 +33,5 @@
     namespace: "{{ default_agent_namespace }}"
     patch:
       - op: remove
-        path: /metadata/labels/{{ cluster_order_label | json_pointer_escape }}
+        path: /metadata/labels/{{ cluster_order_label | cloudkit.service.json_pointer_escape }}
   with_items: "{{ managed_agents_removed[: (managed_agents_removed_count | int)] }}"
