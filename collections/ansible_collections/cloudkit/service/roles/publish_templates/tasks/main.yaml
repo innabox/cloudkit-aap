@@ -1,0 +1,41 @@
+- name: Get list of existing templates
+  ansible.builtin.uri:
+    url: "{{ publish_templates_api_endpoint }}"
+    headers:
+      authorization: Bearer {{ cloudkit_fulfillment_service_token }}
+  register: template_check
+
+- name: Create list of existing template template ids
+  ansible.builtin.set_fact:
+    template_ids: >-
+      {{
+      template_check|json_query("json.items[].id")
+      }}
+
+- name: Update existing template
+  loop: "{{ cloudkit_templates }}"
+  loop_control:
+    label: "{{ template.id }}"
+    loop_var: template
+  when: template.id in template_ids
+  ansible.builtin.uri:
+    url: "{{ publish_templates_api_endpoint }}/{{ template.id }}"
+    method: PATCH
+    headers:
+      authorization: Bearer {{ cloudkit_fulfillment_service_token }}
+    body_format: json
+    body: "{{ template }}"
+
+- name: Create new template
+  loop: "{{ cloudkit_templates }}"
+  loop_control:
+    label: "{{ template.id }}"
+    loop_var: template
+  when: template.id not in template_ids
+  ansible.builtin.uri:
+    url: "{{ publish_templates_api_endpoint }}"
+    method: POST
+    headers:
+      authorization: Bearer {{ cloudkit_fulfillment_service_token }}
+    body_format: json
+    body: "{{ template }}"

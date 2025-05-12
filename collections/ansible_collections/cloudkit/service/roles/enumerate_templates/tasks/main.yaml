@@ -1,7 +1,3 @@
 - name: Enumerate templates
   ansible.builtin.set_fact:
     cloudkit_templates: "{{ cloudkit_template_collections | cloudkit.service.find_template_roles }}"
-
-- name: Publish templates to fulfillment service
-  ansible.builtin.debug:
-    var: cloudkit_templates

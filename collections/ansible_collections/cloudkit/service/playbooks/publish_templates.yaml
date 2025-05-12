@@ -1,0 +1,11 @@
+- name: Discover and publish templates to fulfillment service
+  hosts: localhost
+  gather_facts: false
+  tasks:
+  - name: Discover templates
+    ansible.builtin.include_role:
+      name: cloudkit.service.enumerate_templates
+
+  - name: Publish templates
+    ansible.builtin.include_role:
+      name: cloudkit.service.publish_templates

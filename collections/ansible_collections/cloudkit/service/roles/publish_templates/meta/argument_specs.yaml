@@ -1,0 +1,11 @@
+argument_specs:
+  main:
+    options:
+      cloudkit_templates:
+        type: list
+      cloudkit_fulfillment_service_uri:
+        type: str
+        required: true
+      cloudkit_fulfillment_service_token:
+        type: str
+        required: true

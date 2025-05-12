@@ -1,3 +1,5 @@
+# pyright: reportExplicitAny=false
+
 import json
 import subprocess
 import yaml
@@ -62,18 +64,22 @@ class ProtobufType(StrEnum):
     ANY = "type.googleapis.com/google.protobuf.Value"
 
 
-# This maps Ansible argument types [1] to the protobuf types [2] used in the
-# fulfillment service.
+# This maps Ansible argument types [1] and Python types to the protobuf types
+# [2] used in the fulfillment service.
 #
 # [1]: https://docs.ansible.com/ansible/latest/dev_guide/developing_program_flow_modules.html#argument-spec
 # [2]: https://googleapis.dev/nodejs/analytics-admin/latest/google.protobuf.html
-TypeMapping: dict[AnsibleArgumentType, ProtobufType] = {
+TypeMapping: dict[AnsibleArgumentType | type, ProtobufType] = {
     "str": ProtobufType.STRING,
+    str: ProtobufType.STRING,
     "list": ProtobufType.ANY,
     "dict": ProtobufType.ANY,
     "bool": ProtobufType.BOOL,
+    bool: ProtobufType.BOOL,
     "int": ProtobufType.INT,
+    int: ProtobufType.INT,
     "float": ProtobufType.FLOAT,
+    float: ProtobufType.FLOAT,
     "path": ProtobufType.STRING,
     "json": ProtobufType.STRING,
     "bytes": ProtobufType.BYTEARRAY,
@@ -84,6 +90,13 @@ class Base(pydantic.BaseModel):
     pass
 
 
+class ProtobufAnyValue(Base):
+    type: ProtobufType = pydantic.Field(
+        ProtobufType.STRING, serialization_alias="@type"
+    )
+    value: Any
+
+
 class TemplateParameter(Base):
     """TemplateParameter represents a single template paramter"""
 
@@ -91,8 +104,8 @@ class TemplateParameter(Base):
     title: str | None
     description: str | None
     required: bool = False
-    pbtype: ProtobufType = ProtobufType.STRING
-    default: Any
+    type: ProtobufType = ProtobufType.STRING
+    default: ProtobufAnyValue | None = None
     choices: list[Any] | None = None
 
     @classmethod
@@ -103,8 +116,36 @@ class TemplateParameter(Base):
             title=spec.get("short_description"),
             description=spec.get("description"),
             default=spec.get("default"),
-            pbtype=TypeMapping[spec.get("type", "str")],
+            type=TypeMapping[spec.get("type", "str")],
         )
+
+    @pydantic.field_validator("default", mode="before")
+    @classmethod
+    def validate_default(cls, value: Any) -> ProtobufAnyValue | None:
+        """The 'default' field in the fulfillment API is using the `protobufAny` schema
+        defined in [1]. This requires a value of the form:
+
+            {
+                "@type": "type.googleapis.com/google.protobuf.StringValue",
+                "value": "my default value"
+            }
+
+        We handle this with a "before" field validator which transforms a
+        Python variable into a ProtobufAnyValue object by mapping the variable
+        type to the protobuf type string via the `TypeMapping` table, and then
+        storing the actual value in the "value" key.
+
+        Note that we only handle scalar values; an attempt to use something
+        other than a string, bool, float, or int will result in a validation
+        error.
+
+        [1]: https://raw.githubusercontent.com/innabox/fulfillment-api/refs/heads/main/openapi/v3/openapi.yaml
+        """
+        if value is not None:
+            try:
+                return ProtobufAnyValue(type=TypeMapping[type(value)], value=value)
+            except KeyError as err:
+                raise ValueError(f"Default values must be scalar type, not {err}")
 
 
 class NodeRequest(Base):
@@ -117,27 +158,34 @@ class NodeRequest(Base):
 class Metadata(Base):
     """Metadata about the template"""
 
-    display_name: str
+    title: str
     description: str | None = None
     default_node_request: list[NodeRequest]
     allowed_resource_classes: list[str] | None = None
 
 
-class Role(Base):
+class Template(Base):
     """Role represents a single template role"""
 
-    collection: str
-    name: str
-    path: Path
-    metadata: Metadata
-    template_parameters: list[TemplateParameter]
+    collection: str = pydantic.Field(..., exclude=True)
+    path: Path = pydantic.Field(..., exclude=True)
+
+    name: str = pydantic.Field(..., exclude=True)
+    title: str | None = None
+    description: str | None = None
+
+    # Not currently supported by the API
+    default_node_request: list[NodeRequest] = pydantic.Field(..., exclude=True)
+    allowed_resource_classes: list[str] | None = pydantic.Field(None, exclude=True)
+
+    parameters: list[TemplateParameter]
 
     @pydantic.field_serializer("path")
     def serialize_path(self, value: Path):
         return str(value)
 
     @pydantic.computed_field
-    def fqn(self) -> str:
+    def id(self) -> str:
         return f"{self.collection}.{self.name}"
 
 
@@ -186,24 +234,27 @@ class Collection(Base):
 
         return template_params
 
-    def roles(self):
+    def templates(self):
         for path in (self.parent_path / self.name.replace(".", "/") / "roles").glob(
             "*"
         ):
             metadata = self.read_metadata_for_role(path)
             params = self.read_params_for_role(path)
             if metadata is not None:
-                role = Role(
+                template = Template(
                     collection=self.name,
-                    name=path.name,
                     path=path,
-                    metadata=metadata,
-                    template_parameters=params,
+                    name=path.name,
+                    title=metadata.title,
+                    description=metadata.description,
+                    default_node_request=metadata.default_node_request,
+                    allowed_resource_classes=metadata.allowed_resource_classes,
+                    parameters=params,
                 )
-                yield role
+                yield template
 
 
-def find_template_roles(requested: list[str]) -> Generator[Role, None, None]:
+def find_template_roles(requested: list[str]) -> Generator[Template, None, None]:
     collections: list[Collection] = []
     for collection in requested:
         info: AnsibleCollectionList = cast(
@@ -231,15 +282,15 @@ def find_template_roles(requested: list[str]) -> Generator[Role, None, None]:
             )
 
     for collection in collections:
-        for role in collection.roles():
-            yield role
+        yield from collection.templates()
 
 
 def find_template_roles_filter(requested: list[str]):
     """Transform the return values from find_template_roles into something
     that makes Ansible happy."""
     return [
-        role.model_dump(exclude_none=True) for role in find_template_roles(requested)
+        role.model_dump(by_alias=True, exclude_none=True)
+        for role in find_template_roles(requested)
     ]
 
 

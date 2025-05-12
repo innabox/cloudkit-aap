@@ -1,8 +1,7 @@
 # Define the display name and description of the template
-display_name: OpenShift 4.17 Cluster + GitHub
+title: Simple OpenShift 4.17 Cluster
 description: >
-  This template will build a minimally configured OpenShift 4.17 cluster. It
-  will be configured to support authentication via GitHub.
+  This template will build a minimally configured OpenShift 4.17 cluster.
 
 # This sets the nodeRequest field in the ClusterOrder manifest. There must be at
 # least one entry in this list.
