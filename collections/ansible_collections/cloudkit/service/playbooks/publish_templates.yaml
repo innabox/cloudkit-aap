@@ -2,6 +2,16 @@
   hosts: localhost
   gather_facts: false
   tasks:
+  - name: Get innabox client token
+    ansible.builtin.command:
+      cmd: >
+        oc create token client
+        --duration=10m
+        -n innabox
+    register: innabox_client_token
+    changed_when: false
+    no_log: true
+
   - name: Discover templates
     ansible.builtin.include_role:
       name: cloudkit.service.enumerate_templates
@@ -9,3 +19,5 @@
   - name: Publish templates
     ansible.builtin.include_role:
       name: cloudkit.service.publish_templates
+    vars:
+      cloudkit_fulfillment_service_token: "{{ innabox_client_token.stdout }}"
