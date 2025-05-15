@@ -32,6 +32,13 @@
           - "{{ esi_agent_resource_class_label }}={{ manage_agents_resource_class }}"
       register: manage_agents_available
 
+    # Agents may be picked-up outside of the fulfillment API, so we need to exclude them
+    - name: Filter out agents already allocated to a cluster
+      ansible.builtin.set_fact:
+        manage_agents_available: >
+          {{ manage_agents_available.resources
+          | selectattr('spec.clusterDeploymentName.name', 'undefined') }}
+
     - name: Count the number of agents to add to the cluster
       ansible.builtin.set_fact:
         manage_agents_selected_count: >
@@ -47,7 +54,20 @@
           - op: add
             path: /metadata/labels/{{ cluster_order_label | cloudkit.service.json_pointer_escape }}
             value: "{{ manage_agents_cluster_order_name }}"
-      loop: "{{ manage_agents_available.resources[: (manage_agents_selected_count | int)] }}"
+      loop: "{{ manage_agents_available[: (manage_agents_selected_count | int)] }}"
+      loop_control:
+        label: "Adding agent {{ item.metadata.name }}"
+      register: manage_agents_added
+
+    - name: Count the number of agents effectively added to the cluster
+      ansible.builtin.set_fact:
+        manage_agents_added_count: >
+          {{ manage_agents_added.results | selectattr('changed') | list | length }}
+
+    - name: Print a message if not all agents were added
+      ansible.builtin.debug:
+        msg: "{{ manage_agents_added_count }} agents were added to the cluster instead of {{ manage_agents_selected_count }}. Please check agents availability."
+      when: manage_agents_added_count | int != manage_agents_selected_count | int
 
   always:
 

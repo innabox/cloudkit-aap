@@ -35,3 +35,5 @@
       - op: remove
         path: /metadata/labels/{{ cluster_order_label | cloudkit.service.json_pointer_escape }}
   loop: "{{ manage_agents_removed[: (manage_agents_removed_count | int)] }}"
+  loop_control:
+    label: "Removing agent {{ item.metadata.name }}"
