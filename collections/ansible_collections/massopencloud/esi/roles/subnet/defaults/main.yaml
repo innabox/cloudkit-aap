@@ -1,6 +1,0 @@
-subnet_cidr: 192.168.50.0/22
-subnet_gateway_ip: 192.168.50.1
-subnet_allocation_pool_start: 192.168.50.10
-subnet_allocation_pool_end: 192.168.50.200
-subnet_dns_nameservers:
-  - 8.8.8.8

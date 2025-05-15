@@ -14,12 +14,12 @@
   - name: Create subnet
     openstack.cloud.subnet:
       name: "{{ subnet_name_or_id }}"
-      network: "{{ network_name_or_id }}"
-      gateway_ip: "{{ subnet_gateway_ip }}"
-      cidr: "{{ subnet_cidr }}"
-      dns_nameservers: "{{ subnet_dns_nameservers }}"
-      allocation_pool_start: "{{ subnet_allocation_pool_start }}"
-      allocation_pool_end: "{{ subnet_allocation_pool_end }}"
+      network: "{{ network_id }}"
+      gateway_ip: "{{ l3_subnet_gateway_ip }}"
+      cidr: "{{ l3_subnet_cidr }}"
+      dns_nameservers: "{{ l3_subnet_dns_nameservers }}"
+      allocation_pool_start: "{{ l3_subnet_allocation_pool_start }}"
+      allocation_pool_end: "{{ l3_subnet_allocation_pool_end }}"
     register: subnet_cmd_result
 
   - name: Set create_subnet_result to new subnet

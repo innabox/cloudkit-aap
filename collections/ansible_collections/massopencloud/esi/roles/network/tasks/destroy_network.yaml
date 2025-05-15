@@ -7,21 +7,30 @@
   ansible.builtin.set_fact:
     network_show_cmd_result: "{{ network_show_cmd_raw.stdout | from_json }}"
 
+- name: Destroy related router
+  ansible.builtin.include_role:
+    name: massopencloud.esi.l3
+    tasks_from: destroy_router
+  vars:
+    router_name_or_id: "{{ 'router-' + network_show_cmd_result.id }}"
+
 - name: Get related subnets
   openstack.cloud.subnets_info:
     filters:
       network_id: "{{ network_show_cmd_result.id }}"
   register: subnets
 
-- name: Delete related subnets
+- name: Destroy related subnets
   ansible.builtin.include_role:
-    name: massopencloud.esi.subnet
+    name: massopencloud.esi.l3
+    tasks_from: destroy_subnet
   vars:
-    subnet_state: "absent"
     subnet_name_or_id: "{{ item.id }}"
   loop: "{{ subnets.subnets }}"
 
-- name: Destroy network  # noqa:no-changed-when
-  openstack.cloud.network:
-    state: "absent"
-    name: "{{ network_show_cmd_result.id }}"
+- name: Destroy network
+  ansible.builtin.include_role:
+    name: massopencloud.esi.l2
+  vars:
+    network_state: "absent"
+    network_name_or_id: "{{ network_show_cmd_result.id }}"

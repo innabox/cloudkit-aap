@@ -1,7 +1,0 @@
-- name: Create a new router
-  when: router_state == 'present'
-  ansible.builtin.include_tasks: create_router.yaml
-
-- name: Destroy a router
-  when: router_state == 'absent'
-  ansible.builtin.include_tasks: destroy_router.yaml
