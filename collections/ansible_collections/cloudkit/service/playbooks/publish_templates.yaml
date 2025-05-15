@@ -5,7 +5,7 @@
   - name: Get innabox client token
     ansible.builtin.command:
       cmd: >
-        oc create token client
+        oc create token controller
         --duration=10m
         -n innabox
     register: innabox_client_token
