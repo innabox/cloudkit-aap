@@ -10,7 +10,6 @@
         -n innabox
     register: innabox_client_token
     changed_when: false
-    no_log: true
 
   - name: Discover templates
     ansible.builtin.include_role:
