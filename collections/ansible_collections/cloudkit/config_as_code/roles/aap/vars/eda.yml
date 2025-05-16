@@ -12,7 +12,7 @@ eda_credentials:  # noqa: var-naming[no-role-prefix]
     organization: "{{ aap_organization_name }}"
     credential_type: 'Token Event Stream'
     inputs:
-      http_header_key	: "Authorization"
+      http_header_key: "Authorization"
       token: "{{ aap_eda_fulfillment_auth_token}}"
 
 # Create EDA project from the Git repo
