@@ -3,6 +3,23 @@
   ansible.builtin.include_vars:
     dir: vars/
 
+- name: Update the fact
+  ansible.builtin.set_fact:
+    activations_disabled: "{{ activations_disabled | default([]) + [item | combine({'state': 'disabled'})] }}"
+  loop: "{{ eda_rulebook_activations }}"
+
+- debug:
+    var: activations_disabled
+
+- name: Disable rulebook activations
+  ansible.builtin.include_role:
+    name: infra.aap_configuration.eda_rulebook_activations
+  vars:
+    eda_rulebook_activations: "{{ activations_disabled }}"
+
+- debug:
+    var: eda_rulebook_activations
+
 - name: Cloudkit AAP
   ansible.builtin.include_role:
     name: infra.aap_configuration.dispatch
