@@ -8,14 +8,14 @@
         port: 5000
   rules:
     - name: Create hosted cluster
-      condition: event.meta.endpoint == "create-hosted-cluster"
+      condition: payload.operation == "create-hosted-cluster"
       action:
         run_job_template:
           name: "{{ job_template_prefix }}-create-hosted-cluster"
           organization: "{{ job_template_organization }}"
 
     - name: Delete hosted cluster
-      condition: event.meta.endpoint == "delete-hosted-cluster"
+      condition: payload.operation == "delete-hosted-cluster"
       action:
         run_job_template:
           name: "{{ job_template_prefix }}-delete-hosted-cluster"
