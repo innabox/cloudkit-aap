@@ -18,6 +18,3 @@
 - name: Cloudkit AAP
   ansible.builtin.include_role:
     name: infra.aap_configuration.dispatch
-
-- debug:
-    var: aap_eda_fulfillment_auth_token

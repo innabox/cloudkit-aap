@@ -20,6 +20,7 @@ eda_projects:  # noqa: var-naming[no-role-prefix]
   - name: "{{ aap_prefix }}-eda"
     organization: "{{ aap_organization_name }}"
     url: "{{ aap_project_git_uri }}"
+    scm_branch: "{{ aap_project_git_branch }}"
 
 # Create decision environment
 eda_decision_environments:  # noqa: var-naming[no-role-prefix]
@@ -29,7 +30,7 @@ eda_decision_environments:  # noqa: var-naming[no-role-prefix]
 
 # Create the event stream
 eda_event_streams:
-  - name: "{{ aap_prefix }}-fulfillment-ev"
+  - name: "{{ aap_prefix }}-fulfillment-es"
     organization: "{{ aap_organization_name }}"
     credential_name: "{{ aap_prefix }}-fulfillment-auth-token"
     forward_events: true
@@ -49,6 +50,6 @@ eda_rulebook_activations:  # noqa: var-naming[no-role-prefix]
       job_template_organization: "{{ aap_organization_name }}"
       job_template_prefix: "{{ aap_prefix }}"
     event_streams:
-      - event_stream: "{{ aap_prefix }}-fulfillment-ev"
+      - event_stream: "{{ aap_prefix }}-fulfillment-es"
         source_name: "__SOURCE_1"  # Magic, this is the default source name set be AAP
     state: "present"
