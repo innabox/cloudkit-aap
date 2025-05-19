@@ -13,16 +13,13 @@ eda_credentials:  # noqa: var-naming[no-role-prefix]
     credential_type: 'Token Event Stream'
     inputs:
       http_header_key: "Authorization"
-      token: "{{ aap_eda_fulfillment_auth_token}}"
+      token: "{{ aap_eda_fulfillment_auth_token }}"
 
 # Create EDA project from the Git repo
 eda_projects:  # noqa: var-naming[no-role-prefix]
   - name: "{{ aap_prefix }}-eda"
     organization: "{{ aap_organization_name }}"
     url: "{{ aap_project_git_uri }}"
-    wait: true
-    interval: 10
-    sync: true
 
 # Create decision environment
 eda_decision_environments:  # noqa: var-naming[no-role-prefix]
