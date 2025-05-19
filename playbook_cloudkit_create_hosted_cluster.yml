@@ -55,6 +55,8 @@
               metadata:
                 name: "{{ cluster_order_lock_name }}"
                 namespace: "{{ cluster_working_namespace }}"
+                labels:
+                  cloudkit.openshift.io/aap-job-id: "{{ awx_job_id|default('unknown') }}"
               spec:
                 holderIdentity: "{{ cluster_order_holder_id }}"
 

@@ -15,6 +15,8 @@
           metadata:
             name: "agent-{{ manage_agents_resource_class }}-lock"
             namespace: "{{ default_agent_namespace }}"
+            labels:
+              cloudkit.openshift.io/aap-job-id: "{{ awx_job_id|default('unknown') }}"
           spec:
             holderIdentity: "{{ cluster_order_holder_id }}"
       register: manage_agents_lease
