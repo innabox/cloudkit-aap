@@ -51,5 +51,5 @@ eda_rulebook_activations:  # noqa: var-naming[no-role-prefix]
       job_template_prefix: "{{ aap_prefix }}"
     event_streams:
       - event_stream: "{{ aap_prefix }}-fulfillment-es"
-        source_name: "__SOURCE_1"  # Magic, this is the default source name set be AAP
+        source_name: "__SOURCE_1"  # Magic, this is the default source name set by AAP
     state: "present"
