@@ -19,6 +19,7 @@ dependencies:
     - systemd-devel
     - gcc
     - python3.12-devel
+    - krb5-devel
 
 options:
   package_manager_path: /usr/bin/dnf
