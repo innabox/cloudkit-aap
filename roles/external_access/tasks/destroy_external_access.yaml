@@ -19,7 +19,7 @@
     - "{{ external_access_name }}-api"
     - "{{ external_access_name }}-ingress"
 
-- name: Delete api dns record
+- name: Delete dns records
   amazon.aws.route53:
     state: absent
     zone: "{{ external_access_base_domain }}"
@@ -29,3 +29,4 @@
   loop:
   - "api.{{ external_access_name }}.{{ external_access_base_domain }}"
   - "api-int.{{ external_access_name }}.{{ external_access_base_domain }}"
+  - "*.apps.{{ external_access_name }}.{{ external_access_base_domain }}"
