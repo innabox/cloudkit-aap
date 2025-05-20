@@ -10,9 +10,6 @@
     name: "{{ cluster_order.metadata.name }}-admin-kubeconfig"
   register: admin_kubeconfig_secret
 
-- debug:
-    var: admin_kubeconfig_secret
-
 - name: Extract kubeconfig
   ansible.builtin.set_fact:
     admin_kubeconfig: "{{ admin_kubeconfig_secret.resources[0].data.kubeconfig | b64decode | from_yaml }}"

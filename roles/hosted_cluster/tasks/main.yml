@@ -12,7 +12,7 @@
       data:
         .dockerconfigjson: "{{ hosted_cluster_settings.pull_secret | to_json | b64encode }}"
       type: kubernetes.io/dockerconfigjson
-# no_log: true
+  no_log: true
 
 - name: Manage Secret resource containing ssh-key
   kubernetes.core.k8s:
