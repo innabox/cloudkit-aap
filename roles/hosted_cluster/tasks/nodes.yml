@@ -1,0 +1,57 @@
+- name: Manage NodePool resource
+  kubernetes.core.k8s:
+    state: "{{ hosted_cluster_state }}"
+    definition:
+      apiVersion: hypershift.openshift.io/v1beta1
+      kind: NodePool
+      metadata:
+        name: "nodepool-{{ hosted_cluster_name }}-{{ hosted_cluster_nodes_resource_class }}"
+        namespace: "{{ hosted_cluster_namespace }}"
+        labels: "{{ hosted_cluster_default_cluster_order_label }}"
+      spec:
+        clusterName: "{{ hosted_cluster_name }}"
+        replicas: "{{ hosted_cluster_nodes_number_of_nodes | int }}"
+        management:
+          autoRepair: false
+          upgradeType: InPlace
+        platform:
+          type: Agent
+          agent:
+            agentLabelSelector:
+              matchLabels: "{{ hosted_cluster_default_cluster_order_label }}"
+        release:
+          image: "{{ ocp_release_image }}"
+
+- name: Manage Agents resources
+  ansible.builtin.include_role:
+    name: manage_agents
+  vars:
+    manage_agents_cluster_working_namespace: "{{ hosted_cluster_namespace }}"
+    manage_agents_cluster_order_name: "{{ hosted_cluster_name }}"
+    manage_agents_desired_count: "{{ hosted_cluster_nodes_number_of_nodes | int }}"
+    manage_agents_resource_class: "{{ hosted_cluster_nodes_resource_class }}"
+
+- name: Configure selected agents to add them to the NodePool
+  when: manage_agents_added_result is defined
+  block:
+
+  # - name: Move agent to cluster's network
+  #   ...
+
+  - name: Approve selected agents
+    kubernetes.core.k8s_json_patch:
+      api_version: agent-install.openshift.io/v1beta1
+      kind: Agent
+      name: "{{ item.metadata.name }}"
+      namespace: "{{ item.metadata.namespace }}"
+      patch:
+        - op: add
+          path: /spec/approved
+          value: "true | bool"
+    loop: "{{ manage_agents_added_result }}"
+    loop_control:
+      label: "Approve agent {{ item.metadata.name }}"
+
+# - name: Move removed agents out of cluster's network
+#   ...
+#   when: manage_agents_removed_result is defined

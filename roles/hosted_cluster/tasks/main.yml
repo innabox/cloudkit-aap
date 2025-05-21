@@ -78,26 +78,17 @@
         infrastructureAvailabilityPolicy: HighlyAvailable
         olmCatalogPlacement: management
 
-- name: Manage NodePool resource
-  kubernetes.core.k8s:
-    state: "{{ hosted_cluster_state }}"
-    definition:
-      apiVersion: hypershift.openshift.io/v1beta1
-      kind: NodePool
-      metadata:
-        name: "nodepool-{{ hosted_cluster_name }}"
-        namespace: "{{ hosted_cluster_namespace }}"
-        labels: "{{ hosted_cluster_default_cluster_order_label }}"
-      spec:
-        clusterName: "{{ hosted_cluster_name }}"
-        replicas: "{{ hosted_cluster_node_count | int }}"
-        management:
-          autoRepair: false
-          upgradeType: InPlace
-        platform:
-          type: Agent
-          agent:
-            agentLabelSelector:
-              matchLabels: "{{ hosted_cluster_default_cluster_order_label }}"
-        release:
-          image: "{{ ocp_release_image }}"
+- name: Manage networking
+  ansible.builtin.include_role:
+    name: massopencloud.esi.network
+  vars:
+    network_suffix: "{{ hosted_cluster_name }}"
+    network_state: "{{ hosted_cluster_state }}"
+
+- name: Manage hosted cluster nodes
+  ansible.builtin.include_tasks:
+    file: nodes.yml
+  vars:
+    hosted_cluster_nodes_number_of_nodes: "{{ item.number_of_nodes }}"
+    hosted_cluster_nodes_resource_class: "{{ item.resource_class }}"
+  loop: "{{ hosted_cluster_node_requests }}"

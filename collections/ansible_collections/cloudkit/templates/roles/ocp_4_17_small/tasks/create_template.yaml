@@ -7,8 +7,7 @@
       ocp_release_image: "{{ ocp_release_image }}"
       pull_secret: "{{ template_parameters.pull_secret }}"
       ssh_public_key: "{{ template_parameters.ssh_public_key }}"
-    hosted_cluster_node_count: >-
-      {{ cluster_order.spec.nodeRequests | map(attribute="numberOfNodes") | sum }}
+    hosted_cluster_node_requests: "{{ cluster_order.spec.nodeRequests }}"
     hosted_cluster_state: present
 
 - ansible.builtin.import_role:

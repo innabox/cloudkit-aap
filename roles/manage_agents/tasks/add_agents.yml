@@ -56,6 +56,9 @@
           - op: add
             path: /metadata/labels/{{ cluster_order_label | cloudkit.service.json_pointer_escape }}
             value: "{{ manage_agents_cluster_order_name }}"
+          - op: add
+            path: /spec/approved
+            value: "false | bool"
       loop: "{{ manage_agents_available[: (manage_agents_selected_count | int)] }}"
       loop_control:
         label: "Adding agent {{ item.metadata.name }}"
@@ -63,8 +66,10 @@
 
     - name: Count the number of agents effectively added to the cluster
       ansible.builtin.set_fact:
+        manage_agents_added_result: >
+          {{ manage_agents_added.results | selectattr('changed') }}
         manage_agents_added_count: >
-          {{ manage_agents_added.results | selectattr('changed') | list | length }}
+          {{ manage_agents_added_result | length }}
 
     - name: Print a message if not all agents were added
       ansible.builtin.debug:

@@ -22,7 +22,7 @@
 
 - name: List agents removed from the cluster
   ansible.builtin.set_fact:
-    manage_agents_removed: >
+    manage_agents_removed_result: >
       {{ manage_agents_allocated.resources | selectattr('spec.clusterDeploymentName.name', 'undefined') }}
 
 - name: Cleanup removed agents
