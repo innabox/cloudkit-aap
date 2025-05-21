@@ -9,7 +9,7 @@
   ansible.builtin.set_fact:
     template_ids: >-
       {{
-      template_check|json_query("json.items[].id")
+      template_check | json_query("json.items[].id")
       }}
 
 - name: Update existing template
