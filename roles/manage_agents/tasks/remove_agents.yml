@@ -22,7 +22,7 @@
 
 - name: List agents removed from the cluster
   ansible.builtin.set_fact:
-    manage_agents_removed_result: >
+    manage_agents_removed: >
       {{ manage_agents_allocated.resources | selectattr('spec.clusterDeploymentName.name', 'undefined') }}
 
 - name: Cleanup removed agents
@@ -37,3 +37,9 @@
   loop: "{{ manage_agents_removed[: (manage_agents_removed_count | int)] }}"
   loop_control:
     label: "Removing agent {{ item.metadata.name }}"
+  register: manage_agents_removed_result
+
+- name: Removed agents list
+  ansible.builtin.set_fact:
+    manage_agents_removed_result: >
+      {{ manage_agents_removed_result.results | selectattr('changed') | map(attribute='item') }}

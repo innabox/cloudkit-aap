@@ -47,7 +47,7 @@
       patch:
         - op: add
           path: /spec/approved
-          value: "true | bool"
+          value: true
     loop: "{{ manage_agents_added_result }}"
     loop_control:
       label: "Approve agent {{ item.metadata.name }}"
