@@ -14,6 +14,7 @@
     aap_project_git_uri: "{{ lookup('env', 'AAP_PROJECT_GIT_URI')}}"
     aap_project_git_branch: "{{ lookup('env', 'AAP_PROJECT_GIT_BRANCH') }}"
     aap_ee_image: "{{ lookup('env', 'AAP_EE_IMAGE') }}"
+    aap_eda_fulfillment_auth_token: "{{ lookup('env', 'AAP_EDA_FULFILLMENT_AUTH_TOKEN') }}"
 
   tasks:
     - name: Configure AAP
