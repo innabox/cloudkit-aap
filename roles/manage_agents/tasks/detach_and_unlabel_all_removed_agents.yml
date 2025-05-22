@@ -1,0 +1,38 @@
+---
+- name: List agents currently labeled with the cluster order label
+  kubernetes.core.k8s_info:
+    kind: Agent
+    api_version: agent-install.openshift.io/v1beta1
+    namespace: "{{ default_agent_namespace }}"
+    label_selectors:
+      - "{{ cluster_order_label }}={{ manage_agents_cluster_order_name }}"
+  register: manage_agents_allocated
+
+- name: List agents removed from the cluster
+  ansible.builtin.set_fact:
+    manage_agents_removed: >
+      {{ manage_agents_allocated.resources | selectattr('spec.clusterDeploymentName.name', 'undefined') }}
+
+- name: Detach removed agents from cluster network
+  ansible.builtin.include_role:
+    name: massopencloud.esi.detach_network_from_node
+  vars:
+    node: "{{ item.metadata.annotations['esi.nerc.mghpcc.org/uuid'] }}"
+    network: "{{ manage_agents_cluster_network }}"
+  loop: "{{ manage_agents_removed }}"
+  loop_control:
+    label: "Detach agent {{ item.metadata.name }}"
+
+- name: Un-label agents
+  kubernetes.core.k8s_json_patch:
+    api_version: agent-install.openshift.io/v1beta1
+    kind: Agent
+    name: "{{ item.metadata.name }}"
+    namespace: "{{ default_agent_namespace }}"
+    patch:
+      - op: remove
+        path: /metadata/labels/{{ cluster_order_label | cloudkit.service.json_pointer_escape }}
+  loop: "{{ manage_agents_removed }}"
+  loop_control:
+    label: "Un-label agent {{ item.metadata.name }}"
+  register: manage_agents_removed_result

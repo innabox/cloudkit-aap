@@ -13,9 +13,16 @@ argument_specs:
       hosted_cluster_namespace:
         type: str
         required: true
-      hosted_cluster_node_count:
-        type: int
-        required: true
+      hosted_cluster_node_requests:
+        type: list
+        elements: dict
+        suboptions:
+          number_of_nodes:
+            type: int
+            required: true
+          resource_class:
+            type: str
+            required: true
       hosted_cluster_settings:
         type: dict
         required: true
