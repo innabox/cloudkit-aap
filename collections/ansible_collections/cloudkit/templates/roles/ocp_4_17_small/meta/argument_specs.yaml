@@ -10,7 +10,7 @@ argument_specs:
       node_requests:
         type: list
         elements: dict
-        suboptions:
+        options:
           number_of_nodes:
             type: int
             required: true

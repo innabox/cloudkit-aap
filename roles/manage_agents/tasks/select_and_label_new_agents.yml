@@ -1,5 +1,16 @@
 ---
+- name: List agents currently labeled with the cluster order label
+  kubernetes.core.k8s_info:
+    kind: Agent
+    api_version: agent-install.openshift.io/v1beta1
+    namespace: "{{ default_agent_namespace }}"
+    label_selectors:
+      - "{{ cluster_order_label }}={{ manage_agents_cluster_order_name }}"
+      - "{{ esi_agent_resource_class_label }}={{ manage_agents_resource_class }}"
+  register: manage_agents_allocated
+
 - name: Add agents to the cluster
+  when: (manage_agents_desired_count | int) > (manage_agents_allocated.resources | length)
   block:
     # Since there is only one global pool of agents, we need to make sure that
     # the selection of new agents is serialized by resource class
@@ -66,13 +77,13 @@
 
     - name: Added agent list
       ansible.builtin.set_fact:
-        manage_agents_added_result: >
+        manage_agents_added: >
           {{ manage_agents_added.results | selectattr('changed') | map(attribute='item') }}
 
     - name: Print a message if not all agents were added
       ansible.builtin.debug:
-        msg: "{{ manage_agents_added_count }} agents were added to the cluster instead of {{ manage_agents_selected_count }}. Please check agents availability."
-      when: manage_agents_added_result | length != manage_agents_selected_count | int
+        msg: "{{ manage_agents_added | length }} agents were added to the cluster instead of {{ manage_agents_selected_count }}. Please check agents availability."
+      when: manage_agents_added | length != manage_agents_selected_count | int
 
   always:
 
