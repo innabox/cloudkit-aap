@@ -18,24 +18,12 @@ argument_specs:
           Name of network to be deleted when state is `absent`; the deletion will fail if the network name is not unique.
         type: "str"
         required: true
-  attach_network_to_node:
+  set_networks_for_node:
     options:
-      network:
+      networks:
         description: |
-          Name or UUID of network
-        type: "str"
-        required: true
-      node:
-        description: |
-          Name or UUID of node
-        type: "str"
-        required: true
-  detach_network_from_node:
-    options:
-      network:
-        description: |
-          Name or UUID of network
-        type: "str"
+          List of names of networks
+        type: "list"
         required: true
       node:
         description: |
