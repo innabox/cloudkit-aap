@@ -11,7 +11,7 @@
 - name: List new agents
   set_fact:
     manage_agents_new: >
-      {{ manage_agents_allocated.resources | selectattr('spec.approved', false) }}
+      {{ manage_agents_allocated.resources | selectattr('spec.approved', 'false') }}
 
 - name: Attach new agents to cluster network
   ansible.builtin.include_role:
