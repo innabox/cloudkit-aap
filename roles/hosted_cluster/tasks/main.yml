@@ -98,8 +98,7 @@
           type: Agent
           agent:
             agentLabelSelector:
-              matchLabels: >
-                "{{ {esi_agent_resource_class_label: item.resource_class} | combine(hosted_cluster_default_cluster_order_label) }}"
+              matchLabels: "{{ {esi_agent_resource_class_label: item.resource_class} | combine(hosted_cluster_default_cluster_order_label) }}"
         release:
           image: "{{ ocp_release_image }}"
   loop: "{{ hosted_cluster_node_requests }}"
