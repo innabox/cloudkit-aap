@@ -85,9 +85,9 @@
 
         # Without this, a failure in the template would show up as
         # a successful job run.
-        - name: Propogate failure
+        - name: Propagate failure
           ansible.builtin.fail:
-            msg: Propogating earlier failure from rescue block
+            msg: Propagating earlier failure from rescue block
 
       always:
 
