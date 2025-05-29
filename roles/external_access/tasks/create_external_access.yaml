@@ -66,16 +66,31 @@
   retries: "{{ external_access_resource_wait_retries }}"
   delay: "{{ external_access_resource_wait_delay }}"
 
-- name: Set external_access_worker_node_ip
+- name: Get esi node name of an agent
+  ansible.builtin.set_fact:
+    external_access_worker_node_name: >-
+      {{
+      agents.resources[0].spec.hostname
+      }}
+
+- name: Get network details from esi
+  ansible.builtin.command: >-
+    openstack esi node network list
+    --node {{ external_access_worker_node_name }}
+    --network {{ external_access_ingress_internal_network }}
+    -f json
+  register: worker_node_network_details
+
+- name: Get worker node address
   ansible.builtin.set_fact:
     external_access_worker_node_ip: >-
       {{
-      agents |
-      json_query('resources[*].status.inventory.interfaces[?ipV4Addresses][].ipV4Addresses[]') |
-      shuffle |
-      first |
-      ansible.utils.ipaddr('address')
+        (worker_node_network_details.stdout|from_json)[0]['Fixed IP']
       }}
+
+- name: Show discovered address
+  ansible.builtin.debug:
+    msg: "Found address {{ external_access_worker_node_ip }} for node {{ external_access_worker_node_name }}"
 
 - name: Allocate ingress floating ip
   ansible.builtin.include_role:
