@@ -7,7 +7,11 @@ argument_specs:
         required: true
       manage_agents_cluster_network:
         type: str
-        required: true
+
+        # XXX: Warning, this is a hack! We need this when *creating* a cluster,
+        # but not when *deleting* a cluster, but this task list is called for
+        # both workflows.
+        required: false
   detach_and_unlabel_all_removed_agents:
     options:
       manage_agents_cluster_order_name:

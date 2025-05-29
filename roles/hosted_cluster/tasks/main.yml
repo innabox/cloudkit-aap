@@ -129,7 +129,7 @@
     tasks_from: attach_and_approve_all_new_agents
   vars:
     manage_agents_cluster_order_name: "{{ hosted_cluster_name }}"
-    manage_agents_cluster_network: "{{ create_network_result }}"
+    manage_agents_cluster_network: "{{ create_network_result|default(omit) }}"
 
 - name: Wait for the Agents to be removed from the cluster
   ansible.builtin.include_role:
@@ -147,7 +147,7 @@
     tasks_from: attach_and_approve_all_new_agents
   vars:
     manage_agents_cluster_order_name: "{{ hosted_cluster_name }}"
-    manage_agents_cluster_network: "{{ create_network_result }}"
+    manage_agents_cluster_network: "{{ create_network_result|default(omit) }}"
 
 - name: Delete cluster network
   ansible.builtin.include_role:
