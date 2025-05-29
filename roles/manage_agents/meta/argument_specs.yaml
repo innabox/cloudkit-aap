@@ -16,6 +16,9 @@ argument_specs:
       manage_agents_cluster_network:
         type: str
         required: true
+      manage_agents_idle_agents_network:
+        type: str
+        required: true
   select_and_label_new_agents:
     options:
       manage_agents_desired_count:

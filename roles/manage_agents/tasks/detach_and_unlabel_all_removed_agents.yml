@@ -15,10 +15,11 @@
 
 - name: Detach removed agents from cluster network
   ansible.builtin.include_role:
-    name: massopencloud.esi.detach_network_from_node
+    name: massopencloud.esi.set_networks_for_node
   vars:
     node: "{{ item.metadata.annotations['esi.nerc.mghpcc.org/uuid'] }}"
-    network: "{{ manage_agents_cluster_network }}"
+    networks:
+    - "{{ manage_agents_idle_agents_network }}"
   loop: "{{ manage_agents_removed }}"
   loop_control:
     label: "Detach agent {{ item.metadata.name }}"
