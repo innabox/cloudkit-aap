@@ -85,12 +85,12 @@
       apiVersion: hypershift.openshift.io/v1beta1
       kind: NodePool
       metadata:
-        name: "nodepool-{{ hosted_cluster_name }}-{{ item.resource_class }}"
+        name: "nodepool-{{ hosted_cluster_name }}-{{ item.resourceClass }}"
         namespace: "{{ hosted_cluster_namespace }}"
         labels: "{{ hosted_cluster_default_cluster_order_label }}"
       spec:
         clusterName: "{{ hosted_cluster_name }}"
-        replicas: "{{ item.number_of_nodes | int }}"
+        replicas: "{{ item.numberOfNodes | int }}"
         management:
           autoRepair: false
           upgradeType: InPlace
@@ -98,12 +98,12 @@
           type: Agent
           agent:
             agentLabelSelector:
-              matchLabels: "{{ {esi_agent_resource_class_label: item.resource_class} | combine(hosted_cluster_default_cluster_order_label) }}"
+              matchLabels: "{{ {esi_agent_resource_class_label: item.resourceClass} | combine(hosted_cluster_default_cluster_order_label) }}"
         release:
           image: "{{ ocp_release_image }}"
   loop: "{{ hosted_cluster_node_requests }}"
   loop_control:
-    label: "Manage NodePool nodepool-{{ hosted_cluster_name }}-{{ item.resource_class }}"
+    label: "Manage NodePool nodepool-{{ hosted_cluster_name }}-{{ item.resourceClass }}"
 
 - name: Create cluster network
   ansible.builtin.include_role:
@@ -119,8 +119,8 @@
     tasks_from: select_and_label_new_agents
   vars:
     manage_agents_cluster_order_name: "{{ hosted_cluster_name }}"
-    manage_agents_desired_count: "{{ item.number_of_nodes | int }}"
-    manage_agents_resource_class: "{{ item.resource_class }}"
+    manage_agents_desired_count: "{{ item.numberOfNodes | int }}"
+    manage_agents_resource_class: "{{ item.resourceClass }}"
   loop: "{{ hosted_cluster_node_requests }}"
 
 - name: Attach agents to cluster network and approve them
@@ -137,8 +137,8 @@
     tasks_from: wait_for_agents_to_be_removed
   vars:
     manage_agents_cluster_order_name: "{{ hosted_cluster_name }}"
-    manage_agents_desired_count: "{{ item.number_of_nodes | int }}"
-    manage_agents_resource_class: "{{ item.resource_class }}"
+    manage_agents_desired_count: "{{ item.numberOfNodes | int }}"
+    manage_agents_resource_class: "{{ item.resourceClass }}"
   loop: "{{ hosted_cluster_node_requests }}"
 
 - name: Approve agents assigned to the hosted cluster

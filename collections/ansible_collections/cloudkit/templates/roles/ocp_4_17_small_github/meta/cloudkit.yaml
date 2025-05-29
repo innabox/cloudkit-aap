@@ -7,8 +7,8 @@ description: >
 # This sets the nodeRequest field in the ClusterOrder manifest. There must be at
 # least one entry in this list.
 default_node_request:
-- resource_class: fc430
-  number_of_nodes: 2
+- resourceClass: fc430
+  numberOfNodes: 2
 
 # This declares that for a cluster built from this template, only the resource
 # classes listed here may be used when requesting additional nodes. If this

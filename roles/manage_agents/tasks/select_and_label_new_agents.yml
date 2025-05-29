@@ -61,8 +61,8 @@
       kubernetes.core.k8s_json_patch:
         api_version: agent-install.openshift.io/v1beta1
         kind: Agent
-        name: "{{ item.metadata.name }}"
-        namespace: "{{ item.metadata.namespace }}"
+        name: "{{ agent.metadata.name }}"
+        namespace: "{{ agent.metadata.namespace }}"
         patch:
           - op: add
             path: /metadata/labels/{{ cluster_order_label | cloudkit.service.json_pointer_escape }}
@@ -72,13 +72,14 @@
             value: false
       loop: "{{ manage_agents_available[: (manage_agents_selected_count | int)] }}"
       loop_control:
-        label: "Adding agent {{ item.metadata.name }}"
+        loop_var: agent
+        label: "Adding agent {{ agent.metadata.name }}"
       register: manage_agents_added
 
     - name: Added agent list
       ansible.builtin.set_fact:
         manage_agents_added: >
-          {{ manage_agents_added.results | selectattr('changed') | map(attribute='item') }}
+          {{ manage_agents_added.results | selectattr('changed') | map(attribute='agent') }}
 
     - name: Print a message if not all agents were added
       ansible.builtin.debug:
