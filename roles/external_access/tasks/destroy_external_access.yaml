@@ -1,14 +1,3 @@
-- name: Wait for hostedcluster to finish deleting
-  kubernetes.core.k8s_info:
-    api_version: hypershift.openshift.io/v1beta1
-    kind: HostedCluster
-    namespace: "{{ external_access_namespace }}"
-    name: "{{ external_access_name }}"
-  register: hosted_cluster_check
-  until: not hosted_cluster_check.resources
-  retries: "{{ external_access_resource_wait_retries }}"
-  delay: "{{ external_access_resource_wait_delay }}"
-
 - name: Destroy floating ips
   ansible.builtin.include_role:
     name: massopencloud.esi.floating_ip
