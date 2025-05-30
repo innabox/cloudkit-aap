@@ -20,4 +20,8 @@ dependencies = [
 ]
 
 [dependency-groups]
-development = ["ansible-lint>=25.2.1", "antsibull-changelog>=0.33.0"]
+development = [
+    "ansible-builder>=3.1.0",
+    "ansible-lint>=25.2.1",
+    "antsibull-changelog>=0.33.0",
+]
