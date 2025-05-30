@@ -57,6 +57,9 @@
         manage_agents_selected_count: >
           {{ manage_agents_desired_count | int - manage_agents_allocated.resources | length }}
 
+    - debug:
+        var: manage_agents_available
+
     - name: Add selected agents to the cluster
       kubernetes.core.k8s_json_patch:
         api_version: agent-install.openshift.io/v1beta1
