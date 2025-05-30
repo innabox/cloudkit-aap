@@ -1,0 +1,7 @@
+- name: Import an ESI node to be an agent in the hostpool
+  when: agent_state == 'present'
+  ansible.builtin.include_tasks: import_agents.yaml
+
+- name: Release an agent from the hostpool
+  when: agent_state == 'absent'
+  ansible.builtin.include_tasks: remove_agents.yaml
