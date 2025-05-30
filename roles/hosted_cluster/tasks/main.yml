@@ -149,6 +149,14 @@
     manage_agents_cluster_order_name: "{{ hosted_cluster_name }}"
     manage_agents_cluster_network: "{{ create_network_result|default(omit) }}"
 
+- name: Detach agents from cluster
+  ansible.builtin.include_role:
+    name: manage_agents
+    tasks_from: detach_and_unlabel_all_removed_agents
+  vars:
+    manage_agents_cluster_order_name: "{{ hosted_cluster_name }}"
+    manage_agents_cluster_network: "{{ create_network_result|default(omit) }}"
+
 - name: Delete cluster network
   ansible.builtin.include_role:
     name: massopencloud.esi.network
