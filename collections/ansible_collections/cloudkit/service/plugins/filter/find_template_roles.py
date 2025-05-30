@@ -151,8 +151,8 @@ class TemplateParameter(Base):
 class NodeRequest(Base):
     """NodeRequest represents the bare metal resources requested for a cluster"""
 
-    resource_class: str
-    number_of_nodes: int
+    resource_class: str = pydantic.Field(..., validation_alias="resourceClass")
+    number_of_nodes: int = pydantic.Field(..., validation_alias="numberOfNodes")
 
 
 class Metadata(Base):
