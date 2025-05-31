@@ -1,0 +1,7 @@
+- name: Create (or update) a hosted cluster
+  when: cluster_infra_state == 'present'
+  ansible.builtin.include_tasks: create_cluster_infra.yaml
+
+- name: Destroy a hosted cluster
+  when: cluster_infra_state == 'absent'
+  ansible.builtin.include_tasks: destroy_cluster_infra.yaml
