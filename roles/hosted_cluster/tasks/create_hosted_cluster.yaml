@@ -1,7 +1,6 @@
----
-- name: Manage Secret resource containing pull-secret
+- name: Create Secret resource containing pull-secret
   kubernetes.core.k8s:
-    state: "{{ hosted_cluster_state }}"
+    state: present
     definition:
       apiVersion: v1
       kind: Secret
@@ -14,9 +13,9 @@
       type: kubernetes.io/dockerconfigjson
   no_log: true
 
-- name: Manage Secret resource containing ssh-key
+- name: Create Secret resource containing ssh public key
   kubernetes.core.k8s:
-    state: "{{ hosted_cluster_state }}"
+    state: present
     definition:
       apiVersion: v1
       kind: Secret
@@ -27,9 +26,9 @@
       data:
         id_rsa.pub: "{{ hosted_cluster_settings.ssh_public_key | b64encode }}"
 
-- name: Manage HostedCluster resource
+- name: Create HostedCluster resource
   kubernetes.core.k8s:
-    state: "{{ hosted_cluster_state }}"
+    state: present
     definition:
       apiVersion: hypershift.openshift.io/v1beta1
       kind: HostedCluster
@@ -78,9 +77,9 @@
         infrastructureAvailabilityPolicy: HighlyAvailable
         olmCatalogPlacement: management
 
-- name: Manage NodePool resources
+- name: Create NodePool resources
   kubernetes.core.k8s:
-    state: "{{ hosted_cluster_state }}"
+    state: present
     definition:
       apiVersion: hypershift.openshift.io/v1beta1
       kind: NodePool
@@ -103,64 +102,4 @@
           image: "{{ ocp_release_image }}"
   loop: "{{ hosted_cluster_node_requests }}"
   loop_control:
-    label: "Manage NodePool nodepool-{{ hosted_cluster_name }}-{{ item.resourceClass }}"
-
-- name: Create cluster network
-  ansible.builtin.include_role:
-    name: massopencloud.esi.network
-  vars:
-    network_suffix: "{{ hosted_cluster_name }}"
-    network_state: "{{ hosted_cluster_state }}"
-  when: hosted_cluster_state == "present"
-
-- name: Select and label new Agents resources
-  ansible.builtin.include_role:
-    name: manage_agents
-    tasks_from: select_and_label_new_agents
-  vars:
-    manage_agents_cluster_order_name: "{{ hosted_cluster_name }}"
-    manage_agents_desired_count: "{{ item.numberOfNodes | int }}"
-    manage_agents_resource_class: "{{ item.resourceClass }}"
-  loop: "{{ hosted_cluster_node_requests }}"
-
-- name: Attach agents to cluster network and approve them
-  ansible.builtin.include_role:
-    name: manage_agents
-    tasks_from: attach_and_approve_all_new_agents
-  vars:
-    manage_agents_cluster_order_name: "{{ hosted_cluster_name }}"
-    manage_agents_cluster_network: "{{ create_network_result|default(omit) }}"
-
-- name: Wait for the Agents to be removed from the cluster
-  ansible.builtin.include_role:
-    name: manage_agents
-    tasks_from: wait_for_agents_to_be_removed
-  vars:
-    manage_agents_cluster_order_name: "{{ hosted_cluster_name }}"
-    manage_agents_desired_count: "{{ item.numberOfNodes | int }}"
-    manage_agents_resource_class: "{{ item.resourceClass }}"
-  loop: "{{ hosted_cluster_node_requests }}"
-
-- name: Approve agents assigned to the hosted cluster
-  ansible.builtin.include_role:
-    name: manage_agents
-    tasks_from: attach_and_approve_all_new_agents
-  vars:
-    manage_agents_cluster_order_name: "{{ hosted_cluster_name }}"
-    manage_agents_cluster_network: "{{ create_network_result|default(omit) }}"
-
-- name: Detach agents from cluster
-  ansible.builtin.include_role:
-    name: manage_agents
-    tasks_from: detach_and_unlabel_all_removed_agents
-  vars:
-    manage_agents_cluster_order_name: "{{ hosted_cluster_name }}"
-  when: hosted_cluster_state == "absent"
-
-- name: Delete cluster network
-  ansible.builtin.include_role:
-    name: massopencloud.esi.network
-  vars:
-    network_suffix: "{{ hosted_cluster_name }}"
-    network_state: "{{ hosted_cluster_state }}"
-  when: hosted_cluster_state == "absent"
+    label: "Create NodePool nodepool-{{ hosted_cluster_name }}-{{ item.resourceClass }}"

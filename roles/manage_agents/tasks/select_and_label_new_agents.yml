@@ -57,6 +57,10 @@
         manage_agents_selected_count: >
           {{ manage_agents_desired_count | int - manage_agents_allocated.resources | length }}
 
+    - name: Display agent counts
+      ansible.builtin.debug:
+        msg: "We have {{ manage_agents_allocated.resources | length }} agents, we want {{ manage_agents_desired_count }}"
+
     - name: Add selected agents to the cluster
       kubernetes.core.k8s_json_patch:
         api_version: agent-install.openshift.io/v1beta1

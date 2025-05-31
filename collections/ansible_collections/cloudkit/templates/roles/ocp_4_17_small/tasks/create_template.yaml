@@ -1,4 +1,5 @@
-- ansible.builtin.import_role:
+- name: Create hosted cluster
+  ansible.builtin.import_role:
     name: hosted_cluster
   vars:
     hosted_cluster_name: "{{ cluster_order.metadata.name }}"
@@ -10,7 +11,17 @@
     hosted_cluster_node_requests: "{{ cluster_order.spec.nodeRequests }}"
     hosted_cluster_state: present
 
-- ansible.builtin.import_role:
+- name: Create cluster infrastructure
+  ansible.builtin.import_role:
+    name: cluster_infra
+  vars:
+    cluster_infra_state: present
+    cluster_infra_name: "{{ cluster_order.metadata.name }}"
+    cluster_infra_namespace: "{{ cluster_working_namespace }}"
+    cluster_infra_node_requests: "{{ cluster_order.spec.nodeRequests }}"
+
+- name: Configure port forwarding
+  ansible.builtin.import_role:
     name: external_access
   vars:
     external_access_name: "{{ cluster_order.metadata.name }}"
