@@ -8,21 +8,32 @@ eda_credentials:
       username: "{{ aap_eda_service_user_name }}"
       password: "{{ aap_eda_service_user_password }}"
       host: "{{ aap_hostname }}/api/controller/"
+  - name: "{{ aap_prefix }}-fulfillment-auth-token"
+    organization: "{{ aap_organization_name }}"
+    credential_type: 'Token Event Stream'
+    inputs:
+      http_header_key: "Authorization"
+      token: "{{ aap_eda_fulfillment_auth_token }}"
 
 # Create EDA project from the Git repo
 eda_projects:
   - name: "{{ aap_prefix }}-eda"
     organization: "{{ aap_organization_name }}"
     url: "{{ aap_project_git_uri }}"
-    wait: true
-    interval: 10
-    sync: true
+    scm_branch: "{{ aap_project_git_branch }}"
 
 # Create decision environment
 eda_decision_environments:
   - name: "{{ aap_prefix }}-de"
     organization: "{{ aap_organization_name }}"
     image_url: "registry.redhat.io/ansible-automation-platform-25/de-supported-rhel9:latest"
+
+# Create the event stream
+eda_event_streams:
+  - name: "{{ aap_prefix }}-fulfillment-es"
+    organization: "{{ aap_organization_name }}"
+    credential_name: "{{ aap_prefix }}-fulfillment-auth-token"
+    forward_events: true
 
 # Create rulebook activation
 eda_rulebook_activations:
@@ -38,4 +49,7 @@ eda_rulebook_activations:
     extra_vars:
       job_template_organization: "{{ aap_organization_name }}"
       job_template_prefix: "{{ aap_prefix }}"
-    enabled: true
+    event_streams:
+      - event_stream: "{{ aap_prefix }}-fulfillment-es"
+        source_name: "__SOURCE_1"  # Magic, this is the default source name set by AAP
+    state: "present"
