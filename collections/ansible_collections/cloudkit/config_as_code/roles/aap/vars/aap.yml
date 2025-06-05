@@ -1,15 +1,15 @@
 ---
-aap_organizations:
+aap_organizations:  # noqa: var-naming[no-role-prefix]
   - name: "{{ aap_organization_name }}"
 
-aap_user_accounts:
+aap_user_accounts:  # noqa: var-naming[no-role-prefix]
   # create a user for EDA
   - username: "{{ aap_eda_service_user_name }}"
     is_superuser: false
     password: "{{ aap_eda_service_user_password }}"
     update_secrets: false
 
-controller_roles:
+controller_roles:  # noqa: var-naming[no-role-prefix]
   # Here we allow EDA to trigger the job templates we want
   - user: "{{ aap_eda_service_user_name }}"
     lookup_organization: "{{ aap_organization_name }}"
