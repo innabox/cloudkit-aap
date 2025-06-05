@@ -1,6 +1,6 @@
 ---
 # Create a project from the specified git repo
-controller_projects:
+controller_projects:  # noqa: var-naming[no-role-prefix]
   - name: "{{ aap_prefix }}"
     description: "{{ aap_project_name }}'s project"
     organization: "{{ aap_organization_name }}"
@@ -14,7 +14,7 @@ controller_projects:
     wait: true
 
 # Create cluster-fulfillment templates and a config-as-code template
-controller_templates:
+controller_templates:  # noqa: var-naming[no-role-prefix]
   - name: "{{ aap_prefix }}-create-hosted-cluster"
     project: "{{ aap_prefix }}"
     organization: "{{ aap_organization_name }}"
@@ -53,7 +53,7 @@ controller_templates:
 # Create cluster fulfillment and confg-as-code inventories. They are the same
 # for the moment, but spliting them will allow us to diverge easily in the
 # future.
-controller_inventories:
+controller_inventories:  # noqa: var-naming[no-role-prefix]
   - name: "{{ aap_prefix }}-cluster-fulfillment"
     description: "Cluster fulfilment inventory"
     organization: "{{ aap_organization_name }}"
@@ -61,7 +61,7 @@ controller_inventories:
     description: "Config-as-code inventory"
     organization: "{{ aap_organization_name }}"
 
-controller_inventory_sources:
+controller_inventory_sources:  # noqa: var-naming[no-role-prefix]
   - name: "{{ aap_prefix }}-cluster-fulfillment-is"
     organization: "{{ aap_organization_name }}"
     source: scm
@@ -81,7 +81,7 @@ controller_inventory_sources:
     overwrite_vars: true
     update_cache_timeout: 0
 
-controller_schedules:
+controller_schedules:  # noqa: var-naming[no-role-prefix]
   # Sync project every 10min to get the latest updates from the git repository
   - name: "{{ aap_prefix }}-sync"
     description: "Periodic sync job for {{ aap_project_name }} project"
@@ -96,7 +96,7 @@ controller_schedules:
     rrule: "DTSTART:20250331T144500Z RRULE:FREQ=HOURLY;INTERVAL=1"
 
 # Create custom execution environments
-controller_execution_environments:
+controller_execution_environments:  # noqa: var-naming[no-role-prefix]
   - name: "{{ aap_prefix }}-ee"
     organization: "{{ aap_organization_name }}"
     image: "{{ aap_ee_image }}"
@@ -105,7 +105,7 @@ controller_execution_environments:
 # Customize pod templates in order to inject the configuration and the
 # credentials when the template are run, that way Kubernetes is the source
 # of truth for the secrets, and we don't need to sync credentials into AAP
-controller_instance_groups:
+controller_instance_groups:  # noqa: var-naming[no-role-prefix]
   # For cluster-fulfillment use cases, we want to allow KubeAPI access to the
   # cluster the pod works on, so we mount the credentials for the cloudkit
   # ServiceAccount. All other credentials (AWS, Openstack, ...) that would be

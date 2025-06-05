@@ -29,7 +29,7 @@
   ansible.builtin.set_fact:
     external_access_api_floating_ip: "{{ allocate_floating_ip_result }}"
 
-- name: Create port forwarding for api endpoint# noqa:no-changed-when
+- name: Create port forwarding for api endpoint  # noqa:no-changed-when
   ansible.builtin.command: >-
     openstack esi port forwarding create {{ external_access_api_internal_ip }} {{ external_access_api_floating_ip }}
       --internal-ip-network "{{ external_access_api_internal_network }}"
@@ -73,7 +73,7 @@
       agents.resources[0].spec.hostname
       }}
 
-- name: Get network details from esi
+- name: Get network details from esi  # noqa:no-changed-when
   ansible.builtin.command: >-
     openstack esi node network list
     --node {{ external_access_worker_node_name }}

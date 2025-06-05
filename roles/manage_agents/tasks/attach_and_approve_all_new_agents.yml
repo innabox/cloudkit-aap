@@ -9,7 +9,7 @@
   register: manage_agents_allocated
 
 - name: List new agents
-  set_fact:
+  ansible.builtin.set_fact:
     manage_agents_new: >
       {{ manage_agents_allocated.resources | selectattr('spec.approved', 'false') }}
 

@@ -4,4 +4,4 @@
 
 - name: Destroy a hosted cluster
   when: cluster_infra_state == 'absent'
-  ansible.builtin.include_tasks: destroy_cluster_infra.yaml
+  ansible.builtin.include_tasks: delete_cluster_infra.yaml

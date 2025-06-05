@@ -16,7 +16,7 @@ argument_specs:
       hosted_cluster_node_requests:
         type: list
         elements: dict
-        suboptions:
+        options:
           number_of_nodes:
             type: int
             required: true
