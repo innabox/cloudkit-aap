@@ -5,7 +5,7 @@
       authorization: Bearer {{ cloudkit_fulfillment_service_token }}
   register: template_check
 
-- name: Create list of existing template template ids
+- name: Create list of existing template template ids  # noqa: jinja[invalid]
   ansible.builtin.set_fact:
     template_ids: >-
       {{
