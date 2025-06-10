@@ -5,17 +5,13 @@
   gather_facts: false
 
   vars:
-    aap_hostname: "{{ lookup('env', 'AAP_HOSTNAME') }}"
-    aap_username: "{{ lookup('env', 'AAP_USERNAME') }}"
-    aap_password: "{{ lookup('env', 'AAP_PASSWORD') }}"
-    aap_validate_certs: "{{ lookup('env', 'AAP_VALIDATE_CERTS') | bool }}"
-    aap_organization_name: "{{ lookup('env', 'AAP_ORGANIZATION_NAME') }}"
-    aap_project_name: "{{ lookup('env', 'AAP_PROJECT_NAME') }}"
-    aap_project_git_uri: "{{ lookup('env', 'AAP_PROJECT_GIT_URI')}}"
-    aap_project_git_branch: "{{ lookup('env', 'AAP_PROJECT_GIT_BRANCH') }}"
-    aap_ee_image: "{{ lookup('env', 'AAP_EE_IMAGE') }}"
+    config_as_code_extra_vars: "{{ lookup('env', 'CONFIG_AS_CODE_EXTRA_VARS_PATH') }}"
 
   tasks:
+    - name: Load extra vars
+      ansible.builtin.include_vars:
+        file: "{{ config_as_code_extra_vars }}"
+
     - name: Configure AAP
       ansible.builtin.include_role:
         name: cloudkit.config_as_code.aap
