@@ -12,24 +12,28 @@ be passed as environment variables. These environment variables are defined as
 We define 2 container groups in AAP, one used to reconcile the configuration of
 AAP itself, and one used for cluster fulfillment operations.
 
-### Config-as-code environment variables
+### Config-as-code var file
+
+Config-as-code relies on an Ansible var file, this file is specified using
+`CONFIG_AS_CODE_EXTRA_VARS_PATH` environment variable.
 
 In order to reconcile the configuration of AAP, we require the following
-variables:
+variables to be defined in the Ansible var file:
 
-- `RH_USERNAME` and `RH_PASSWORD`: your Red Hat console username and password,
-  used to manage the subscription of AAP
-- `AAP_HOSTNAME`: URL of the AAP instance to be configured
-- `AAP_VALIDATE_CERTS`: true if the SSL certificate behind `AAP_HOSTNAME`
+- `aap_hostname`, `aap_username`, and `aap_password`: URL and admin credentials of the aap instance to be configured
+- `aap_validate_certs`: true if the ssl certificate behind `aap_hostname`
   should be checked
-- `AAP_ORGANIZATION_NAME`: the AAP organization that should be created
-- `AAP_PROJECT_NAME`: the name of the project to be created
-- `AAP_PROJECT_GIT_URI`: the repository that is behind the AAP project
-- `AAP_PROJECT_GIT_BRANCH`: the git branch to use
-- `AAP_EE_IMAGE`: the registry URL to the execution environment image
+- `aap_organization_name`: the AAP organization that should be created
+- `aap_project_name`: the name of the project to be created
+- `aap_project_git_uri`: the repository that is behind the AAP project
+- `aap_project_git_branch`: the git branch to use
+- `aap_ee_image`: the registry URL to the execution environment image
+- `license_manifest_path`: path to the license manifest file in order to
+  register the AAP instance, your can allocate one from your
+  [Red Hat account](https://access.redhat.com/management/subscription_allocations)
 
 These variables must be defined in a secret named:
-`${AAP_ORGANIZATION_NAME}-${AAP_PROJECT_NAME}-config-as-code-ig` in the
+`{{ aap_organization_name }}-{{ aap_project_name }}-config-as-code-ig` in the
 namespace where AAP is deployed.
 
 Note: since the container group is configured to run in the same namespace as
@@ -46,7 +50,7 @@ use case, e.g.:
 - ...whatever in needed
 
 These variables must be defined in a secret named:
-`${AAP_ORGANIZATION_NAME}-${AAP_PROJECT_NAME}-cluster-fulfillment-ig` in the
+`{{ aap_organization_name }}-{{ aap_project_name }}-cluster-fulfillment-ig` in the
 namespace where AAP is deployed.
 
 The cluster fulfillment needs to access the Kube API of the cluster it runs on,
@@ -175,17 +179,20 @@ metadata:
   name: <your AAP organization>-<your AAP project>-config-as-code-ig
 type: Opaque
 stringData:
-  RH_USERNAME: <your Red Hat username>
-  RH_PASSWORD: <your Red Hat password>
-  AAP_HOSTNAME: https://fulfillment-fulfillment-aap.apps-crc.testing
-  AAP_USERNAME: admin
-  AAP_PASSWORD: $(oc get secret/fulfillment-admin-password -n fulfillment-aap -o go-template='{{index .data "password" | base64decode}}')
-  AAP_VALIDATE_CERTS: false
-  AAP_ORGANIZATION_NAME: <the organization name to be created in AAP>
-  AAP_PROJECT_NAME: <the project name to be create in AAP>
-  AAP_PROJECT_GIT_URI: <the git repository where your playbooks and rulebooks live>
-  AAP_PROJECT_GIT_BRANCH: <the git branch to be tracked>
-  AAP_EE_IMAGE: <the execution environment image>
+  vars.yaml: |
+    ---
+    aap_hostname: "{{ lookup('env', 'AAP_HOSTNAME') }}"
+    aap_username: "{{ lookup('env', 'AAP_USERNAME') }}"
+    aap_password: "{{ lookup('env', 'AAP_PASSWORD') }}"
+    aap_organization_name: ...
+    aap_project_name: ...
+    aap_project_git_uri: ...
+    aap_project_git_branch: ...
+    aap_ee_image: ...
+    aap_validate_certs: ...
+    license_manifest_path: "{{ lookup('env', 'LICENSE_MANIFEST_PATH') }}"
+data:
+  license.zip: <copy here the output of `cat manifest.zip | base64 -w 0`>
 ---
 apiVersion: v1
 kind: Secret
@@ -201,21 +208,24 @@ oc apply -f cloudkit_env.yml -n fulfillment-aap
 
 #### Option 1: from your local environment
 
-Set your environment (same as above in `<your AAP organization>-<your AAP
-project>-config-as-code-ig` secret):
-
+Create an Ansible var file with the following content:
 ```
-export RH_USERNAME=...
-export RH_PASSWORD=...
-export AAP_HOSTNAME=...
-export AAP_USERNAME=...
-export AAP_PASSWORD=...
-export AAP_VALIDATE_CERTS=...
-export AAP_ORGANIZATION_NAME=...
-export AAP_PROJECT_NAME=...
-export AAP_PROJECT_GIT_URI=...
-export AAP_PROJECT_GIT_BRANCH=...
-export AAP_EE_IMAGE=...
+---
+aap_hostname: ...
+aap_username: ...
+aap_password: ...
+aap_organization_name: ...
+aap_project_name: ...
+aap_project_git_uri: ...
+aap_project_git_branch: ...
+aap_ee_image: ...
+aap_validate_certs: ...
+license_manifest_path: ...
+```
+
+And set the enviroment variable `CONFIG_AS_CODE_EXTRA_VARS_PATH` to point to that Ansible var file:
+```
+export CONFIG_AS_CODE_EXTRA_VARS_PATH=/path/to/ansible/vars.yaml
 ```
 
 Run subscription and configure playbooks:
@@ -246,9 +256,10 @@ spec:
             - ansible-playbook
             - "cloudkit.config_as_code.subscription"
             - "cloudkit.config_as_code.configure"
-          envFrom:
-            - secretRef:
-                name: <your AAP organization>-<your AAP project>-config-as-code-ig
+          volumeMounts:
+            - name: config-as-code-volume
+              mountPath: /var/secrets/config-as-code
+              readOnly: true
           env:
             - name: AAP_USERNAME
               value: admin
@@ -257,6 +268,14 @@ spec:
                 secretKeyRef:
                   name: fulfillment-admin-password
                   key: password
+            - name: CONFIG_AS_CODE_EXTRA_VARS_PATH
+              value: /var/secrets/config-as-code/vars.yaml
+            - name: LICENSE_MANIFEST_PATH
+              value: /var/secrets/config-as-code/license.zip
+      volumes:
+        - name: config-as-code-volume
+          secret:
+            secretName: <your AAP organization>-<your AAP project>-config-as-code-ig
       restartPolicy: Never
   backoffLimit: 4
 EOF
