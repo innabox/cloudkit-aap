@@ -16,6 +16,7 @@
       ansible.builtin.template:
         src: "{{ config_as_code_extra_vars }}"
         dest: "{{ extra_vars.path }}"
+        mode: "0644"
 
     - name: Load extra vars
       ansible.builtin.include_vars:
