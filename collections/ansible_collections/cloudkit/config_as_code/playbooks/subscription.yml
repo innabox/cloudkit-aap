@@ -6,9 +6,20 @@
     config_as_code_extra_vars: "{{ lookup('env', 'CONFIG_AS_CODE_EXTRA_VARS_PATH') }}"
 
   tasks:
+    - name: Create temporary file
+      ansible.builtin.tempfile:
+        state: file
+        suffix: subscription
+      register: extra_vars
+
+    - name: Render extra vars template
+      ansible.builtin.template:
+        src: "{{ config_as_code_extra_vars }}"
+        dest: "{{ extra_vars.path }}"
+
     - name: Load extra vars
       ansible.builtin.include_vars:
-        file: "{{ config_as_code_extra_vars }}"
+        file: "{{ extra_vars.path }}"
 
     - name: Enable AAP license
       ansible.controller.license:
@@ -17,3 +28,8 @@
         controller_password: "{{ aap_password }}"
         validate_certs: "{{ aap_validate_certs }}"
         manifest: "{{ license_manifest_path }}"
+
+    - name: Cleanup temporary file
+      ansible.builtin.file:
+        path: "{{ extra_vars.path }}"
+        state: absent
