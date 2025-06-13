@@ -20,7 +20,8 @@ Config-as-code relies on an Ansible var file, this file is specified using
 In order to reconcile the configuration of AAP, we require the following
 variables to be defined in the Ansible var file:
 
-- `aap_hostname`, `aap_username`, and `aap_password`: URL and admin credentials of the aap instance to be configured
+- `aap_hostname`, `aap_username`, and `aap_password`: URL and admin credentials
+  of the aap instance to be configured
 - `aap_validate_certs`: true if the ssl certificate behind `aap_hostname`
   should be checked
 - `aap_organization_name`: the AAP organization that should be created
@@ -181,7 +182,7 @@ type: Opaque
 stringData:
   vars.yaml: |
     ---
-    aap_hostname: "{{ lookup('env', 'AAP_HOSTNAME') }}"
+    aap_hostname: ...
     aap_username: "{{ lookup('env', 'AAP_USERNAME') }}"
     aap_password: "{{ lookup('env', 'AAP_PASSWORD') }}"
     aap_organization_name: ...
