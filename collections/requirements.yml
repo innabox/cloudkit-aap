@@ -12,3 +12,7 @@ collections:
   - name: "cloudkit.config_as_code"
     source: "collections/ansible_collections/cloudkit/config_as_code"
     type: dir
+  - name: "isaiahstapleton.ai_cluster_ansible"
+    source: "https://github.com/IsaiahStapleton/ai-cluster-ansible.git"
+    type: git
+    version: main
