@@ -26,13 +26,13 @@ options:
 additional_build_files:
   - src: ../collections
     dest: collections
-  - src: ../collections_vendor
-    dest: collections_vendor
+  - src: ../vendor
+    dest: vendor
 
 additional_build_steps:
   prepend_galaxy:
     - COPY _build/collections /usr/share/ansible/collections
-    - COPY _build/collections_vendor /usr/share/ansible/collections
+    - COPY _build/vendor /usr/share/ansible/collections
   append_final:
     - COPY --from=quay.io/openshift/origin-cli:4.19 /usr/bin/oc /usr/local/bin/
     - COPY --from=quay.io/openshift/origin-cli:4.19 /usr/bin/kubectl /usr/local/bin/
