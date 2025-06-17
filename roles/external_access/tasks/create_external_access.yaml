@@ -30,10 +30,16 @@
     external_access_api_floating_ip: "{{ allocate_floating_ip_result }}"
 
 - name: Create port forwarding for api endpoint  # noqa:no-changed-when
-  ansible.builtin.command: >-
-    openstack esi port forwarding create {{ external_access_api_internal_ip }} {{ external_access_api_floating_ip }}
-      --internal-ip-network "{{ external_access_api_internal_network }}"
-      -p {{ external_access_kube_apiserver_port }} -d "{{ external_access_name }}" -f json
+  ansible.builtin.include_role:
+    name: massopencloud.esi.floating_ip
+    tasks_from: create_port_forwarding
+  vars:
+    internal_ip: "{{ external_access_api_internal_ip }}"
+    floating_ip: "{{ external_access_api_floating_ip }}"
+    internal_network: "{{ external_access_api_internal_network }}"
+    ports:
+    - "{{ external_access_kube_apiserver_port }}"
+    description: "{{ external_access_name }}-api"
 
 - name: Create api dns records
   when: >-
@@ -74,18 +80,18 @@
       }}
 
 - name: Get network details from esi  # noqa:no-changed-when
-  ansible.builtin.command: >-
-    openstack esi node network list
-    --node {{ external_access_worker_node_name }}
-    --network {{ external_access_ingress_internal_network }}
-    -f json
-  register: worker_node_network_details
+  ansible.builtin.include_role:
+    name: massopencloud.esi.network
+    tasks_from: get_node_network_info
+  vars:
+    node: "{{ external_access_worker_node_name }}"
+    network: "{{ external_access_ingress_internal_network }}"
 
 - name: Get worker node address
   ansible.builtin.set_fact:
     external_access_worker_node_ip: >-
       {{
-        (worker_node_network_details.stdout|from_json)[0]['Fixed IP']
+        (node_network_info.stdout|from_json)[0]['Fixed IP']
       }}
 
 - name: Show discovered address
@@ -104,17 +110,17 @@
     external_access_ingress_floating_ip: "{{ allocate_floating_ip_result }}"
 
 - name: Create port forwarding for ingress endpoint  # noqa:no-changed-when
-  ansible.builtin.command: >-
-    openstack esi port forwarding create {{ external_access_worker_node_ip }} {{ external_access_ingress_floating_ip }}
-      --internal-ip-network "{{ external_access_ingress_internal_network }}"
-      -p 80 -p 443 -d "{{ external_access_name }}-ingress" -f json
-
-# XXX: This is sensitive to the ordering of nodes returned by `openstack esi node network list`.
-# If we pick a different node than was originally selected, this will fail with a "duplicate port forwarding"
-# error. Ignore duplicate port forwarding errors for now.
-  register: port_fwd_result
-  failed_when: >
-    port_fwd_result.rc != 0 and "duplicate port forwarding" not in port_fwd_result.stderr
+  ansible.builtin.include_role:
+    name: massopencloud.esi.floating_ip
+    tasks_from: create_port_forwarding
+  vars:
+    internal_ip: "{{ external_access_worker_node_ip }}"
+    floating_ip: "{{ external_access_ingress_floating_ip }}"
+    internal_network: "{{ external_access_ingress_internal_network }}"
+    ports:
+    - "80"
+    - "443"
+    description: "{{ external_access_name }}-ingress"
 
 - name: Create ingress dns record
   amazon.aws.route53:

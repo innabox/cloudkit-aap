@@ -1,0 +1,13 @@
+- name: Create port forwarding  # noqa:no-changed-when
+  when: ports
+  ansible.builtin.command: >-
+    openstack esi port forwarding create {{ internal_ip }} {{ floating_ip }}
+      --internal-ip-network "{{ internal_network }}"
+      {% for portarg in ports %}-p {{ portarg }} {% endfor %}
+      -d "{{ description }}" -f json
+  # XXX: This is sensitive to the ordering of nodes returned by `openstack esi node network list`.
+  # If we pick a different node than was originally selected, this will fail with a "duplicate port forwarding"
+  # error. Ignore duplicate port forwarding errors for now.
+  register: create_port_fwd_result
+  failed_when: >
+    create_port_fwd_result.rc != 0 and "duplicate port forwarding" not in create_port_fwd_result.stderr
