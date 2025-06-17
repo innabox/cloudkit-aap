@@ -15,8 +15,6 @@ on:  # yamllint disable-line rule:truthy
 jobs:
   ansible-lint:
     runs-on: ubuntu-latest
-    env:
-      ANSIBLE_LINT_NODEPS: 1
     steps:
       - name: Checkout
         uses: actions/checkout@v4
