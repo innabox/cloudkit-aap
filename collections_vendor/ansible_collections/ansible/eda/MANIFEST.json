@@ -1,0 +1,35 @@
+{
+ "collection_info": {
+  "namespace": "ansible",
+  "name": "eda",
+  "version": "2.6.1",
+  "authors": [
+   "bthomass@redhat.com",
+   "jpisciot@redhat.com"
+  ],
+  "readme": "README.md",
+  "tags": [
+   "infrastructure",
+   "tools",
+   "eda"
+  ],
+  "description": "Event-Driven Ansible",
+  "license": [
+   "Apache-2.0"
+  ],
+  "license_file": null,
+  "dependencies": {},
+  "repository": "https://github.com/ansible/event-driven-ansible",
+  "documentation": "https://ansible.readthedocs.io/projects/ansible-eda/",
+  "homepage": "http://ansible.com/event-driven",
+  "issues": "https://github.com/ansible/event-driven-ansible/issues"
+ },
+ "file_manifest_file": {
+  "name": "FILES.json",
+  "ftype": "file",
+  "chksum_type": "sha256",
+  "chksum_sha256": "a784b7c64f024576438202fa1a7133f2bd8cc67c847b456ea0b271f6db3b73c1",
+  "format": 1
+ },
+ "format": 1
+}
