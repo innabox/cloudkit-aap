@@ -13,13 +13,13 @@ collections:
     source: "https://github.com/IsaiahStapleton/ai-cluster-ansible.git"
     type: git
     version: 0.1.0
-  - name:  ansible.platform
+  - name: ansible.platform
     version: "2.5.20250326"
-  - name:  ansible.hub
+  - name: ansible.hub
     version: "1.0.0"
-  - name:  ansible.controller
+  - name: ansible.controller
     version: "4.6.11"
-  - name:  ansible.eda
+  - name: ansible.eda
     version: "2.6.1"
-  - name:  infra.aap_configuration
+  - name: infra.aap_configuration
     version: "3.2.0"
