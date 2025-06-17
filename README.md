@@ -28,7 +28,7 @@ source .venv/bin/activate
 ## Re-vendor Ansible collections
 
 This repository explicitly vendors the Ansible collections that are used as
-dependencies, they are located in `collections_vendor/` directory. You'll need
+dependencies, they are located in `vendor/` directory. You'll need
 to re-vendor them after an update of `collections/requirements.yaml`.
 
 First set your environment in order to be able to pull some of the collections
@@ -45,6 +45,6 @@ export ANSIBLE_GALAXY_SERVER_AUTOMATION_HUB_TOKEN=<Get your token from https://c
 Then re-vendor the collections:
 
 ```
-rm -rf collections_vendor
+rm -rf vendor
 ansible-galaxy collections install -r collections/requirements.yml
 ```
