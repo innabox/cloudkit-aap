@@ -4,31 +4,13 @@
   connection: local
   gather_facts: false
 
-  vars:
-    config_as_code_extra_vars: "{{ lookup('env', 'CONFIG_AS_CODE_EXTRA_VARS_PATH') }}"
-
   tasks:
-    - name: Create temporary file
-      ansible.builtin.tempfile:
-        state: file
-        suffix: configure
-      register: extra_vars
-
-    - name: Render extra vars template
-      ansible.builtin.template:
-        src: "{{ config_as_code_extra_vars }}"
-        dest: "{{ extra_vars.path }}"
-        mode: "0644"
-
-    - name: Load extra vars
-      ansible.builtin.include_vars:
-        file: "{{ extra_vars.path }}"
+    - name: Load extra variables
+      ansible.builtin.include_role:
+        name: load_extra_vars
+      vars:
+        load_extra_vars_file_path: "{{ lookup('env', 'CONFIG_AS_CODE_EXTRA_VARS_PATH') }}"
 
     - name: Configure AAP
       ansible.builtin.include_role:
         name: cloudkit.config_as_code.aap
-
-    - name: Cleanup temporary file
-      ansible.builtin.file:
-        path: "{{ extra_vars.path }}"
-        state: absent
