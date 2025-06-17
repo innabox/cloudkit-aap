@@ -1,0 +1,7 @@
+---
+argument_specs:
+  main:
+    options:
+      load_extra_vars_file_path:
+        type: str
+        required: true
