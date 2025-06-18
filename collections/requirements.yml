@@ -9,8 +9,7 @@ collections:
     version: 10.5.0
   - name: ansible.utils
     version: 5.1.2
-  - name: "isaiahstapleton.ai_cluster_ansible"
-    source: "https://github.com/IsaiahStapleton/ai-cluster-ansible.git"
+  - source: "https://github.com/IsaiahStapleton/ai-cluster-ansible.git"
     type: git
     version: 0.1.0
   - name: ansible.platform
