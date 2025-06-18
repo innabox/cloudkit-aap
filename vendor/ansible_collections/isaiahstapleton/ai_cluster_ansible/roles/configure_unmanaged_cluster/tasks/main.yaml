@@ -1,0 +1,130 @@
+---
+- name: Install Operators
+  kubernetes.core.k8s:
+    state: present
+    definition: "{{ lookup('kubernetes.core.kustomize', dir = kustomize_dir ~ '/feature/operators') }}"
+    validate_certs: false
+
+- name: Wait for NVIDIA GPU Operator to be ready
+  kubernetes.core.k8s_info:
+    namespace: nvidia-gpu-operator
+    kind: Pod
+    label_selectors:
+      - app=gpu-operator
+    wait: true
+    wait_timeout: 600
+    wait_condition:
+      type: Ready
+      status: 'True'
+
+- name: Apply NVIDIA GPU Clusterpolicy
+  kubernetes.core.k8s:
+    state: present
+    definition: "{{ lookup('kubernetes.core.kustomize', dir = kustomize_dir ~ '/feature/nvidia/') }}"
+    validate_certs: false
+
+- name: Wait for RHOAI operator to be ready
+  kubernetes.core.k8s_info:
+    namespace: redhat-ods-operator
+    kind: Pod
+    label_selectors:
+      - name=rhods-operator
+    wait: true
+    wait_timeout: 600
+    wait_condition:
+      type: Ready
+      status: 'True'
+
+- name: Apply RHOAI Config
+  kubernetes.core.k8s:
+    state: present
+    definition: "{{ lookup('kubernetes.core.kustomize', dir = kustomize_dir ~ '/feature/rhoai/') }}"
+    validate_certs: false
+
+- name: Apply NFD Config
+  kubernetes.core.k8s:
+    state: present
+    definition: "{{ lookup('kubernetes.core.kustomize', dir = kustomize_dir ~ '/feature/nfd/') }}"
+    validate_certs: false
+
+- name: Configure Prometheus
+  kubernetes.core.k8s:
+    state: present
+    definition: "{{ lookup('kubernetes.core.kustomize', dir = kustomize_dir ~ '/feature/prometheus/') }}"
+    validate_certs: false
+
+- name: Wait for OpenTelemetry operator to be ready
+  kubernetes.core.k8s_info:
+    namespace: opentelemetry
+    kind: Pod
+    label_selectors:
+      - app.kubernetes.io/name=opentelemetry-operator
+    wait: true
+    wait_timeout: 600
+    wait_condition:
+      type: Ready
+      status: 'True'
+
+- name: Configure OpenTelemetry
+  kubernetes.core.k8s:
+    state: present
+    definition: "{{ lookup('kubernetes.core.kustomize', dir='../files/feature/opentelemetry/') }}"
+    validate_certs: false
+
+- name: Setup Grafana
+  kubernetes.core.k8s:
+    state: present
+    definition: "{{ lookup('kubernetes.core.kustomize', dir = kustomize_dir ~ '/feature/grafana/') }}"
+    validate_certs: false
+
+- name: Configure Grafana 
+  kubernetes.core.k8s:
+    state: present
+    definition: "{{ lookup('kubernetes.core.kustomize', dir = kustomize_dir ~ '/feature/observability/') }}"
+    validate_certs: false
+
+- name: Wait for Grafana Instance
+  kubernetes.core.k8s_info:
+    namespace: grafana
+    kind: Pod
+    label_selectors:
+      - app=grafana
+    wait: true
+    wait_timeout: 600
+    wait_condition:
+      type: Ready
+      status: 'True'
+
+- name: Get Grafana-Prometheus bearer token
+  kubernetes.core.k8s_info:
+    api_version: v1
+    kind: Secret
+    namespace: openshift-monitoring
+    name: grafana-prometheus-token
+  register: grafana_token_secret
+
+- name: Set Grafana-Prometheus token 
+  ansible.builtin.set_fact:
+    bearer_token: "{{ grafana_token_secret.resources[0].data.token | b64decode }}"
+
+- name: Create Prometheus Datasource in Grafana
+  ansible.builtin.uri:
+    url: "https://grafana-grafana.apps.albany.nerc.mghpcc.org/api/datasources"
+    method: POST
+    headers:
+      Content-Type: application/json
+      Authorization: "Basic {{ 'admin:admin' | b64encode }}"
+    body_format: json
+    body:
+      name: Prometheus-Thanos
+      type: prometheus
+      access: proxy
+      url: https://thanos-querier.openshift-monitoring.svc.cluster.local:9091
+      isDefault: true
+      jsonData:
+        tlsSkipVerify: true
+        httpHeaderName1: Authorization
+      secureJsonData:
+        httpHeaderValue1: "Bearer {{ bearer_token }}"
+    validate_certs: false
+  delegate_to: localhost

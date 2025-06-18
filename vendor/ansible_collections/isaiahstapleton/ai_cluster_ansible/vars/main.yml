@@ -1,0 +1,2 @@
+---
+kustomize_dir="{{role_path}}/../../files”

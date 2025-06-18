@@ -1,0 +1,52 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: upload-granite-model
+  labels:
+    app: minio
+    app.kubernetes.io/part-of: minio
+spec:
+  template:
+    metadata:
+      labels:
+        app: minio
+    spec:
+      serviceAccountName: minio-setup
+      restartPolicy: Never
+      containers:
+        - name: upload-granite-model
+          image: image-registry.openshift-image-registry.svc:5000/redhat-ods-applications/s2i-minimal-notebook:2025.1
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - secretRef:
+                name: minio-root-user
+          command: ["/bin/bash","-c"]
+          args:
+            - |
+              pip install --no-cache-dir huggingface-hub boto3
+
+              python3 - << 'EOF'
+              import os, boto3
+              from huggingface_hub import snapshot_download
+              from botocore.client import Config
+
+              repo_id    = "RedHatAI/granite-3.1-2b-instruct-quantized.w4a16"
+              model_name = repo_id.split("/",1)[1]
+              model_dir  = snapshot_download(repo_id, cache_dir="/tmp")
+
+              s3 = boto3.client(
+                "s3",
+                endpoint_url="http://minio-service:9000",
+                aws_access_key_id=os.environ["MINIO_ROOT_USER"],
+                aws_secret_access_key=os.environ["MINIO_ROOT_PASSWORD"],
+                config=Config(signature_version="s3v4")
+              )
+
+              for root, _, files in os.walk(model_dir):
+                  for f in files:
+                      src = os.path.join(root, f)
+                      key = f"{model_name}/{os.path.relpath(src, model_dir)}"
+                      s3.upload_file(src, "my-storage", key)
+
+              print("Uploaded model")
+              EOF

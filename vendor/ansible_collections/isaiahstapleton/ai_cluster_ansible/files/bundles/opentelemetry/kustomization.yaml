@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+labels:
+  - pairs:
+      bundle: autopilot
+    includeSelectors: true
+resources:
+  - ../../base/core/namespaces/opentelemetry
+  - ../../base/core/namespaces/openshift-distributed-tracing
+  - ../../base/core/namespaces/openshift-tempo-operator
+  - ../../base/operators.coreos.com/operatorgroups/opentelemetry
+  - ../../base/operators.coreos.com/operatorgroups/openshift-distributed-tracing
+  - ../../base/operators.coreos.com/operatorgroups/openshift-tempo-operator
+  - ../../base/operators.coreos.com/subscriptions/opentelemetry
+  - ../../base/operators.coreos.com/subscriptions/jaeger-product
+  - ../../base/operators.coreos.com/subscriptions/tempo-product

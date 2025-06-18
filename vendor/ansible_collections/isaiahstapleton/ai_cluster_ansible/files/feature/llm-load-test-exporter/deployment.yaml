@@ -1,0 +1,47 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: llm-load-test-exporter
+spec:
+  replicas: 1
+  template:
+    spec:
+      initContainers:                
+        - name: init-container
+          image: alpine/git:latest  
+          imagePullPolicy: Always
+          command: ['sh', '-c', 'git clone https://github.com/openshift-psap/llm-load-test.git /shared_data/llm-load-test']
+          volumeMounts:
+            - name: llm-load-test-dir
+              mountPath: /shared_data
+      containers:
+        - name: exporter
+          image: quay.io/rh-ee-istaplet/nerc-tools:llm-load-test-exporter
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - name: llm-load-test-dir
+              mountPath: /shared_data
+          resources:
+            limits:
+              cpu: 500m
+              memory: 512Mi
+        - name: run-llm-load-test
+          image: quay.io/rh-ee-istaplet/nerc-tools:run-llm-load-test
+          imagePullPolicy: Always
+          command: ["python", "run-llm-load-test.py"]
+          volumeMounts:
+            - name: llm-load-test-dir
+              mountPath: /shared_data
+          resources:
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          env:
+          - name: WAIT_TIME # Change to modify how often application is run
+            value: "60"
+      serviceAccountName: llm-load-test-sa
+      volumes:
+        - name: llm-load-test-dir
+          emptyDir: {}

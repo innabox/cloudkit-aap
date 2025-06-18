@@ -1,0 +1,6 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - granite-3.1-2b-instruct-quantized.yaml
+  - vllm-servingruntime.yaml
