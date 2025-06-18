@@ -46,5 +46,5 @@ Then re-vendor the collections:
 
 ```
 rm -rf vendor
-ansible-galaxy collections install -r collections/requirements.yml
+ansible-galaxy collection install -r collections/requirements.yml
 ```
