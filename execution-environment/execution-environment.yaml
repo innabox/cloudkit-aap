@@ -23,7 +23,7 @@ additional_build_files:
 
 additional_build_steps:
   prepend_base:
-    - RUN $PKGMGR -y install bash-completion systemd-libs systemd-devel gcc python3.11-devel
+    - RUN $PKGMGR -y install bash-completion systemd-libs systemd-devel gcc python3.11-devel krb5-devel
     - COPY _build/rpms/openshift-clients.rpm /tmp
     - RUN rpm -ivh /tmp/openshift-clients.rpm
     - ENV PIP_IGNORE_INSTALLED=1  # allow pip to override packages installed with RPM
