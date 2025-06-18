@@ -1,2 +1,5 @@
 skip_list:
-- role-name[path]
+  - role-name[path]
+exclude_paths:
+  - vendor/
+  - .github/

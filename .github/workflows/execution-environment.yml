@@ -1,0 +1,57 @@
+---
+name: "Build execution environment"
+
+concurrency:
+  group: ${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-execution-environment:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: "Set up Python"
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: "pyproject.toml"
+
+      - name: Install the project
+        run: uv sync --locked --all-extras --group development
+
+      - name: Build execution enviroment
+        run: |
+          uv tool run ansible-builder build -vvv                        \
+                                            --container-runtime podman  \
+                                            --tag "cloudkit-ee"         \
+                                            -f "./execution-environment/execution-environment.yaml"
+
+      - name: Log against GHCR
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          echo ${{ secrets.GITHUB_TOKEN }} | podman login --username ${{ github.actor }} --password-stdin ghcr.io
+
+      - name: Push execution environment image
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          IMAGE_NAME="ghcr.io/${{ github.repository }}"
+          IMAGE_NAME_LATEST="${IMAGE_NAME}:latest"
+          IMAGE_NAME_SHA="${IMAGE_NAME}:${{ github.sha }}"
+
+          podman tag "cloudkit-ee" "${IMAGE_NAME_LATEST}"
+          podman tag "cloudkit-ee" "${IMAGE_NAME_SHA}"
+
+          podman push "${IMAGE_NAME_LATEST}"
+          podman push "${IMAGE_NAME_SHA}"

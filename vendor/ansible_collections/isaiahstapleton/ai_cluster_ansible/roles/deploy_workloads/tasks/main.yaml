@@ -1,0 +1,64 @@
+---
+- name: Create Demo Namespace
+  kubernetes.core.k8s:
+    state: present
+    definition: "{{ lookup('kubernetes.core.kustomize', dir = kustomize_dir ~ '/feature/demo-namespace/') }}"
+    validate_certs: false
+
+- name: Deploy Minio S3 Storage
+  kubernetes.core.k8s:
+    state: present
+    definition: "{{ lookup('kubernetes.core.kustomize', dir = kustomize_dir ~ '/feature/minio/') }}"
+    validate_certs: false
+
+- name: Wait for Minio Jobs to Finish
+  kubernetes.core.k8s_info:
+    namespace: demo
+    kind: Job
+    name: create-minio-buckets
+    wait: true
+    wait_timeout: 600
+    wait_condition:
+      type: Complete
+      status: "True"
+
+- name: Upload Granite Model
+  kubernetes.core.k8s:
+    state: present
+    definition: "{{ lookup('kubernetes.core.kustomize', dir = kustomize_dir ~ '/feature/upload-model/') }}"
+    validate_certs: false
+
+- name: Wait for Granite Model to Finish Uploading
+  kubernetes.core.k8s_info:
+    namespace: demo
+    kind: Job
+    name: upload-granite-model
+    wait: true
+    wait_timeout: 600
+    wait_condition:
+      type: Complete
+      status: "True"
+
+- name: Wait for NVIDIA GPU Feature Discovery to be Ready
+  kubernetes.core.k8s_info:
+    namespace: nvidia-gpu-operator
+    kind: Pod
+    label_selectors:
+      - app=gpu-feature-discovery
+    wait: true
+    wait_timeout: 600
+    wait_condition:
+      type: Ready
+      status: 'True'
+
+- name: Deploy Granite Model and vLLM ServingRuntime
+  kubernetes.core.k8s:
+    state: present
+    definition: "{{ lookup('kubernetes.core.kustomize', dir = kustomize_dir ~ '/feature/models/') }}"
+    validate_certs: false
+
+- name: Deploy llm-load-test-exporter
+  kubernetes.core.k8s:
+    state: present
+    definition: "{{ lookup('kubernetes.core.kustomize', dir = kustomize_dir ~ '/feature/llm-load-test-exporter/') }}"
+    validate_certs: false
