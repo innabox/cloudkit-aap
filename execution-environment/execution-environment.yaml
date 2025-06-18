@@ -33,6 +33,7 @@ additional_build_steps:
   prepend_galaxy:
     - COPY _build/collections /usr/share/ansible/collections
     - COPY _build/vendor /usr/share/ansible/collections
+    - RUN dnf install -y git  # required to pull non-versioned git collections specified in collections/requirements.yaml
   append_final:
     - COPY --from=quay.io/openshift/origin-cli:4.19 /usr/bin/oc /usr/local/bin/
     - COPY --from=quay.io/openshift/origin-cli:4.19 /usr/bin/kubectl /usr/local/bin/
