@@ -1,0 +1,1755 @@
+{
+ "files": [
+  {
+   "name": ".",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": ".gitignore",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "4c2a090da027c6ec31282ed387d97012e0ca97caf693d9f53b9a6a6c416f8d9f",
+   "format": 1
+  },
+  {
+   "name": "README.md",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "3bedbca188b424d203ad04d4819f9b1a84801fb3e7bb1522ff036aaecbf3296d",
+   "format": 1
+  },
+  {
+   "name": "files",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "files/base",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "files/base/core",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "files/base/core/namespaces",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "files/base/core/namespaces/autopilot",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "files/base/core/namespaces/autopilot/kustomization.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "f84e68e7ff348e3194a38eec13d9833d92a4df72912743f4393af2d9c2dfb949",
+   "format": 1
+  },
+  {
+   "name": "files/base/core/namespaces/autopilot/namespace.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "857854182d610dbb3991260aeae9077e9e41fffac6d4e6725efc6a7a7a201b01",
+   "format": 1
+  },
+  {
+   "name": "files/base/core/namespaces/grafana",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "files/base/core/namespaces/grafana/kustomization.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "f84e68e7ff348e3194a38eec13d9833d92a4df72912743f4393af2d9c2dfb949",
+   "format": 1
+  },
+  {
+   "name": "files/base/core/namespaces/grafana/namespace.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "ffee05677f13a5abcd9a8e77cac2ed69b838d6b478d60f26f59589e87cd3ea0b",
+   "format": 1
+  },
+  {
+   "name": "files/base/core/namespaces/minio",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "files/base/core/namespaces/minio/kustomization.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "f84e68e7ff348e3194a38eec13d9833d92a4df72912743f4393af2d9c2dfb949",
+   "format": 1
+  },
+  {
+   "name": "files/base/core/namespaces/minio/namespace.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "0845245d41f74bdc59be928ff5a05331b7c2d8934f2d15d4cb9d93bb079ba044",
+   "format": 1
+  },
+  {
+   "name": "files/base/core/namespaces/nfd-operator",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "files/base/core/namespaces/nfd-operator/kustomization.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "f84e68e7ff348e3194a38eec13d9833d92a4df72912743f4393af2d9c2dfb949",
+   "format": 1
+  },
+  {
+   "name": "files/base/core/namespaces/nfd-operator/namespace.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "ced2f8716dc4e1bb2dd01faef8bfa657f8580885701a4a7be20e862d9a6147b6",
+   "format": 1
+  },
+  {
+   "name": "files/base/core/namespaces/nvidia-gpu-operator",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "files/base/core/namespaces/nvidia-gpu-operator/kustomization.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "f84e68e7ff348e3194a38eec13d9833d92a4df72912743f4393af2d9c2dfb949",
+   "format": 1
+  },
+  {
+   "name": "files/base/core/namespaces/nvidia-gpu-operator/namespace.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "dbf35e33099573b919a9185e251ed38f9a60967ea2acdb04036e6ce200927c1e",
+   "format": 1
+  },
+  {
+   "name": "files/base/core/namespaces/openshift-distributed-tracing",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "files/base/core/namespaces/openshift-distributed-tracing/kustomization.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "f84e68e7ff348e3194a38eec13d9833d92a4df72912743f4393af2d9c2dfb949",
+   "format": 1
+  },
+  {
+   "name": "files/base/core/namespaces/openshift-distributed-tracing/namespace.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "e0fb6d02fc5c044d75c3830b9947e423b5a6a01f74e9efd466bc3a77951a243c",
+   "format": 1
+  },
+  {
+   "name": "files/base/core/namespaces/openshift-tempo-operator",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "files/base/core/namespaces/openshift-tempo-operator/kustomization.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "f84e68e7ff348e3194a38eec13d9833d92a4df72912743f4393af2d9c2dfb949",
+   "format": 1
+  },
+  {
+   "name": "files/base/core/namespaces/openshift-tempo-operator/namespace.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "4a7e4fdf3e186a0f0272cabae0ddc4c28a72320e1d9d35a0891b839563c7302d",
+   "format": 1
+  },
+  {
+   "name": "files/base/core/namespaces/opentelemetry",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "files/base/core/namespaces/opentelemetry/kustomization.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "f84e68e7ff348e3194a38eec13d9833d92a4df72912743f4393af2d9c2dfb949",
+   "format": 1
+  },
+  {
+   "name": "files/base/core/namespaces/opentelemetry/namespace.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "8692b1a125ead0df422367ce584f005331e77940e200eb2a9bc6755f6771b7cc",
+   "format": 1
+  },
+  {
+   "name": "files/base/core/namespaces/redhat-ods-operator",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "files/base/core/namespaces/redhat-ods-operator/kustomization.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "74ec54395075455996b03b8372db95bbd29da99561ee50c96ee7d1a324b9af54",
+   "format": 1
+  },
+  {
+   "name": "files/base/core/namespaces/redhat-ods-operator/namespace.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "bf2915fc75e9583b32d50b23667d9f7f225f3c561e0c4c29071bff4fe0800f7a",
+   "format": 1
+  },
+  {
+   "name": "files/base/core/namespaces/serverless-operator",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "files/base/core/namespaces/serverless-operator/kustomization.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "74ec54395075455996b03b8372db95bbd29da99561ee50c96ee7d1a324b9af54",
+   "format": 1
+  },
+  {
+   "name": "files/base/core/namespaces/serverless-operator/namespace.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "8255edccd451ee6f8aac9efaa065cccbdd1b1e7d3380c25d0af74177b5b627ce",
+   "format": 1
+  },
+  {
+   "name": "files/base/operators.coreos.com",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "files/base/operators.coreos.com/operatorgroups",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "files/base/operators.coreos.com/operatorgroups/nfd-operator",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "files/base/operators.coreos.com/operatorgroups/nfd-operator/kustomization.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "3e9882b90ab47ca5da3451f6a1187be849f6b60968b8114c4893dc4069d7b00e",
+   "format": 1
+  },
+  {
+   "name": "files/base/operators.coreos.com/operatorgroups/nfd-operator/operatorgroup.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "5b1d65e8d48f356281125a0dfc2e55871307e296c464e7d086e2d12319dd8682",
+   "format": 1
+  },
+  {
+   "name": "files/base/operators.coreos.com/operatorgroups/nvidia-gpu-operator",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "files/base/operators.coreos.com/operatorgroups/nvidia-gpu-operator/kustomization.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "969864cb54c02337ad6aceaa610406bf2fca0e82f067343afd032ae21b04743b",
+   "format": 1
+  },
+  {
+   "name": "files/base/operators.coreos.com/operatorgroups/nvidia-gpu-operator/operatorgroup.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "0aab3954815dcc35ba5d985ec08f14caa018a13f5d78da4d8ba9f948e0925ad4",
+   "format": 1
+  },
+  {
+   "name": "files/base/operators.coreos.com/operatorgroups/openshift-distributed-tracing",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "files/base/operators.coreos.com/operatorgroups/openshift-distributed-tracing/kustomization.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "95633e0a65c1f3c7a81320f8a736123bb28d2d6ef7bb1639713335d6386a1407",
+   "format": 1
+  },
+  {
+   "name": "files/base/operators.coreos.com/operatorgroups/openshift-distributed-tracing/operatorgroup.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "ca2197a7a3b3e3097fa8a91df7d789e750578a36547b993c167a6c369dcee244",
+   "format": 1
+  },
+  {
+   "name": "files/base/operators.coreos.com/operatorgroups/openshift-tempo-operator",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "files/base/operators.coreos.com/operatorgroups/openshift-tempo-operator/kustomization.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "95633e0a65c1f3c7a81320f8a736123bb28d2d6ef7bb1639713335d6386a1407",
+   "format": 1
+  },
+  {
+   "name": "files/base/operators.coreos.com/operatorgroups/openshift-tempo-operator/operatorgroup.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "ca3ed409fe9240f02e101b2d6792df52c8b9a1e69ae2d8b4627c4dfd6f23fd5e",
+   "format": 1
+  },
+  {
+   "name": "files/base/operators.coreos.com/operatorgroups/opentelemetry",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "files/base/operators.coreos.com/operatorgroups/opentelemetry/kustomization.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "95633e0a65c1f3c7a81320f8a736123bb28d2d6ef7bb1639713335d6386a1407",
+   "format": 1
+  },
+  {
+   "name": "files/base/operators.coreos.com/operatorgroups/opentelemetry/operatorgroup.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "baa29e558040c2cef2251d07293ffc375e97c722b7c60652f5c000312078c93b",
+   "format": 1
+  },
+  {
+   "name": "files/base/operators.coreos.com/operatorgroups/redhat-ods-operator",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "files/base/operators.coreos.com/operatorgroups/redhat-ods-operator/kustomization.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "69fc28a9f70dfbd365840983f456975b2fe88b5e39c3e81dd68c1d68ab2da707",
+   "format": 1
+  },
+  {
+   "name": "files/base/operators.coreos.com/operatorgroups/redhat-ods-operator/operatorgroup.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "b4f2468a0d85e12c0222c1c84ed61d674501627e8fe6f879747ea2a42a7a461a",
+   "format": 1
+  },
+  {
+   "name": "files/base/operators.coreos.com/operatorgroups/serverless-operator",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "files/base/operators.coreos.com/operatorgroups/serverless-operator/kustomization.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "67fa7031cc8e3e6f4998e1e5f7a655e13fcd2bb2f9458c20b01a7f46d86a8b0f",
+   "format": 1
+  },
+  {
+   "name": "files/base/operators.coreos.com/operatorgroups/serverless-operator/operatorgroup.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "f444331abd6bdbc7cdfff23ac7e8d831c5dd0c215c381620c2aea6ab9665635d",
+   "format": 1
+  },
+  {
+   "name": "files/base/operators.coreos.com/subscriptions",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "files/base/operators.coreos.com/subscriptions/authorino-operator",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "files/base/operators.coreos.com/subscriptions/authorino-operator/kustomization.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "07cfca0174d69c932d62172250a498fcb80f82bcc43b6d48f90bb5292551d920",
+   "format": 1
+  },
+  {
+   "name": "files/base/operators.coreos.com/subscriptions/authorino-operator/subscription.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "498037406313980180b1b0467810be08ab44e9098f71007b8ea470fa43783f4d",
+   "format": 1
+  },
+  {
+   "name": "files/base/operators.coreos.com/subscriptions/jaeger-product",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "files/base/operators.coreos.com/subscriptions/jaeger-product/kustomization.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "7778edc291723a02bf24ae73bb9ad979663c76fcfa7f69d467d3e2c58efb6587",
+   "format": 1
+  },
+  {
+   "name": "files/base/operators.coreos.com/subscriptions/jaeger-product/subscription.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "2db8cbe1f7eab93794633f3af6c3748aa17b65a332db7381a72aa3b06f2d283c",
+   "format": 1
+  },
+  {
+   "name": "files/base/operators.coreos.com/subscriptions/nfd-operator",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "files/base/operators.coreos.com/subscriptions/nfd-operator/kustomization.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "07cfca0174d69c932d62172250a498fcb80f82bcc43b6d48f90bb5292551d920",
+   "format": 1
+  },
+  {
+   "name": "files/base/operators.coreos.com/subscriptions/nfd-operator/subscription.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "c18cdd0001e746cd6ac1acece63cca2df4d7d46a0cfccfd7a2f6ad7621217fef",
+   "format": 1
+  },
+  {
+   "name": "files/base/operators.coreos.com/subscriptions/nvidia-gpu-operator",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "files/base/operators.coreos.com/subscriptions/nvidia-gpu-operator/kustomization.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "07cfca0174d69c932d62172250a498fcb80f82bcc43b6d48f90bb5292551d920",
+   "format": 1
+  },
+  {
+   "name": "files/base/operators.coreos.com/subscriptions/nvidia-gpu-operator/subscription.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "d50547089d699b9853f9b3767e5b4e8fdcb9d98797a42025c3f2c4214cd6b20f",
+   "format": 1
+  },
+  {
+   "name": "files/base/operators.coreos.com/subscriptions/opentelemetry",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "files/base/operators.coreos.com/subscriptions/opentelemetry/kustomization.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "7778edc291723a02bf24ae73bb9ad979663c76fcfa7f69d467d3e2c58efb6587",
+   "format": 1
+  },
+  {
+   "name": "files/base/operators.coreos.com/subscriptions/opentelemetry/subscription.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "d6853e8ee4565b5458ad557672d4c2650417c900da554700359949d128809980",
+   "format": 1
+  },
+  {
+   "name": "files/base/operators.coreos.com/subscriptions/redhat-ods-operator",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "files/base/operators.coreos.com/subscriptions/redhat-ods-operator/kustomization.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "07cfca0174d69c932d62172250a498fcb80f82bcc43b6d48f90bb5292551d920",
+   "format": 1
+  },
+  {
+   "name": "files/base/operators.coreos.com/subscriptions/redhat-ods-operator/subscription.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "df983dbdab7c255f1266cd25785f3f73d306c522747b2130922c5000e0ac8274",
+   "format": 1
+  },
+  {
+   "name": "files/base/operators.coreos.com/subscriptions/serverless-operator",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "files/base/operators.coreos.com/subscriptions/serverless-operator/kustomization.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "07cfca0174d69c932d62172250a498fcb80f82bcc43b6d48f90bb5292551d920",
+   "format": 1
+  },
+  {
+   "name": "files/base/operators.coreos.com/subscriptions/serverless-operator/subscription.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "fa4c553fc78be1b1e6938a264ec00679b51bfa80443a45324e7678b3331955b8",
+   "format": 1
+  },
+  {
+   "name": "files/base/operators.coreos.com/subscriptions/servicemesh-operator",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "files/base/operators.coreos.com/subscriptions/servicemesh-operator/kustomization.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "07cfca0174d69c932d62172250a498fcb80f82bcc43b6d48f90bb5292551d920",
+   "format": 1
+  },
+  {
+   "name": "files/base/operators.coreos.com/subscriptions/servicemesh-operator/subscription.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "8dbdaaf5adabef7ed0ad5da2b2ced95158c886a225dcca66d7a0f0537474eb54",
+   "format": 1
+  },
+  {
+   "name": "files/base/operators.coreos.com/subscriptions/tempo-product",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "files/base/operators.coreos.com/subscriptions/tempo-product/kustomization.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "7778edc291723a02bf24ae73bb9ad979663c76fcfa7f69d467d3e2c58efb6587",
+   "format": 1
+  },
+  {
+   "name": "files/base/operators.coreos.com/subscriptions/tempo-product/subscription.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "7c16136d6e5725d0656822b52bf1b12a51f91b769c68a552245cf0e36526e1d2",
+   "format": 1
+  },
+  {
+   "name": "files/bundles",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "files/bundles/authorino-operator",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "files/bundles/authorino-operator/kustomization.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "2a4182bf6dd90e3776718d8252c273795b602f6316bc2d4d3d3df4d0f64ae33c",
+   "format": 1
+  },
+  {
+   "name": "files/bundles/autopilot",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "files/bundles/autopilot/kustomization.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "85cd5aeb10b06a11ef957ce2b7831a6e75f6b8364ebaea686c92e93afe724dde",
+   "format": 1
+  },
+  {
+   "name": "files/bundles/grafana",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "files/bundles/grafana/kustomization.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "ae4fd8924d35017aaebcabbf30cf11a29d45dbe48abf8cc5ec314cb60151c9d8",
+   "format": 1
+  },
+  {
+   "name": "files/bundles/nfd-operator",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "files/bundles/nfd-operator/kustomization.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "f2e72d146fecc9a8e43f6577feff5018988a8c3085bb80fd5dc57c1640cc33a0",
+   "format": 1
+  },
+  {
+   "name": "files/bundles/nvidia-gpu-operator",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "files/bundles/nvidia-gpu-operator/kustomization.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "86ef639d6390a49c6b75d2f0c7b8714a636377684b791746c9c9985d4e63784e",
+   "format": 1
+  },
+  {
+   "name": "files/bundles/opentelemetry",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "files/bundles/opentelemetry/kustomization.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "4cb89cce48cdc989cd0fd8ee0f0b5df786a606a133d5eff874a210f2a72efef0",
+   "format": 1
+  },
+  {
+   "name": "files/bundles/rhods-operator",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "files/bundles/rhods-operator/kustomization.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "3aee6ef37483784c0b49480d9b7c6d00a7a20fee247d474d5ac6151d4ce66af1",
+   "format": 1
+  },
+  {
+   "name": "files/bundles/serverless-operator",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "files/bundles/serverless-operator/kustomization.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "f45b18fd778e87d9365cc96035b5853f2e54f4ae2895b5a8cf33f799e8d2f101",
+   "format": 1
+  },
+  {
+   "name": "files/bundles/servicemesh-operator",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "files/bundles/servicemesh-operator/kustomization.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "896838a79f0d351a046d5a59f6b732b765cc4eca08472f9e106dbb8e4604793e",
+   "format": 1
+  },
+  {
+   "name": "files/feature",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "files/feature/autopilot",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "files/feature/autopilot/clusterrolebindings",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "files/feature/autopilot/clusterrolebindings/autopilot-privileged.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "f4c11b93abb5dba8432d80dbf17df667a867ff68b94c696207116e948733b7db",
+   "format": 1
+  },
+  {
+   "name": "files/feature/autopilot/clusterrolebindings/autopilot.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "c533e01a66113209ed43d6102d727c27d9335a45137edf43c8db2bb94efb7f63",
+   "format": 1
+  },
+  {
+   "name": "files/feature/autopilot/clusterrolebindings/kustomization.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "cce4391aacdd332912e0048638b3e041079c779255762fda6117b79713494e8e",
+   "format": 1
+  },
+  {
+   "name": "files/feature/autopilot/clusterrolebindings/prometheus-k8s-autopilot.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "9c582a169ce01bfb517aa9fbb806053b4083ef73e0878cba4ebeec607ac39ae7",
+   "format": 1
+  },
+  {
+   "name": "files/feature/autopilot/clusterroles",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "files/feature/autopilot/clusterroles/autopilot.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "864bb9ba6e676290c132c3c693a9e203a04cf7ae15a83eba35f6edbb9ad8e44a",
+   "format": 1
+  },
+  {
+   "name": "files/feature/autopilot/clusterroles/kustomization.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "c736f7dfedbb76c2e195a4613c41a5d91094a05a903aa33cbbe242a1408003f0",
+   "format": 1
+  },
+  {
+   "name": "files/feature/autopilot/clusterroles/prometheus-k8s-autopilot.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "7aa86681e7d21cce1a4d5b92e7446afa47a5ece49b8bbe3da8d2f1b2b5625831",
+   "format": 1
+  },
+  {
+   "name": "files/feature/autopilot/daemonsets",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "files/feature/autopilot/daemonsets/autopilot.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "f31d7e1cd1429c2c2c6a20b1f8f03731fe5f9a703d283cae5364ed3929f8bb35",
+   "format": 1
+  },
+  {
+   "name": "files/feature/autopilot/daemonsets/kustomization.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "28f6bc6dd5ea22f625ca213bcc8048e9588a0d6b43b632f84d97c6ed90558ae6",
+   "format": 1
+  },
+  {
+   "name": "files/feature/autopilot/kustomization.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "7f0bf13d2067aae9a85b54c9d45954802e9fe7659e8951b3a6d40ca84fb69c14",
+   "format": 1
+  },
+  {
+   "name": "files/feature/autopilot/serviceaccounts",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "files/feature/autopilot/serviceaccounts/autopilot.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "ca0963e31f69df5ec9b0ae6fb618cb196de9073029975bbebd91fcec4ab7aca8",
+   "format": 1
+  },
+  {
+   "name": "files/feature/autopilot/serviceaccounts/kustomization.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "28f6bc6dd5ea22f625ca213bcc8048e9588a0d6b43b632f84d97c6ed90558ae6",
+   "format": 1
+  },
+  {
+   "name": "files/feature/autopilot/servicemonitors",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "files/feature/autopilot/servicemonitors/autopilot-metrics-monitor.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "6609fa3692a7421be6989d83a1cd8cc8f0a2de03d2458157e2131e97b1cb2946",
+   "format": 1
+  },
+  {
+   "name": "files/feature/autopilot/servicemonitors/kustomization.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "06cb06f2ef75e9fed30a7b9ba52068e901571d64d87db6c72be11697bc1ee56b",
+   "format": 1
+  },
+  {
+   "name": "files/feature/autopilot/services",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "files/feature/autopilot/services/autopilot-healthchecks.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "9175f0c95549b1bad2aca1c3f9d81b38d7ebaa43c3c0d4207f0ac3e6b04c2d50",
+   "format": 1
+  },
+  {
+   "name": "files/feature/autopilot/services/autopilot-metrics-service.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "7d6bba43a7e67b1ebd028af3d85779a51e62e49dbd3c9fc09a813bd423861ec3",
+   "format": 1
+  },
+  {
+   "name": "files/feature/autopilot/services/autopilot-readinessprobe.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "b3eb83d844f41abfd5cb10f6a6ef1334ea24ccc0f74be3e4d17bcc3a68050629",
+   "format": 1
+  },
+  {
+   "name": "files/feature/autopilot/services/kustomization.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "983abc7a858a53cb54308bb2aea5caaf3f93cd3c84b02a930488cc959129a013",
+   "format": 1
+  },
+  {
+   "name": "files/feature/demo-namespace",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "files/feature/demo-namespace/kustomization.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "f1c145c84360c8862794536d2635f99aaa28d0d92a3dcdbcf42d0c21b7f02d56",
+   "format": 1
+  },
+  {
+   "name": "files/feature/demo-namespace/namespace.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "4796fd99978c52303e081cf7dfbe144746d4c9549318c87c7f9cca4a81d73990",
+   "format": 1
+  },
+  {
+   "name": "files/feature/grafana",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "files/feature/grafana/grafana-setup.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "d68bf30e18f661977fe04a77983bb629650cad84f69f4c73289a0b78858adbf9",
+   "format": 1
+  },
+  {
+   "name": "files/feature/grafana/kustomization.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "ab3e21aee876c0e02c424740088b2c7cd03c45d96b1ba0bcb4ef6064be98758c",
+   "format": 1
+  },
+  {
+   "name": "files/feature/llm-load-test-exporter",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "files/feature/llm-load-test-exporter/clusterrole.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "09618dc2dc32065185a6413acb45c79657d45e5f7f5caaf733ca31942d365411",
+   "format": 1
+  },
+  {
+   "name": "files/feature/llm-load-test-exporter/clusterrolebinding.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "faa1b10f5a3b819a0147a4b305dca9f37d41e11863306285a7505bff93a4072a",
+   "format": 1
+  },
+  {
+   "name": "files/feature/llm-load-test-exporter/configmap.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "fa8a67d37e61ac56612ee603e701c1675a5786ec4689fa8b65b67069f2ea407b",
+   "format": 1
+  },
+  {
+   "name": "files/feature/llm-load-test-exporter/deployment.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "90a9b90a858927cceb681007da17da27b0d5c9ea44ac8fd0f56a87b8a45c8002",
+   "format": 1
+  },
+  {
+   "name": "files/feature/llm-load-test-exporter/kustomization.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "1ab68fe88b7196812dd247dbfbe8d53df17a29b44144117cc57d59c097cb49c7",
+   "format": 1
+  },
+  {
+   "name": "files/feature/llm-load-test-exporter/service.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "935d6bf533bcd57fec53e7629d0fa3d6f6e7c40bb592e0b638c9f6199978a1f2",
+   "format": 1
+  },
+  {
+   "name": "files/feature/llm-load-test-exporter/serviceaccount.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "68e69d99fa646573a6aa650cea65badf721749e71556938a3ea1ecebabeffd06",
+   "format": 1
+  },
+  {
+   "name": "files/feature/llm-load-test-exporter/servicemonitor.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "1de6ccd84341b4b2f4ba42b8257362a55ed819343474bc7a62b85a3eca9dbbce",
+   "format": 1
+  },
+  {
+   "name": "files/feature/minio",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "files/feature/minio/kustomization.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "586b14ca37cd411746bcddf98dee4a1b39ac1208ed736990127611f51ffa1ea2",
+   "format": 1
+  },
+  {
+   "name": "files/feature/minio/minio-setup.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "5ec7a8e7a8977aa5634319980aae91e1e5d8a6d3766d48878f552e7d82ba63e9",
+   "format": 1
+  },
+  {
+   "name": "files/feature/models",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "files/feature/models/granite-3.1-2b-instruct-quantized.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "7007c4a560118fe32ba5c2ee100d3c61d67efe12089e8d2ebe0b2a4a05384eaf",
+   "format": 1
+  },
+  {
+   "name": "files/feature/models/kustomization.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "de004ff67a646d7689ac5d1b820194555475d435bf755bb7d5edabbb01a384de",
+   "format": 1
+  },
+  {
+   "name": "files/feature/models/vllm-servingruntime.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "66997c3e2698208d826e8b762011ed6bdbd925ccfa9c7b4604358b3ad990fae8",
+   "format": 1
+  },
+  {
+   "name": "files/feature/nfd",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "files/feature/nfd/kustomization.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "7be27b62c9de7741b787da18be06c387d346dfe0e1c75a1410c6260c6acbaad9",
+   "format": 1
+  },
+  {
+   "name": "files/feature/nfd/nfd-instance.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "cc4e9e924a1078e8fc13275488d7a806cb8fac295a7b6e9274df7c5e54ab328e",
+   "format": 1
+  },
+  {
+   "name": "files/feature/nvidia",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "files/feature/nvidia/kustomization.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "4bc83d4b950e9b29691746f815e4335d7fc18742b3d15a6fa894aef3c96600e5",
+   "format": 1
+  },
+  {
+   "name": "files/feature/nvidia/nvidia-gpu-clusterpolicy.json",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "d4ea9c3809dd5f1ecb5eb55dc813b3102272022e52c12c85347b780bd8f1ca48",
+   "format": 1
+  },
+  {
+   "name": "files/feature/observability",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "files/feature/observability/expose-grafana.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "6c97f4dcc57b1a4143947dd7964bbb4871db72294d26d1974bee6f66dc110c29",
+   "format": 1
+  },
+  {
+   "name": "files/feature/observability/grafana-prometheus-token.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "47abfd19e2ba35efac2e62de5a9d8fd0bd139b1c81915a9d98d28b1e81fafa71",
+   "format": 1
+  },
+  {
+   "name": "files/feature/observability/kustomization.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "31095f1a81c53cf7424aa87f5127429d0d5f28656bf1c665d1fcc8f686cd4de6",
+   "format": 1
+  },
+  {
+   "name": "files/feature/opentelemetry",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "files/feature/opentelemetry/externalsecret-opentelemetry.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "8afedb88387ba33df48e19151a2e098020d7e28ef05b393146c654ebffd610fc",
+   "format": 1
+  },
+  {
+   "name": "files/feature/opentelemetry/kustomization.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "bdc8e796c874a9d63622f860bd5b9e7d80bbb969f54d038022a06442385ff877",
+   "format": 1
+  },
+  {
+   "name": "files/feature/opentelemetry/opentelemetry-collector.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "6a0afc546e8ef01350bd8e86392177c213f27db8801725721daf004bb04138ee",
+   "format": 1
+  },
+  {
+   "name": "files/feature/opentelemetry/opentelemetry-instrumentation.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "1b5faa31cc74c13b455149a69f773a0ccf5cf1474ab209dfdd17caf421a87df9",
+   "format": 1
+  },
+  {
+   "name": "files/feature/opentelemetry/opentelemetry-rbac.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "fc9553348456ce913ca89aea58ce94e96c071f30b1e4bc51635874cca0c9fd23",
+   "format": 1
+  },
+  {
+   "name": "files/feature/opentelemetry/opentelemetry-tempostack.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "680368564adfc4e5f15fe6f41d69fa565a22d99f55ac8f17ce54e9763172a146",
+   "format": 1
+  },
+  {
+   "name": "files/feature/operators",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "files/feature/operators/kustomization.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "02f0981b137deb43132bca55d61fdc2607d81552e52d74c3d72896b5eb087c26",
+   "format": 1
+  },
+  {
+   "name": "files/feature/prometheus",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "files/feature/prometheus/cluster-monitoring-config.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "fc79c3f429fabfc383168ea91ca183f11d1e49d665620e87367d65a20c554313",
+   "format": 1
+  },
+  {
+   "name": "files/feature/prometheus/kustomization.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "9e4fd693f326c7fc1b0bc3d633cd88e90c669cae2e3d152f059865b64d0fc25f",
+   "format": 1
+  },
+  {
+   "name": "files/feature/prometheus/metrics_allowlist.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "4a5ef29295d5f801c9928a0eceae8341333e47383d78a03687ca9662c36500b5",
+   "format": 1
+  },
+  {
+   "name": "files/feature/rhoai",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "files/feature/rhoai/datascienceclusters",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "files/feature/rhoai/datascienceclusters/datasciencecluster.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "582100d9f25e3aa654a28c10ede2ee709a7ed7db6eab70dcbc596ff8e74e7cc1",
+   "format": 1
+  },
+  {
+   "name": "files/feature/rhoai/datascienceclusters/kustomization.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "5f00c0c62020acac49c3e9005413343645614eba0526f7ae5c484f7504f1053c",
+   "format": 1
+  },
+  {
+   "name": "files/feature/rhoai/kustomization.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "8edcfced5d463ef0335cc85f700e1fcd75c2b3f1be8b7ed76bccff172722a530",
+   "format": 1
+  },
+  {
+   "name": "files/feature/rhoai/odhdashboardconfigs",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "files/feature/rhoai/odhdashboardconfigs/kustomization.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "c1749893d68c88634bcce225ecea02994a14cd09f253e4e5f720720f6043034e",
+   "format": 1
+  },
+  {
+   "name": "files/feature/rhoai/odhdashboardconfigs/odh-dashboard-config.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "23cec37475298d11caa2306a048bc28d414aee1f161d7867104b1854308b16ee",
+   "format": 1
+  },
+  {
+   "name": "files/feature/upload-model",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "files/feature/upload-model/kustomization.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "1c8d93782f164d4f6641f4bc1bb2cea1a43dbd2985fa3b9ea6806281ffd471a7",
+   "format": 1
+  },
+  {
+   "name": "files/feature/upload-model/upload-granite-model.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "ca57dc45b467bbb7252574be187339b0b9b2d51dad650315ec9feac1bc3966b7",
+   "format": 1
+  },
+  {
+   "name": "playbooks",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "playbooks/ansible.cfg",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "f629e8c0666a34d5f07cfa35dbd46a7b8e7ad49699c3636e8283db831b5d4cbe",
+   "format": 1
+  },
+  {
+   "name": "playbooks/configure_cluster_and_deploy_workloads.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "5c66b483483b60945de6e5f66663d0f1f3d0ea13fce5cac27651c89da9505ac1",
+   "format": 1
+  },
+  {
+   "name": "playbooks/configure_managed_cluster.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "4029fea9eab438faea80a0c238a739ad996f248f36860ece5fd81091556bae92",
+   "format": 1
+  },
+  {
+   "name": "playbooks/configure_unmanaged_cluster.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "f68613e6f2f7ae0cc5935cbe4a343a62bfc11aefa4d9c315b01926b9e25f6bcf",
+   "format": 1
+  },
+  {
+   "name": "playbooks/deploy_workloads.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "f3da60ebdf5d81cf3fcf69388432080f68c58eaed55df00d99722fcf311a61f9",
+   "format": 1
+  },
+  {
+   "name": "playbooks/uninstall_config_and_workloads.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "50df8076082050767e199f8975a83e71a06cf0ebef6691dd763dcd847cca2da4",
+   "format": 1
+  },
+  {
+   "name": "playbooks/uninstall_managed_cluster_config.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "4e3e156e1eb25b8c919335590c63a44211203fc4c3e7e8855393efd0254dfeb5",
+   "format": 1
+  },
+  {
+   "name": "playbooks/uninstall_unmanaged_cluster_config.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "1c6987b072a9baf0419bc2271fe27a8aeb11a4d6d8e5330014dd9f0906762ac5",
+   "format": 1
+  },
+  {
+   "name": "playbooks/uninstall_workloads.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "b4da648184c0006f256475c7c76a3a228ae6b06673eba2b908877003591c4cb1",
+   "format": 1
+  },
+  {
+   "name": "requirements.txt",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "4c004c7329c1778c649f046f2b421a64650669acc657871a91bfa0ed9d082ea6",
+   "format": 1
+  },
+  {
+   "name": "roles",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "roles/build_and_configure",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "roles/build_and_configure/meta",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "roles/build_and_configure/meta/argument_specs.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "daab3afae67c8da9ab5ca7d09a8dd6ad1920a29f803004d89b2966c16bf81a0b",
+   "format": 1
+  },
+  {
+   "name": "roles/build_and_configure/meta/cloudkit.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "098fe42748b48c1ebc879c067f9edfcb90fc322d610aad67c4a31878b0453283",
+   "format": 1
+  },
+  {
+   "name": "roles/build_and_configure/tasks",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "roles/build_and_configure/tasks/main.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "17bf9f23503c2c642094f0be7fd779c190a241a20e246d09bedee122fcea088a",
+   "format": 1
+  },
+  {
+   "name": "roles/build_and_configure/vars",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "roles/build_and_configure/vars/main.yml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "c7d98a300fdeb2adc877f3b4cbb1ec74a975bca69288b9bfa36cae443247a157",
+   "format": 1
+  },
+  {
+   "name": "roles/configure_managed_cluster",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "roles/configure_managed_cluster/tasks",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "roles/configure_managed_cluster/tasks/main.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "9e511acc4ba4e19001f9d5369c82f1a29479f74e906b0d162fc1dffb9df9058b",
+   "format": 1
+  },
+  {
+   "name": "roles/configure_managed_cluster/vars",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "roles/configure_managed_cluster/vars/main.yml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "c7d98a300fdeb2adc877f3b4cbb1ec74a975bca69288b9bfa36cae443247a157",
+   "format": 1
+  },
+  {
+   "name": "roles/configure_unmanaged_cluster",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "roles/configure_unmanaged_cluster/tasks",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "roles/configure_unmanaged_cluster/tasks/main.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "f9de7c52e5b062f5f0c6e824a86a532e3d50007c8c1b012fa4e0e89abe3dcc0b",
+   "format": 1
+  },
+  {
+   "name": "roles/configure_unmanaged_cluster/vars",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "roles/configure_unmanaged_cluster/vars/main.yml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "c7d98a300fdeb2adc877f3b4cbb1ec74a975bca69288b9bfa36cae443247a157",
+   "format": 1
+  },
+  {
+   "name": "roles/deploy_workloads",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "roles/deploy_workloads/tasks",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "roles/deploy_workloads/tasks/main.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "641b90f6d280158c8e6a27072ed0ff1812cc90d3a2367a4abce72ffef75186da",
+   "format": 1
+  },
+  {
+   "name": "roles/deploy_workloads/vars",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "roles/deploy_workloads/vars/main.yml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "c7d98a300fdeb2adc877f3b4cbb1ec74a975bca69288b9bfa36cae443247a157",
+   "format": 1
+  },
+  {
+   "name": "roles/testrole",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "roles/testrole/files",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "roles/testrole/files/feature",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "roles/testrole/files/feature/operators",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "roles/testrole/files/feature/operators/example.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "75dd5061cdc56e0a619b08da68265586c46596cebb9e84b087a284fd58fd4658",
+   "format": 1
+  },
+  {
+   "name": "roles/testrole/files/feature/operators/kustomization.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "4caafe505c178fba6b3b3dc0c2c126751a8832899c70b3dcdf9db358ff310aca",
+   "format": 1
+  },
+  {
+   "name": "roles/testrole/tasks",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "roles/testrole/tasks/main.yml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "24e0330f70ec69f630aefd16bab071df124732814799d766166a5c147a4fe996",
+   "format": 1
+  },
+  {
+   "name": "roles/testrole/tasks/someotherlist.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "2cc037bef866cd21f82b2b7861bc92bb6ad880da1dc7e459d6fd0b6a878e55ea",
+   "format": 1
+  },
+  {
+   "name": "roles/uninstall_managed_cluster_config",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "roles/uninstall_managed_cluster_config/tasks",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "roles/uninstall_managed_cluster_config/tasks/main.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "c29c47fb74c2c53fc29a073dab05e6b555a9c810607b5f82c8b9b36a227f8ee9",
+   "format": 1
+  },
+  {
+   "name": "roles/uninstall_managed_cluster_config/vars",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "roles/uninstall_managed_cluster_config/vars/main.yml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "c7d98a300fdeb2adc877f3b4cbb1ec74a975bca69288b9bfa36cae443247a157",
+   "format": 1
+  },
+  {
+   "name": "roles/uninstall_unmanaged_cluster_config",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "roles/uninstall_unmanaged_cluster_config/tasks",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "roles/uninstall_unmanaged_cluster_config/tasks/main.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "d7189178ed63849daee9c27bb70ec9a568bb4bf81e3355453997bc208b11365b",
+   "format": 1
+  },
+  {
+   "name": "roles/uninstall_unmanaged_cluster_config/vars",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "roles/uninstall_unmanaged_cluster_config/vars/main.yml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "c7d98a300fdeb2adc877f3b4cbb1ec74a975bca69288b9bfa36cae443247a157",
+   "format": 1
+  },
+  {
+   "name": "roles/uninstall_workloads",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "roles/uninstall_workloads/tasks",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "roles/uninstall_workloads/tasks/main.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "6ae5e535d10c8682bb4ed90c240e746e5dc9bb5c77fe165d2f83e508766321f3",
+   "format": 1
+  },
+  {
+   "name": "roles/uninstall_workloads/vars",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "roles/uninstall_workloads/vars/main.yml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "c7d98a300fdeb2adc877f3b4cbb1ec74a975bca69288b9bfa36cae443247a157",
+   "format": 1
+  },
+  {
+   "name": "vars",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "vars/main.yml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "467eac89e054c19453c924c28e3498241ecafe92f5c0d7882a56861b7f9c88de",
+   "format": 1
+  }
+ ],
+ "format": 1
+}

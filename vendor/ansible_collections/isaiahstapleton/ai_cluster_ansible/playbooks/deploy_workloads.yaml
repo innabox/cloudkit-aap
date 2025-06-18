@@ -1,0 +1,7 @@
+---
+- name: Deploy AI Workload Components
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  roles:
+    - deploy_workloads

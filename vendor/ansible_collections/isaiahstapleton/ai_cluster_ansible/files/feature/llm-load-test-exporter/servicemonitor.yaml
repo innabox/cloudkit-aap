@@ -1,0 +1,14 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    k8s-app: llm-load-test-exporter
+  name: llm-load-test-exporter
+spec:
+  endpoints:
+  - interval: 180s
+    port: web
+    scheme: http
+  selector:
+    matchLabels:
+      app: llm-load-test-exporter

@@ -1,0 +1,55 @@
+---
+- name: Remove Finalizers from Models
+  kubernetes.core.k8s_json_patch:
+    api_version: serving.kserve.io/v1beta1
+    kind: InferenceService
+    namespace: "{{ item.metadata.namespace }}"
+    name: "{{ item.metadata.name }}"
+    patch:
+      - op: remove
+        path: "/metadata/finalizers"
+    validate_certs: false
+  loop: "{{ query('kubernetes.core.k8s', api_version='serving.kserve.io/v1beta1', kind='InferenceService') }}"
+  ignore_errors: true
+
+- name: Delete InferenceServices (models)
+  kubernetes.core.k8s:
+    state: absent
+    api_version: serving.kserve.io/v1beta1
+    kind: InferenceService
+    namespace: "{{ item.metadata.namespace }}"
+    name: "{{ item.metadata.name }}"
+    validate_certs: false
+  loop: "{{ query('kubernetes.core.k8s', api_version='serving.kserve.io/v1beta1', kind='InferenceService') }}"
+  loop_control:
+    label: "{{ item.metadata.name }}"
+  ignore_errors: true
+
+- name: Remove all ServingRuntimes
+  kubernetes.core.k8s:
+    state: absent
+    api_version: serving.kserve.io/v1alpha1
+    kind: ServingRuntime
+    namespace: "{{ item.metadata.namespace }}"
+    name: "{{ item.metadata.name }}"
+    validate_certs: false
+  loop: "{{ query('kubernetes.core.k8s', api_version='serving.kserve.io/v1alpha1', kind='ServingRuntime') }}"
+  ignore_errors: true
+
+- name: Remove Minio S3 Storage
+  kubernetes.core.k8s:
+    state: absent
+    definition: "{{ lookup('kubernetes.core.kustomize', dir = kustomize_dir ~ '/feature/minio/') }}"
+    validate_certs: false
+
+- name: Remove llm-load-test-exporter
+  kubernetes.core.k8s:
+    state: absent
+    definition: "{{ lookup('kubernetes.core.kustomize', dir = kustomize_dir ~ '/feature/llm-load-test-exporter/') }}"
+    validate_certs: false
+
+- name: Remove all Minio Jobs
+  shell: oc delete job --all -n demo
+
+- name: Remove all Minio Job Pods
+  shell: oc delete pod --all -n demo

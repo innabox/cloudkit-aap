@@ -1,0 +1,7 @@
+---
+- name: Configure AI Cluster
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  roles:
+    - uninstall_unmanaged_cluster_config

@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../bundles/rhods-operator
+  - ../../bundles/nfd-operator
+  - ../../bundles/nvidia-gpu-operator
+  - ../../bundles/serverless-operator
+  - ../../bundles/servicemesh-operator
+  - ../../bundles/authorino-operator
+  - ../../bundles/autopilot
+  - ../../bundles/opentelemetry
+  - ../../bundles/grafana
