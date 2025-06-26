@@ -22,7 +22,7 @@ variables to be defined in the Ansible var file:
 
 - `aap_hostname`, `aap_username`, and `aap_password`: URL and admin credentials
   of the aap instance to be configured
-- `aap_validate_certs`: true if the ssl certificate behind `aap_hostname`
+- `aap_validate_certs`: true if the SSL certificate behind `aap_hostname`
   should be checked
 - `aap_organization_name`: the AAP organization that should be created
 - `aap_project_name`: the name of the project to be created
@@ -151,10 +151,34 @@ oc apply -f aap.yml
 
 #### Prepare OpenShift environment
 
-Create service account and secrets:
+As described above, setup your Red Hat subscription and download the zipped
+manifest, then create an Ansible variable file with your settings, and create a
+secret in the cluster that contains these files:
 
 ```
-cat << EOF > cloudkit_env.yml
+cat << EOF > vars.yaml
+---
+aap_hostname: ...
+aap_username: "{{ lookup('env', 'AAP_USERNAME') }}"
+aap_password: "{{ lookup('env', 'AAP_PASSWORD') }}"
+aap_organization_name: ...
+aap_project_name: ...
+aap_project_git_uri: ...
+aap_project_git_branch: ...
+aap_ee_image: ...
+aap_validate_certs: ...
+license_manifest_path: "{{ lookup('env', 'LICENSE_MANIFEST_PATH') }}"
+EOF
+
+oc create secret generic <your AAP organization>-<your AAP project>-config-as-code-ig --from-file=vars.yaml=vars.yaml --from-file=license.zip=/path/to/license.zip`
+```
+
+To perform fulfillment operations (create, update and delete clusters), you
+need to setup a service account that has sufficient rights in the OpenShift
+cluster:
+
+```
+cat << EOF > cloudkit_sa.yaml
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -173,73 +197,31 @@ subjects:
   - kind: ServiceAccount
     name: cloudkit-sa
     namespace: fulfillment-aap
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: <your AAP organization>-<your AAP project>-config-as-code-ig
-type: Opaque
-stringData:
-  vars.yaml: |
-    ---
-    aap_hostname: ...
-    aap_username: "{{ lookup('env', 'AAP_USERNAME') }}"
-    aap_password: "{{ lookup('env', 'AAP_PASSWORD') }}"
-    aap_organization_name: ...
-    aap_project_name: ...
-    aap_project_git_uri: ...
-    aap_project_git_branch: ...
-    aap_ee_image: ...
-    aap_validate_certs: ...
-    license_manifest_path: "{{ lookup('env', 'LICENSE_MANIFEST_PATH') }}"
-data:
-  license.zip: <copy here the output of `cat manifest.zip | base64 -w 0`>
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: <your AAP organization>-<your AAP project>-cluster-fulfillment-ig
-type: Opaque
-stringData:
-  <setup here the credentials required for cluster fulfillment playbooks (AWS, OpenStack, ...)>
 EOF
 
-oc apply -f cloudkit_env.yml -n fulfillment-aap
+oc apply -f cloudkit_sa.yaml -n fulfillment-aap
 ```
 
-#### Option 1: from your local environment
-
-Create an Ansible var file with the following content:
+Finally, create a secret that pass extra environment variables required for the fulfillment
+operations, such as AWS and OpenStack credentials:
 ```
----
-aap_hostname: ...
-aap_username: ...
-aap_password: ...
-aap_organization_name: ...
-aap_project_name: ...
-aap_project_git_uri: ...
-aap_project_git_branch: ...
-aap_ee_image: ...
-aap_validate_certs: ...
-license_manifest_path: ...
+cat < EOF > fulfillment_creds
+AWS_ACCESS_KEY_ID=...
+AWS_SECRET_ACCESS_KEY=...
+AWS_REGION=...
+OS_AUTH_URL=...
+OS_PROJECT_NAME=...
+...
+EOF
+
+oc create secret generic <your AAP organization>-<your AAP project>-cluster-fulfillment-ig --from-env-file=fufillment_creds`
 ```
 
-And set the enviroment variable `CONFIG_AS_CODE_EXTRA_VARS_PATH` to point to that Ansible var file:
-```
-export CONFIG_AS_CODE_EXTRA_VARS_PATH=/path/to/ansible/vars.yaml
-```
+#### Configure AAP
 
-Run subscription and configure playbooks:
-```
-ansible-playbook cloudkit.config_as_code.subscription
-ansible-playbook cloudkit.config_as_code.configure
-```
-
-#### Option 2: as a job running in Kubernetes
-
-If this collection is being used in a container image (e.g.: in the custom
-execution environment used in AAP), there is the possibility to run the
-configuration in a k8s job:
+`config-as-code` collection is embedded into the Ansible execution environment
+provided as part of this repo, we can use it to trigger the initial
+configuration of AAP:
 
 ```
 cat << EOF > job.yml
@@ -251,7 +233,7 @@ spec:
   template:
     spec:
       containers:
-        - image: <your container image with cloudkit.config_as_code collection in it>
+        - image: ghcr.io/innabox/cloudkit-aap:latest
           name: bootstrap
           args:
             - ansible-playbook
@@ -283,3 +265,7 @@ EOF
 
 oc apply -f job.yml -n fulfillment-aap
 ```
+
+If you updated `config-as-code` collection or want to use your own Ansible
+execution environment, follow this
+[readme](https://github.com/innabox/cloudkit-aap/blob/main/execution-environment/README.md).
