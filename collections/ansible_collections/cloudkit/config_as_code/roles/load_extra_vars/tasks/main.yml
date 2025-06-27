@@ -1,0 +1,21 @@
+---
+- name: Create temporary file
+  ansible.builtin.tempfile:
+    state: file
+    suffix: subscription
+  register: extra_vars
+
+- name: Render extra vars template
+  ansible.builtin.template:
+    src: "{{ load_extra_vars_file_path }}"
+    dest: "{{ extra_vars.path }}"
+    mode: "0644"
+
+- name: Load extra vars
+  ansible.builtin.include_vars:
+    file: "{{ extra_vars.path }}"
+
+- name: Cleanup temporary file
+  ansible.builtin.file:
+    path: "{{ extra_vars.path }}"
+    state: absent
