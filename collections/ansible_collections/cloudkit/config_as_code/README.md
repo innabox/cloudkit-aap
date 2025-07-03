@@ -27,10 +27,17 @@ variables:
 - `AAP_PROJECT_GIT_URI`: the repository that is behind the AAP project
 - `AAP_PROJECT_GIT_BRANCH`: the git branch to use
 - `AAP_EE_IMAGE`: the registry URL to the execution environment image
+- `LICENSE_MANIFEST_PATH`: path to the license manifest file in order to
+  register the AAP instance, your can allocate one from your [Red Hat
+  account](https://access.redhat.com/management/subscription_allocations)
 
-These variables must be defined in a secret named:
+These variables must be defined in a secret named
 `${AAP_ORGANIZATION_NAME}-${AAP_PROJECT_NAME}-config-as-code-ig` in the
 namespace where AAP is deployed.
+
+The content of license manifest file must be set in a secret named
+`${AAP_ORGANIZATION_NAME}-${AAP_PROJECT_NAME}-config-as-code-manifest-ig` as
+`license.zip` in the namespace where AAP is deployed.
 
 Note: since the container group is configured to run in the same namespace as
 the AAP instance, the admin credentials to log against AAP are injected into
@@ -146,10 +153,29 @@ oc apply -f aap.yml
 
 #### Prepare OpenShift environment
 
-Create service account and secrets:
+Create the secrets required for the configuration of AAP:
 
 ```
-cat << EOF > cloudkit_env.yml
+cat << EOF > config-as-code
+AAP_HOSTNAME=<your AAP hostname>
+AAP_VALIDATE_CERTS=true
+AAP_ORGANIZATION_NAME=<the organization name to be created in AAP>
+AAP_PROJECT_NAME=<the project name to be create in AAP>
+AAP_PROJECT_GIT_URI=<the git repository where your playbooks and rulebooks live>
+AAP_PROJECT_GIT_BRANCH=<the git branch to be tracked>
+AAP_EE_IMAGE=<the execution environment image>
+EOF
+
+oc apply -f cloudkit_env.yml -n fulfillment-aap
+oc create secret generic <your AAP organization>-<your AAP project>-config-as-code-ig --from-env-file=config-as-code
+oc create secret generic <your AAP organization>-<your AAP project>-config-as-code-manifest-ig --from-file=license.zip=/path/to/license.zip`
+```
+
+Create service account and secret required for the fulfillment operations, such
+as AWS and OpenStack credentials:
+
+```
+cat << EOF > cloudkit_sa.yml
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -168,67 +194,24 @@ subjects:
   - kind: ServiceAccount
     name: cloudkit-sa
     namespace: fulfillment-aap
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: <your AAP organization>-<your AAP project>-config-as-code-ig
-type: Opaque
-stringData:
-  RH_USERNAME: <your Red Hat username>
-  RH_PASSWORD: <your Red Hat password>
-  AAP_HOSTNAME: https://fulfillment-fulfillment-aap.apps-crc.testing
-  AAP_USERNAME: admin
-  AAP_PASSWORD: $(oc get secret/fulfillment-admin-password -n fulfillment-aap -o go-template='{{index .data "password" | base64decode}}')
-  AAP_VALIDATE_CERTS: false
-  AAP_ORGANIZATION_NAME: <the organization name to be created in AAP>
-  AAP_PROJECT_NAME: <the project name to be create in AAP>
-  AAP_PROJECT_GIT_URI: <the git repository where your playbooks and rulebooks live>
-  AAP_PROJECT_GIT_BRANCH: <the git branch to be tracked>
-  AAP_EE_IMAGE: <the execution environment image>
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: <your AAP organization>-<your AAP project>-cluster-fulfillment-ig
-type: Opaque
-stringData:
-  <setup here the credentials required for cluster fulfillment playbooks (AWS, OpenStack, ...)>
 EOF
 
-oc apply -f cloudkit_env.yml -n fulfillment-aap
+cat < EOF > fulfillment_creds
+AWS_ACCESS_KEY_ID=...
+AWS_SECRET_ACCESS_KEY=...
+AWS_REGION=...
+OS_AUTH_URL=...
+OS_PROJECT_NAME=...
+...
+EOF
+
+oc create secret generic <your AAP organization>-<your AAP project>-cluster-fulfillment-ig --from-env-file=fufillment_creds`
 ```
 
-#### Option 1: from your local environment
+#### Bootstrap AAP configuration
 
-Set your environment (same as above in `<your AAP organization>-<your AAP
-project>-config-as-code-ig` secret):
-
-```
-export RH_USERNAME=...
-export RH_PASSWORD=...
-export AAP_HOSTNAME=...
-export AAP_USERNAME=...
-export AAP_PASSWORD=...
-export AAP_VALIDATE_CERTS=...
-export AAP_ORGANIZATION_NAME=...
-export AAP_PROJECT_NAME=...
-export AAP_PROJECT_GIT_URI=...
-export AAP_PROJECT_GIT_BRANCH=...
-export AAP_EE_IMAGE=...
-```
-
-Run subscription and configure playbooks:
-```
-ansible-playbook cloudkit.config_as_code.subscription
-ansible-playbook cloudkit.config_as_code.configure
-```
-
-#### Option 2: as a job running in Kubernetes
-
-If this collection is being used in a container image (e.g.: in the custom
-execution environment used in AAP), there is the possibility to run the
-configuration in a k8s job:
+Use the execution environment built in the scope of `cloudkit-aap` to run the
+playbook that will perform the initial configuration of AAP:
 
 ```
 cat << EOF > job.yml
@@ -240,7 +223,7 @@ spec:
   template:
     spec:
       containers:
-        - image: <your container image with cloudkit.config_as_code collection in it>
+        - image: ghcr.io/innabox/cloudkit-aap:latest
           name: bootstrap
           args:
             - ansible-playbook
@@ -257,6 +240,16 @@ spec:
                 secretKeyRef:
                   name: fulfillment-admin-password
                   key: password
+              - name: LICENSE_MANIFEST_PATH
+                value: /var/secrets/config-as-code-manifest/license.zip
+            volumeMounts:
+              - name: config-as-code-manifest-volume
+                mountPath: /var/secrets/config-as-code-manifest
+                readOnly: true
+        volumes:
+          - name: config-as-code-manifest-volume
+            secret:
+              secretName: <your AAP organization>-<your AAP project>-config-as-code-manifest-ig
       restartPolicy: Never
   backoffLimit: 4
 EOF

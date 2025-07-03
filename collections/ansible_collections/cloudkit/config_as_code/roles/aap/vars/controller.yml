@@ -241,6 +241,16 @@ controller_instance_groups:  # noqa: var-naming[no-role-prefix]
                   secretKeyRef:
                     name: fulfillment-admin-password
                     key: password
+              - name: LICENSE_MANIFEST_PATH
+                value: /var/secrets/config-as-code/license.zip
+            volumeMounts:
+              - name: config-as-code-manifest-volume
+                mountPath: /var/secrets/config-as-code
+                readOnly: true
+        volumes:
+          - name: config-as-code-manifest-volume
+            secret:
+              secretName: {{ aap_prefix }}-config-as-code-manifest-ig
   - name: "{{ aap_prefix }}-publish-templates-ig"
     is_container_group: true
     pod_spec_override: |
