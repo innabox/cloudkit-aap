@@ -2,13 +2,14 @@
   hosts: localhost
   connection: local
 
-  tasks:
-    - name: Load extra variables
-      ansible.builtin.include_role:
-        name: load_extra_vars
-      vars:
-        load_extra_vars_file_path: "{{ lookup('env', 'CONFIG_AS_CODE_EXTRA_VARS_PATH') }}"
+  vars:
+    aap_hostname: "{{ lookup('env', 'AAP_HOSTNAME') }}"
+    aap_username: "{{ lookup('env', 'AAP_USERNAME') }}"
+    aap_password: "{{ lookup('env', 'AAP_PASSWORD') }}"
+    aap_validate_certs: "{{ lookup('env', 'AAP_VALIDATE_CERTS') | bool }}"
+    license_manifest_path: "{{ lookup('env', 'LICENSE_MANIFEST_PATH') }}"
 
+  tasks:
     - name: Enable AAP license
       ansible.controller.license:
         controller_host: "{{ aap_hostname }}"

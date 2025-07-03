@@ -12,30 +12,32 @@ be passed as environment variables. These environment variables are defined as
 We define 2 container groups in AAP, one used to reconcile the configuration of
 AAP itself, and one used for cluster fulfillment operations.
 
-### Config-as-code var file
-
-Config-as-code relies on an Ansible var file, this file is specified using
-`CONFIG_AS_CODE_EXTRA_VARS_PATH` environment variable.
+### Config-as-code environment variables
 
 In order to reconcile the configuration of AAP, we require the following
-variables to be defined in the Ansible var file:
+variables:
 
-- `aap_hostname`, `aap_username`, and `aap_password`: URL and admin credentials
-  of the aap instance to be configured
-- `aap_validate_certs`: true if the SSL certificate behind `aap_hostname`
+- `RH_USERNAME` and `RH_PASSWORD`: your Red Hat console username and password,
+  used to manage the subscription of AAP
+- `AAP_HOSTNAME`: URL of the AAP instance to be configured
+- `AAP_VALIDATE_CERTS`: true if the SSL certificate behind `AAP_HOSTNAME`
   should be checked
-- `aap_organization_name`: the AAP organization that should be created
-- `aap_project_name`: the name of the project to be created
-- `aap_project_git_uri`: the repository that is behind the AAP project
-- `aap_project_git_branch`: the git branch to use
-- `aap_ee_image`: the registry URL to the execution environment image
-- `license_manifest_path`: path to the license manifest file in order to
-  register the AAP instance, your can allocate one from your
-  [Red Hat account](https://access.redhat.com/management/subscription_allocations)
+- `AAP_ORGANIZATION_NAME`: the AAP organization that should be created
+- `AAP_PROJECT_NAME`: the name of the project to be created
+- `AAP_PROJECT_GIT_URI`: the repository that is behind the AAP project
+- `AAP_PROJECT_GIT_BRANCH`: the git branch to use
+- `AAP_EE_IMAGE`: the registry URL to the execution environment image
+- `LICENSE_MANIFEST_PATH`: path to the license manifest file in order to
+  register the AAP instance, your can allocate one from your [Red Hat
+  account](https://access.redhat.com/management/subscription_allocations)
 
-These variables must be defined in a secret named:
-`{{ aap_organization_name }}-{{ aap_project_name }}-config-as-code-ig` in the
+These variables must be defined in a secret named
+`${AAP_ORGANIZATION_NAME}-${AAP_PROJECT_NAME}-config-as-code-ig` in the
 namespace where AAP is deployed.
+
+The content of license manifest file must be set in a secret named
+`${AAP_ORGANIZATION_NAME}-${AAP_PROJECT_NAME}-config-as-code-manifest-ig` as
+`license.zip` in the namespace where AAP is deployed.
 
 Note: since the container group is configured to run in the same namespace as
 the AAP instance, the admin credentials to log against AAP are injected into
@@ -51,7 +53,7 @@ use case, e.g.:
 - ...whatever in needed
 
 These variables must be defined in a secret named:
-`{{ aap_organization_name }}-{{ aap_project_name }}-cluster-fulfillment-ig` in the
+`${AAP_ORGANIZATION_NAME}-${AAP_PROJECT_NAME}-cluster-fulfillment-ig` in the
 namespace where AAP is deployed.
 
 The cluster fulfillment needs to access the Kube API of the cluster it runs on,
@@ -151,34 +153,29 @@ oc apply -f aap.yml
 
 #### Prepare OpenShift environment
 
-As described above, setup your Red Hat subscription and download the zipped
-manifest, then create an Ansible variable file with your settings, and create a
-secret in the cluster that contains these files:
+Create the secrets required for the configuration of AAP:
 
 ```
-cat << EOF > vars.yaml
----
-aap_hostname: ...
-aap_username: "{{ lookup('env', 'AAP_USERNAME') }}"
-aap_password: "{{ lookup('env', 'AAP_PASSWORD') }}"
-aap_organization_name: ...
-aap_project_name: ...
-aap_project_git_uri: ...
-aap_project_git_branch: ...
-aap_ee_image: ...
-aap_validate_certs: ...
-license_manifest_path: "{{ lookup('env', 'LICENSE_MANIFEST_PATH') }}"
+cat << EOF > config-as-code
+AAP_HOSTNAME=<your AAP hostname>
+AAP_VALIDATE_CERTS=true
+AAP_ORGANIZATION_NAME=<the organization name to be created in AAP>
+AAP_PROJECT_NAME=<the project name to be create in AAP>
+AAP_PROJECT_GIT_URI=<the git repository where your playbooks and rulebooks live>
+AAP_PROJECT_GIT_BRANCH=<the git branch to be tracked>
+AAP_EE_IMAGE=<the execution environment image>
 EOF
 
-oc create secret generic <your AAP organization>-<your AAP project>-config-as-code-ig --from-file=vars.yaml=vars.yaml --from-file=license.zip=/path/to/license.zip`
+oc apply -f cloudkit_env.yml -n fulfillment-aap
+oc create secret generic <your AAP organization>-<your AAP project>-config-as-code-ig --from-env-file=config-as-code
+oc create secret generic <your AAP organization>-<your AAP project>-config-as-code-manifest-ig --from-file=license.zip=/path/to/license.zip`
 ```
 
-To perform fulfillment operations (create, update and delete clusters), you
-need to setup a service account that has sufficient rights in the OpenShift
-cluster:
+Create service account and secret required for the fulfillment operations, such
+as AWS and OpenStack credentials:
 
 ```
-cat << EOF > cloudkit_sa.yaml
+cat << EOF > cloudkit_sa.yml
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -199,12 +196,6 @@ subjects:
     namespace: fulfillment-aap
 EOF
 
-oc apply -f cloudkit_sa.yaml -n fulfillment-aap
-```
-
-Finally, create a secret that pass extra environment variables required for the fulfillment
-operations, such as AWS and OpenStack credentials:
-```
 cat < EOF > fulfillment_creds
 AWS_ACCESS_KEY_ID=...
 AWS_SECRET_ACCESS_KEY=...
@@ -217,11 +208,10 @@ EOF
 oc create secret generic <your AAP organization>-<your AAP project>-cluster-fulfillment-ig --from-env-file=fufillment_creds`
 ```
 
-#### Configure AAP
+#### Bootstrap AAP configuration
 
-`config-as-code` collection is embedded into the Ansible execution environment
-provided as part of this repo, we can use it to trigger the initial
-configuration of AAP:
+Use the execution environment built in the scope of `cloudkit-aap` to run the
+playbook that will perform the initial configuration of AAP:
 
 ```
 cat << EOF > job.yml
@@ -239,10 +229,9 @@ spec:
             - ansible-playbook
             - "cloudkit.config_as_code.subscription"
             - "cloudkit.config_as_code.configure"
-          volumeMounts:
-            - name: config-as-code-volume
-              mountPath: /var/secrets/config-as-code
-              readOnly: true
+          envFrom:
+            - secretRef:
+                name: <your AAP organization>-<your AAP project>-config-as-code-ig
           env:
             - name: AAP_USERNAME
               value: admin
@@ -251,21 +240,19 @@ spec:
                 secretKeyRef:
                   name: fulfillment-admin-password
                   key: password
-            - name: CONFIG_AS_CODE_EXTRA_VARS_PATH
-              value: /var/secrets/config-as-code/vars.yaml
-            - name: LICENSE_MANIFEST_PATH
-              value: /var/secrets/config-as-code/license.zip
-      volumes:
-        - name: config-as-code-volume
-          secret:
-            secretName: <your AAP organization>-<your AAP project>-config-as-code-ig
+              - name: LICENSE_MANIFEST_PATH
+                value: /var/secrets/config-as-code-manifest/license.zip
+            volumeMounts:
+              - name: config-as-code-manifest-volume
+                mountPath: /var/secrets/config-as-code-manifest
+                readOnly: true
+        volumes:
+          - name: config-as-code-manifest-volume
+            secret:
+              secretName: <your AAP organization>-<your AAP project>-config-as-code-manifest-ig
       restartPolicy: Never
   backoffLimit: 4
 EOF
 
 oc apply -f job.yml -n fulfillment-aap
 ```
-
-If you updated `config-as-code` collection or want to use your own Ansible
-execution environment, follow this
-[readme](https://github.com/innabox/cloudkit-aap/blob/main/execution-environment/README.md).
