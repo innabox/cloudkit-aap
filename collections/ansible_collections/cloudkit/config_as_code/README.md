@@ -17,8 +17,6 @@ AAP itself, and one used for cluster fulfillment operations.
 In order to reconcile the configuration of AAP, we require the following
 variables:
 
-- `RH_USERNAME` and `RH_PASSWORD`: your Red Hat console username and password,
-  used to manage the subscription of AAP
 - `AAP_HOSTNAME`: URL of the AAP instance to be configured
 - `AAP_VALIDATE_CERTS`: true if the SSL certificate behind `AAP_HOSTNAME`
   should be checked
@@ -151,7 +149,7 @@ oc apply -f aap.yml
 
 ### Apply CloudKit configuration on AAP instance
 
-#### Prepare OpenShift environment
+#### Config-as-code configauration
 
 Create the secrets required for the configuration of AAP:
 
@@ -166,10 +164,12 @@ AAP_PROJECT_GIT_BRANCH=<the git branch to be tracked>
 AAP_EE_IMAGE=<the execution environment image>
 EOF
 
-oc apply -f cloudkit_env.yml -n fulfillment-aap
+oc apply -f config-as-code -n fulfillment-aap
 oc create secret generic <your AAP organization>-<your AAP project>-config-as-code-ig --from-env-file=config-as-code
 oc create secret generic <your AAP organization>-<your AAP project>-config-as-code-manifest-ig --from-file=license.zip=/path/to/license.zip`
 ```
+
+#### Fulfilment operations configuration
 
 Create service account and secret required for the fulfillment operations, such
 as AWS and OpenStack credentials:
@@ -196,7 +196,7 @@ subjects:
     namespace: fulfillment-aap
 EOF
 
-cat < EOF > fulfillment_creds
+cat << EOF > fulfillment_creds
 AWS_ACCESS_KEY_ID=...
 AWS_SECRET_ACCESS_KEY=...
 AWS_REGION=...
@@ -205,7 +205,49 @@ OS_PROJECT_NAME=...
 ...
 EOF
 
-oc create secret generic <your AAP organization>-<your AAP project>-cluster-fulfillment-ig --from-env-file=fufillment_creds`
+oc create secret generic <your AAP organization>-<your AAP project>-cluster-fulfillment-ig --from-env-file=fufillment_creds
+```
+
+#### Template publisher configuration
+
+Create the service account, role, and role bindings required by the template
+publisher to authenticate against the
+[fulfillment-service](https://github.com/innabox/fulfillment-service/):
+
+```
+cat << EOF > template-publisher
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: template-publisher
+  namespace: fulfillment-aap
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: create-controller-token
+  namespace: innabox
+rules:
+  - apiGroups: [""]
+    resources: ["serviceaccounts/token"]
+    resourceNames: ["controller"] # here is the name of the service account to authenticate against the fulfillment-service
+    verbs: ["create"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: aap-fulfillment-template-publisher-binding
+  namespace: innabox
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: create-controller-token
+subjects:
+  - kind: ServiceAccount
+    name: template-publisher
+    namespace: fulfillment-aap
+
+oc apply -f template-publisher
 ```
 
 #### Bootstrap AAP configuration
