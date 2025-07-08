@@ -165,8 +165,8 @@ AAP_EE_IMAGE=<the execution environment image>
 EOF
 
 oc apply -f config-as-code -n fulfillment-aap
-oc create secret generic <your AAP organization>-<your AAP project>-config-as-code-ig --from-env-file=config-as-code
-oc create secret generic <your AAP organization>-<your AAP project>-config-as-code-manifest-ig --from-file=license.zip=/path/to/license.zip`
+oc create secret generic <your AAP organization>-<your AAP project>-config-as-code-ig --from-env-file=config-as-code -n fulfillment-aap
+oc create secret generic <your AAP organization>-<your AAP project>-config-as-code-manifest-ig --from-file=license.zip=/path/to/license.zip` -n fulfillment-aap
 ```
 
 #### Fulfilment operations configuration
@@ -205,7 +205,7 @@ OS_PROJECT_NAME=...
 ...
 EOF
 
-oc create secret generic <your AAP organization>-<your AAP project>-cluster-fulfillment-ig --from-env-file=fufillment_creds
+oc create secret generic <your AAP organization>-<your AAP project>-cluster-fulfillment-ig --from-env-file=fufillment_creds -n fulfillment-aap
 ```
 
 #### Template publisher configuration
@@ -246,6 +246,7 @@ subjects:
   - kind: ServiceAccount
     name: template-publisher
     namespace: fulfillment-aap
+EOF
 
 oc apply -f template-publisher
 ```
@@ -284,10 +285,10 @@ spec:
                   key: password
               - name: LICENSE_MANIFEST_PATH
                 value: /var/secrets/config-as-code-manifest/license.zip
-            volumeMounts:
-              - name: config-as-code-manifest-volume
-                mountPath: /var/secrets/config-as-code-manifest
-                readOnly: true
+          volumeMounts:
+            - name: config-as-code-manifest-volume
+              mountPath: /var/secrets/config-as-code-manifest
+              readOnly: true
         volumes:
           - name: config-as-code-manifest-volume
             secret:
