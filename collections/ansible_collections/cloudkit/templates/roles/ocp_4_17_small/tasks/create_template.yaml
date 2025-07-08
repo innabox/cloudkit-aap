@@ -1,6 +1,6 @@
 - name: Create hosted cluster
   ansible.builtin.import_role:
-    name: hosted_cluster
+    name: cloudkit.service.hosted_cluster
   vars:
     hosted_cluster_name: "{{ cluster_order.metadata.name }}"
     hosted_cluster_namespace: "{{ cluster_working_namespace }}"
@@ -13,7 +13,7 @@
 
 - name: Create cluster infrastructure
   ansible.builtin.import_role:
-    name: cluster_infra
+    name: cloudkit.service.cluster_infra
   vars:
     cluster_infra_state: present
     cluster_infra_name: "{{ cluster_order.metadata.name }}"
@@ -22,7 +22,7 @@
 
 - name: Configure port forwarding
   ansible.builtin.import_role:
-    name: external_access
+    name: cloudkit.service.external_access
   vars:
     external_access_name: "{{ cluster_order.metadata.name }}"
     external_access_state: present

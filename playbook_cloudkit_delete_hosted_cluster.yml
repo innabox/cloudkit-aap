@@ -11,15 +11,15 @@
   pre_tasks:
     - name: Apply default settings
       ansible.builtin.include_role:
-        name: cluster_settings
+        name: cloudkit.service.cluster_settings
 
     - name: Extract template info
       ansible.builtin.include_role:
-        name: extract_template_info
+        name: cloudkit.service.extract_template_info
 
     - name: Determine working namespace
       ansible.builtin.include_role:
-        name: cluster_working_namespace
+        name: cloudkit.service.cluster_working_namespace
       vars:
         cluster_working_namespace_cluster_order_name: "{{ cluster_order.metadata.name }}"
 
