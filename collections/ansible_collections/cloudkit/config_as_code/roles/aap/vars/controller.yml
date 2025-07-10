@@ -59,6 +59,51 @@ controller_templates:  # noqa: var-naming[no-role-prefix]
     instance_groups:
       - "{{ aap_prefix }}-publish-templates-ig"
     verbosity: 0
+  - name: "{{ aap_prefix }}-create-hosted-cluster-post-install"
+    project: "{{ aap_prefix }}"
+    organization: "{{ aap_organization_name }}"
+    job_type: run
+    playbook: "playbook_cloudkit_create_hosted_cluster_post_install.yml"
+    inventory: "{{ aap_prefix }}-cluster-fulfillment"
+    execution_environment: "{{ aap_prefix }}-ee"
+    instance_groups:
+      - "{{ aap_prefix }}-create-hosted-cluster-post-install-ig"
+    allow_simultaneous: true
+    ask_variables_on_launch: true
+    verbosity: 0
+
+controller_job_template_surveys:  # noqa: var-naming[no-role-prefix]
+  - name: "{{ aap_prefix }}-create-hosted-cluster-post-install"
+    survey_enabled: true
+    survey_spec:
+      name: "Create hosted cluster post-install survey"
+      description: "Provide kubeconfig for post-install hosted cluster configuration"
+      spec:
+        - question_name: "kubeconfig"
+          question_description: "Kubeconfig file content for the hosted cluster"
+          required: true
+          type: "textarea"
+          variable: "kubeconfig"
+          min: 0
+          max: 65535
+          default: ""
+          new_question: true
+          secret: true
+
+# Create workflows for cluster management
+controller_workflows:  # noqa: var-naming[no-role-prefix]
+  - name: "{{ aap_prefix }}-create-hosted-cluster-workflow"
+    description: "Workflow for hosted cluster creation"
+    organization: "{{ aap_organization_name }}"
+    ask_variables_on_launch: true
+    inventory: "{{ aap_prefix }}-cluster-fulfillment"
+    workflow_nodes:
+      - identifier: "create-cluster"
+        unified_job_template: "{{ aap_prefix }}-create-hosted-cluster"
+        success_nodes:
+          - "post-install"
+      - identifier: "post-install"
+        unified_job_template: "{{ aap_prefix }}-create-hosted-cluster-post-install"
 
 # Create cluster fulfillment and confg-as-code inventories. They are the same
 # for the moment, but spliting them will allow us to diverge easily in the
@@ -312,3 +357,5 @@ controller_instance_groups:  # noqa: var-naming[no-role-prefix]
                       - key: service-ca.crt
                         path: service-ca.crt
               defaultMode: 420
+  - name: "{{ aap_prefix }}-create-hosted-cluster-post-install-ig"
+    is_container_group: true

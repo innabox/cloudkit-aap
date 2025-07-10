@@ -10,8 +10,8 @@
     - name: Create hosted cluster
       condition: event.meta.endpoint == "create-hosted-cluster"
       action:
-        run_job_template:
-          name: "{{ job_template_prefix }}-create-hosted-cluster"
+        run_workflow_template:
+          name: "{{ job_template_prefix }}-create-hosted-cluster-workflow"
           organization: "{{ job_template_organization }}"
 
     - name: Delete hosted cluster
