@@ -72,31 +72,40 @@
   retries: "{{ external_access_resource_wait_retries }}"
   delay: "{{ external_access_resource_wait_delay }}"
 
-- name: Get esi node name of an agent
+- name: Set ingress_internal_subnet_name
   ansible.builtin.set_fact:
-    external_access_worker_node_name: >-
-      {{
-      agents.resources[0].spec.hostname
-      }}
+    ingress_internal_subnet_name: "subnet-{{ external_access_name }}"
 
-- name: Get network details from esi  # noqa:no-changed-when
+- name: Get ingress internal subnet
   ansible.builtin.include_role:
-    name: massopencloud.esi.network
-    tasks_from: get_node_network_info
+    name: massopencloud.esi.l3
+    tasks_from: get_subnet
   vars:
-    node: "{{ external_access_worker_node_name }}"
-    network: "{{ external_access_ingress_internal_network }}"
+    subnet_name: "{{ ingress_internal_subnet_name }}"
 
-- name: Get worker node address
+- name: Set external_access_metallb_ingress_ip
   ansible.builtin.set_fact:
-    external_access_worker_node_ip: >-
-      {{
-        (node_network_info.stdout|from_json)[0]['Fixed IP']
-      }}
+    external_access_metallb_ingress_ip: "{{ subnet_info.cidr | ansible.utils.nthhost(-10) }}"
 
-- name: Show discovered address
-  ansible.builtin.debug:
-    msg: "Found address {{ external_access_worker_node_ip }} for node {{ external_access_worker_node_name }}"
+- name: Get managed cluster admin kubeconfig secret
+  kubernetes.core.k8s_info:
+    api_version: v1
+    kind: Secret
+    namespace: "{{ cluster_working_namespace }}"
+    name: "{{ cluster_order.metadata.name }}-admin-kubeconfig"
+  register: managed_cluster_admin_kubeconfig_secret
+
+- name: Extract kubeconfig
+  ansible.builtin.set_fact:
+    managed_cluster_admin_kubeconfig: "{{ managed_cluster_admin_kubeconfig_secret.resources[0].data.kubeconfig | b64decode | from_yaml }}"
+
+- name: Configure metallb for ingress
+  ansible.builtin.include_role:
+    name: metallb_ingress
+    tasks_from: configure_metallb_ingress
+  vars:
+    metallb_ingress_admin_kubeconfig: "{{ managed_cluster_admin_kubeconfig }}"
+    metallb_ingress_ip: "{{ external_access_metallb_ingress_ip }}"
 
 - name: Allocate ingress floating ip
   ansible.builtin.include_role:
@@ -114,7 +123,7 @@
     name: massopencloud.esi.floating_ip
     tasks_from: create_port_forwarding
   vars:
-    internal_ip: "{{ external_access_worker_node_ip }}"
+    internal_ip: "{{ external_access_metallb_ingress_ip }}"
     floating_ip: "{{ external_access_ingress_floating_ip }}"
     internal_network: "{{ external_access_ingress_internal_network }}"
     ports:

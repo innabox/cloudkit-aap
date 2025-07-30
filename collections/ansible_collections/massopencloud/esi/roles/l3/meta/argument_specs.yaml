@@ -18,6 +18,13 @@ argument_specs:
           Name or ID of the subnet to be destroyed
         type: "str"
         required: true
+  get_subnet:
+    options:
+      subnet_name:
+        description: |
+          Name or ID of the subnet to be destroyed
+        type: "str"
+        required: true
   create_router:
     options:
       router_name:
