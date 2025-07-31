@@ -13,8 +13,8 @@ repository: https://github.com/innabox/cloudkit-aap
 issues: https://github.com/innabox/cloudkit-aap/issues
 build_ignore: []
 dependencies:
-  ansible.platform: "2.5.20250326"
+  ansible.platform: "2.5.20250702"
   ansible.hub: "1.0.0"
-  ansible.controller: "4.6.11"
-  ansible.eda: "2.6.1"
-  infra.aap_configuration: "3.2.0"
+  ansible.controller: "4.6.16"
+  ansible.eda: "2.8.2"
+  infra.aap_configuration: "3.4.1"

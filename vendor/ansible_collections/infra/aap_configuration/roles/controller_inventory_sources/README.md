@@ -7,10 +7,6 @@ An Ansible Role to create/update/remove inventory sources on Ansible Controller.
 ## Requirements
 
 ansible-galaxy collection install -r tests/collections/requirements.yml to be installed
-Currently:
-  awx.awx
-  or
-  ansible.controller
 
 ## Variables
 
@@ -101,7 +97,7 @@ The role will strip the double space between the curly bracket in order to provi
 |`description`|`false`|no|The description to use for the inventory source.|
 |`inventory`|""|yes|Inventory the group should be made a member of.|
 |`organization`|""|no|Organization the inventory belongs to.|
-|`source`|""|no|The source to use for this group. If set to `constructed` this role will be skipped as they are not meant to be edited.|
+|`source`|""|no|The source to use for this group. If set to `constructed` this role will be skipped as they are not meant to be edited. See the list below for choices.|
 |`source_path`|""|no|For an SCM based inventory source, the source path points to the file within the repo to use as an inventory.|
 |`source_vars`|""|no|The variables or environment fields to apply to this source type.|
 |`enabled_var`|""|no|The variable to use to determine enabled state e.g., "status.power_state".|
@@ -124,6 +120,21 @@ The role will strip the double space between the curly bracket in order to provi
 |`notification_templates_success`|""|no|The notifications on success to use for this inventory source in a list.|
 |`notification_templates_error`|""|no|The notifications on error to use for this inventory source in a list.|
 
+#### Source Types
+
+- "scm"
+- "ec2"
+- "gce"
+- "azure_rm"
+- "vmware"
+- "satellite6"
+- "openstack"
+- "rhv"
+- "controller"
+- "insights"
+- "terraform"
+- "openshift_virtualization"
+
 ### Standard Inventory Source Data Structure
 
 #### Json Example
@@ -140,6 +151,14 @@ The role will strip the double space between the curly bracket in order to provi
       "overwrite": true,
       "update_on_launch": true,
       "update_cache_timeout": 0
+    },
+    {
+      "name": "Auto-created source for: All RHEL 7 Hosts",
+      "inventory": "All RHEL 7 Hosts",
+      "limit": "rhel7_hosts",
+      "source_vars": "---\nplugin: ansible.builtin.constructed\ngroups:\n  \"'rhel7' in foreman_content_attributes.lifecycle_environment_name\"",
+      "update_cache_timeout": 0,
+      "verbosity": 0
     }
   ]
 }
@@ -151,6 +170,14 @@ The role will strip the double space between the curly bracket in order to provi
 ```yaml
 ---
 controller_inventory_sources:
+  - name: sourced_from_project
+    source: scm
+    source_project: inventory-project
+    source_path: inventories/my_inv
+    inventory: SCM-01
+    description: Inventory sourced from a Project
+    overwrite: true
+    update_on_launch: true
   - name: RHVM-01
     source: rhv
     inventory: RHVM-01
@@ -159,6 +186,16 @@ controller_inventory_sources:
     overwrite: true
     update_on_launch: true
     update_cache_timeout: 0
+  - name: "Auto-created source for: All RHEL 7 Hosts"
+    inventory: All RHEL 7 Hosts
+    limit: "rhel7_hosts"
+    source_vars:
+      plugin: ansible.builtin.constructed
+      groups:
+        rhel7_hosts: "'rhel7' in foreman_content_attributes.lifecycle_environment_name"
+      strict: false
+    update_cache_timeout: 0
+    verbosity: 0
 
 ```
 

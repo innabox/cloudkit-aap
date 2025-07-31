@@ -2,7 +2,7 @@
  "collection_info": {
   "namespace": "ansible",
   "name": "platform",
-  "version": "2.5.20250326",
+  "version": "2.5.20250702",
   "authors": [
    "automation platform gateway <aap-project@googlegroups.com>",
    "Sean Sullivan <@sean-m-sullivan>"
@@ -27,7 +27,7 @@
   "name": "FILES.json",
   "ftype": "file",
   "chksum_type": "sha256",
-  "chksum_sha256": "c5765979a18f5175926a317d300ddcfdfab9f34ddc8990eda99b4e6f8cd6e320",
+  "chksum_sha256": "8b4f17e48560d3362c952536b4293a578fbe7b246a983e82bf90b1dc375fcec2",
   "format": 1
  },
  "format": 1

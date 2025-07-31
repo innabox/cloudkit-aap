@@ -55,20 +55,61 @@
     # </Http Ports> -------------------------------
 
     # <Service Clusters> --------------------------
+    - name: Create Hub Service Type
+      ansible.platform.service_type:
+        name: "{{ test_id }}hub"
+        ping_url: "/api/ping/"
+        login_path: "/api/login/"
+        logout_path: "/api/logout/"
+        service_index_path: "/api/service-index/"
+      register: hub_st
+
     - name: Create Hub Service Cluster
       ansible.platform.service_cluster:
         name: "{{ name_prefix }}-Hub"
-        service_type: "hub"
+        service_type: "{{ hub_st.id }}"
       register: hub_sc
+
+    - name: Create Controller Service Type
+      ansible.platform.service_type:
+        name: "{{ test_id }}controller"
+        ping_url: "/api/ping/"
+        login_path: "/api/login/"
+        logout_path: "/api/logout/"
+        service_index_path: "/api/service-index/"
+      register: controller_st
 
     - name: Create Controller Service Cluster
       ansible.platform.service_cluster:
         name: "{{ name_prefix }}-Controller"
-        service_type: "controller"
+        service_type: "{{ controller_st.id }}"
       register: controller_sc
     # </Service Clusters> -------------------------
 
     # <Services> ----------------------------------
+    - name: Create Hub Service with check mode
+      ansible.platform.service:
+        name: "{{ name_prefix }}-Automation Hub API"
+        description: "Proxy to the Automation Hub"
+        http_port: "{{ api_port_id }}"
+        api_slug: hub
+        service_cluster: "{{ hub_sc.id }}"
+        service_path: '/api/hub/'
+        service_port: 5001
+        order: 1
+      check_mode: true
+
+    - name: Search for the Hub Service
+      ansible.builtin.set_fact:
+        item_that_should_not_exist: "{{ lookup('ansible.platform.gateway_api', 'services',
+          query_params={'name': '{{ name_prefix }}-Automation Hub API'}, **connection_info) }}"
+
+    - name: Assert that Hub Service does not exist
+      ansible.builtin.assert:
+        that:
+          - item_that_should_not_exist is not defined or item_that_should_not_exist | length == 0
+        fail_msg: "Service '{{ name_prefix }}-Automation Hub API' exists in the system!"
+
     - name: Create Hub Service
       ansible.platform.service:
         name: "{{ name_prefix }}-Automation Hub API"
@@ -213,4 +254,14 @@
       loop:
         - "port1"
         - "new_http_api_port"
+
+    - name: Delete Service Types
+      ansible.platform.service_type:
+        name: "{{ item.name }}"
+        state: absent
+      loop: "{{ gateway_service_types }}"
+      vars:
+        gateway_service_types:
+          - name: "{{ test_id }}controller"
+          - name: "{{ test_id }}hub"
 ...

@@ -53,23 +53,30 @@ class AAPModule(AnsibleModule):
     AUTH_ARGSPEC = dict(
         gateway_hostname=dict(
             required=False,
-            fallback=(env_fallback, ["GATEWAY_HOSTNAME"]),
+            aliases=["aap_hostname"],
+            fallback=(env_fallback, ["GATEWAY_HOSTNAME", "AAP_HOSTNAME"]),
         ),
-        gateway_username=dict(required=False, fallback=(env_fallback, ["GATEWAY_USERNAME"])),
-        gateway_password=dict(no_log=True, required=False, fallback=(env_fallback, ["GATEWAY_PASSWORD"])),
+        gateway_username=dict(required=False, aliases=["aap_username"], fallback=(env_fallback, ["GATEWAY_USERNAME", "AAP_USERNAME"])),
+        gateway_password=dict(no_log=True, required=False, aliases=["aap_password"], fallback=(env_fallback, ["GATEWAY_PASSWORD", "AAP_PASSWORD"])),
         gateway_validate_certs=dict(
-            aliases=["validate_certs"],
+            aliases=["validate_certs", "aap_validate_certs"],
             type="bool",
             required=False,
-            fallback=(env_fallback, ["GATEWAY_VERIFY_SSL"]),
+            fallback=(env_fallback, ["GATEWAY_VERIFY_SSL", "AAP_VALIDATE_CERTS"]),
         ),
         gateway_token=dict(
             type="raw",
+            aliases=["aap_token"],
             no_log=True,
             required=False,
-            fallback=(env_fallback, ["GATEWAY_API_TOKEN"]),
+            fallback=(env_fallback, ["GATEWAY_API_TOKEN", 'AAP_TOKEN']),
         ),
-        gateway_request_timeout=dict(aliases=["request_timeout"], type="float", required=False, fallback=(env_fallback, ["GATEWAY_REQUEST_TIMEOUT"])),
+        gateway_request_timeout=dict(
+            aliases=["request_timeout", "aap_request_timeout"],
+            type="float",
+            required=False,
+            fallback=(env_fallback, ["GATEWAY_REQUEST_TIMEOUT", "AAP_REQUEST_TIMEOUT"]),
+        ),
     )
     ENCRYPTED_STRING = "$encrypted$"
     product_name = "automation platform gateway"
@@ -92,6 +99,7 @@ class AAPModule(AnsibleModule):
         "service_clusters": "name",
         "service_keys": "name",
         "service_nodes": "name",
+        "service_types": "name",
         "organizations": "name",
         "teams": ["name", "organization"],
         "users": "username",
@@ -325,6 +333,10 @@ class AAPModule(AnsibleModule):
         elif kwargs.get("binary", False):
             data = kwargs.get("data", None)
 
+        if method.upper() in {'PUT', 'POST', 'DELETE', 'PATCH'} and self.check_mode:
+            self.json_output['changed'] = True
+            self.exit_json(**self.json_output)
+
         try:
             response = self.session.open(
                 method,
@@ -369,7 +381,7 @@ class AAPModule(AnsibleModule):
             # API sends it as a logic error in a few situations (e.g. trying to cancel a job that isn't running).
             elif he.code == 405:
                 self.fail_json(
-                    msg="The {0} server says you can't make a request with the {1} method to this endpoing {2}".format(self.product_name, method, url.path)
+                    msg="The {0} server says you can't make a request with the {1} method to this endpoint {2}".format(self.product_name, method, url.path)
                 )
             # Sanity check: Did we get some other kind of error?  If so, write an appropriate error message.
             elif he.code >= 400:
@@ -454,6 +466,7 @@ class AAPModule(AnsibleModule):
             # If we don't have an existing_item, we can try to create it
             # We have to rely on item_type being passed in since we don't have an existing item that declares its type
             # We will pull the item_name out from the new_item, if it exists
+            response = {}
             item_name = self.get_item_name(new_item, allow_unknown=True)
             response = self.make_request("POST", item_url, **{"data": new_item})
 
@@ -485,9 +498,10 @@ class AAPModule(AnsibleModule):
             on_create(self, response["json"])
         elif auto_exit:
             self.exit_json(**self.json_output)
-        else:
+        elif not existing_item:
             last_data = response["json"]
             return last_data
+        return None
 
     def update_if_needed(
         self,
