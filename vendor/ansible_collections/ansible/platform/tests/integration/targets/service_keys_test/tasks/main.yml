@@ -29,26 +29,74 @@
 
   block:
     # <Service Clusters> ----------------------------
+    - name: Create Controller Service Type
+      ansible.platform.service_type:
+        name: "{{ test_id }}controller"
+        ping_url: "/api/ping/"
+        login_path: "/api/login/"
+        logout_path: "/api/logout/"
+        service_index_path: "/api/service-index/"
+      register: controller_st
+
     - name: Create Controller Service Cluster
       ansible.platform.service_cluster:
         name: "Automation Controller"
-        service_type: "controller"
+        service_type: "{{ controller_st.id }}"
       register: controller_sc
+
+    - name: Create Hub Service Type
+      ansible.platform.service_type:
+        name: "{{ test_id }}hub"
+        ping_url: "/api/ping/"
+        login_path: "/api/login/"
+        logout_path: "/api/logout/"
+        service_index_path: "/api/service-index/"
+      register: hub_st
 
     - name: Create Hub Service Cluster
       ansible.platform.service_cluster:
         name: Automation Hub
-        service_type: "hub"
+        service_type: "{{ hub_st.id }}"
       register: hub_sc
+
+    - name: Create EDA Service Type
+      ansible.platform.service_type:
+        name: "{{ test_id }}eda"
+        ping_url: "/api/ping/"
+        login_path: "/api/login/"
+        logout_path: "/api/logout/"
+        service_index_path: "/api/service-index/"
+      register: eda_st
 
     - name: "Create EDA Service Cluster"
       ansible.platform.service_cluster:
         name: Event Driven Automation
-        service_type: "eda"
+        service_type: "{{ eda_st.id }}"
       register: eda_sc
     # </Service Clusters> ----------------------------
 
     # <Service Keys> ----------------------------
+    - name: Create Service Key 1 with check mode
+      ansible.platform.service_key:
+        name: "{{ name_prefix }}-Key 1"
+        is_active: true
+        service_cluster: "{{ controller_sc.id }}"
+        algorithm: HS384
+        secret: "gateway-secret"
+        mark_previous_inactive: false
+      check_mode: true
+
+    - name: Search for Service Key 1
+      ansible.builtin.set_fact:
+        item_that_should_not_exist: "{{ lookup('ansible.platform.gateway_api', 'service_keys',
+          query_params={'name': '{{ name_prefix }}-Key 1'}, **connection_info) }}"
+
+    - name: Assert that Service Key 1 does not exist
+      ansible.builtin.assert:
+        that:
+          - item_that_should_not_exist is not defined or item_that_should_not_exist | length == 0
+        fail_msg: "Service Key '{{ name_prefix }}-Key 1' exists in the system!"
+
     - name: Create Service Key 1
       ansible.platform.service_key:
         name: "{{ name_prefix }}-Key 1"
@@ -209,4 +257,15 @@
         - "hub_sc"
         - "eda_sc"
       when: "item in vars and 'id' in vars[item]"
+
+    - name: Delete Service Types
+      ansible.platform.service_type:
+        name: "{{ item.name }}"
+        state: absent
+      loop: "{{ gateway_service_types }}"
+      vars:
+        gateway_service_types:
+          - name: "{{ test_id }}controller"
+          - name: "{{ test_id }}hub"
+          - name: "{{ test_id }}eda"
 ...

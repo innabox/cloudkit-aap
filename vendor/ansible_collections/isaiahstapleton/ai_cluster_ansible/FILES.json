@@ -15,13 +15,6 @@
    "format": 1
   },
   {
-   "name": "README.md",
-   "ftype": "file",
-   "chksum_type": "sha256",
-   "chksum_sha256": "3bedbca188b424d203ad04d4819f9b1a84801fb3e7bb1522ff036aaecbf3296d",
-   "format": 1
-  },
-  {
    "name": "files",
    "ftype": "dir",
    "chksum_type": null,
@@ -1748,6 +1741,13 @@
    "ftype": "file",
    "chksum_type": "sha256",
    "chksum_sha256": "467eac89e054c19453c924c28e3498241ecafe92f5c0d7882a56861b7f9c88de",
+   "format": 1
+  },
+  {
+   "name": "README.md",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "3bedbca188b424d203ad04d4819f9b1a84801fb3e7bb1522ff036aaecbf3296d",
    "format": 1
   }
  ],

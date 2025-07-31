@@ -1,8 +1,19 @@
 # Ansible Platform Collection
 
-## Changelog for v2.5.20250326
+## Changelog for v2.5.20250702
 
-* Added support for setting URL for applications
+* Ensures that modules in the ansible.platform collection accepts `AAP_*` variable for authentication.
+* Adds missing option in the ansible.platform.user module to allow setting the `is_platform_auditor` flag on a user.
+* Allows running `ansible.platform` collection modules in check mode.
+* Fixes `ansible.platform.user` not adding users to organizations.
+* Specify correct `aap_*` parameters in `ansible.platform.token` module examples.
+* Fixes an example task in `ansible.platform.token` module.
+* Adds a new section in the collection README describing how to authenticate to AAP from the playbook.
+* Allows `object_id` field in `role_user_assignment` module to accept a list of items.
+* Updated documentation examples for the `ansible.platform.settings` module with tested tasks examples.
+* Improve documentation and examples for `ansible.platform.authenticator` and `ansible.platform.authenticator_map` modules.
+* Allows role assignments using `object_ansible_id` in the `role_user_assignment` module.
+* Improve documentation and examples related to `object_id` and `object_ansible_id` parameters in `role_user_assignment` module.
 
 ## Description
 
@@ -53,6 +64,21 @@ This collection can be used to automate to the creation of resources inside of t
 
 Adding services (Controller, Event Driven Automation, Automation) can also be done with this collection. Nodes for those services can also be added. 
 
+## Authenticating to AAP in a playbook
+
+Connecting to AAP requires specifying authentication variables (the ones prefixed by `aap_` here) in the task. Alternatively, `AAP_` environment variables can also be set. For a complete list of authentication variables that can be used, please refer to the module specific documentations.
+
+```yaml
+- name: Manage AAP
+  hosts: localhost
+  tasks:
+    - name: Example for auth
+      ansible.platform.<module-name>:
+        your-module-parameters: parameter-values
+        aap_hostname: your-hostname
+        aap_username: your-username
+        aap_password: your-password
+```
 
 ## Testing
 
@@ -77,7 +103,7 @@ Please refer to Ansible Automation Platform Documentation for further documentat
 
 ## License Information
 
-[GPLv3](https://github.com/ansible/aap-gateway/ansible_platform_collection/COPYING)
+[GPLv3](https://github.com/ansible/ansible.platform/blob/devel/COPYING)
 
 ## Authors
 
@@ -87,3 +113,4 @@ Please refer to Ansible Automation Platform Documentation for further documentat
 [Brennan Paciorek](https://github.com/brennanpaciorek)
 [John Westcott](https://github.com/john-westcott-iv)
 [Jessica Steurer](https://github.com/jay-steurer)
+[Bryan Havenstein](https://github.com/bhavenst)

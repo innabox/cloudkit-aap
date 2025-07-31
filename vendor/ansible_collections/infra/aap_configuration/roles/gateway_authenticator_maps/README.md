@@ -50,7 +50,7 @@ This also speeds up the overall role.
 
 ### Authenticator Map Arguments
 
-Options for the `authenticator_maps_list` variable:
+Options for the `gateway_authenticator_maps` variable:
 
 | Variable Name       |  Default Value  | Required | Type | Description                                                                                                                                 |
 |:--------------------|:---------------:|:--------:|:----:|:--------------------------------------------------------------------------------------------------------------------------------------------|
@@ -88,8 +88,6 @@ Options for the `authenticator_maps_list` variable:
       "map_type": "organization",
       "organization": "Organization 1",
       "triggers": {
-        "always": {},
-        "never": {}
       },
       "order": 10
     },
@@ -101,7 +99,6 @@ Options for the `authenticator_maps_list` variable:
       "organization": "Organization 1",
       "role": "Team Member",
       "triggers": {
-        "never": {}
       }
     }
   ]
@@ -123,8 +120,6 @@ gateway_authenticator_maps:
   organization: Organization 1
   role: Organization Admin
   triggers:
-    always: { }
-    never: { }
     groups:
       has_or:
       - has_or_11
@@ -151,10 +146,10 @@ gateway_authenticator_maps:
 
 ### Run Playbook
 
-File name: [manage_data.yml](../../README.md#example-ansible-playbook) can be found in the top-level README.
+File name: [configure_aap.yml](https://github.com/redhat-cop/infra.aap_configuration/blob/devel/playbooks/configure_aap.yml) can be found in the top level playbooks directory.
 
 ```shell
-ansible-playbook manage_data.yml -e @data/gateway_authenticator_maps.yml
+ansible-playbook infra.aap_configuration.configure_aap.yml
 ```
 
 ## License

@@ -24,11 +24,42 @@
       gateway_validate_certs: "{{ gateway_validate_certs | bool }}"
 
   block:
+    - name: Create Controller Service Type with check mode
+      ansible.platform.service_type:
+        name: "{{ test_id }}controller"
+        ping_url: "/api/ping/"
+        login_path: "/api/login/"
+        logout_path: "/api/logout/"
+        service_index_path: "/api/service-index/"
+      check_mode: true
+
+    - name: Search for the Controller Service Type and assert that it does not exist
+      ansible.builtin.set_fact:
+        item_that_should_not_exist: "{{ lookup('ansible.platform.gateway_api', 'service_clusters',
+          query_params={'name': '{{ test_id }}controller'}, **connection_info) }}"
+
+    - name: Assert that Route does not exist
+      ansible.builtin.assert:
+        that:
+          - item_that_should_not_exist is not defined or item_that_should_not_exist | length == 0
+        fail_msg: "Service Type '{{ test_id }}controller' exists in the system!"
+
+    - name: Create Controller Service Type
+      ansible.platform.service_type:
+        name: "{{ test_id }}controller"
+        ping_url: "/api/ping/"
+        login_path: "/api/login/"
+        logout_path: "/api/logout/"
+        service_index_path: "/api/service-index/"
+      register: controller_st
+
     - name: Create Controller Service Cluster
       ansible.platform.service_cluster:
         name: "{{ test_id }}-Automation-Controller"
-        service_type: "controller"
+        service_type: "{{ controller_st.id }}"
         health_check_interval_seconds: 1162
+        dns_discovery_type: LOGICAL_DNS
+        dns_lookup_family: V4_ONLY
       register: controller_sc
 
     - name: Assert that we created the controller service cluster
@@ -39,7 +70,7 @@
     - name: Recreate Controller Service Cluster
       ansible.platform.service_cluster:
         name: "{{ test_id }}-Automation-Controller"
-        service_type: "controller"
+        service_type: "{{ controller_st.id }}"
         health_check_interval_seconds: 1162
       register: recreate_controller_sc
 
@@ -48,11 +79,21 @@
         that:
           - recreate_controller_sc is not changed
 
+    - name: Create Automation Hub Service Type
+      ansible.platform.service_type:
+        name: "{{ test_id }}hub"
+        ping_url: "/api/ping/"
+        login_path: "/api/login/"
+        logout_path: "/api/logout/"
+        service_index_path: "/api/service-index/"
+      register: hub_st
+
     - name: Create Automation Hub Cluster
       ansible.platform.service_cluster:
         name: "{{ test_id }}-Automation-Hub"
-        service_type: "hub"
+        service_type: "{{ hub_st.id }}"
         health_check_interval_seconds: 1162
+        upstream_hostname: hub.com
       register: hub_sc
 
     - name: Assert that we created the hub service cluster
@@ -60,10 +101,19 @@
         that:
           - hub_sc is changed
 
-    - name: Create gateway Service Cluster
+    - name: Create EDA Service Type
+      ansible.platform.service_type:
+        name: "{{ test_id }}eda"
+        ping_url: "/api/ping/"
+        login_path: "/api/login/"
+        logout_path: "/api/logout/"
+        service_index_path: "/api/service-index/"
+      register: eda_st
+
+    - name: Create EDA Service Cluster
       ansible.platform.service_cluster:
-        name: "{{ test_id }}-AAP-gateway"
-        service_type: "eda"
+        name: "{{ test_id }}-AAP-eda"
+        service_type: "{{ eda_st.id }}"
         health_check_interval_seconds: 333
       register: eda_sc
 
@@ -86,7 +136,8 @@
     - name: Assert exists works with parameters
       ansible.platform.service_cluster:
         name: "{{ hub_sc.name }}"
-        service_type: "hub"
+        service_type: "{{ hub_st.id }}"
+        upstream_hostname: hub.com
         state: exists
       register: exists_hub
 
@@ -153,7 +204,7 @@
     - name: Change a service type
       ansible.platform.service_cluster:
         name: "{{ eda_sc.id }}"
-        service_type: "controller"
+        service_type: "{{ controller_st.id }}"
       register: change_eda_sc
 
     - name: Assert that we can change a cluster type
@@ -161,6 +212,17 @@
         that:
           - change_eda_sc is changed
           - change_eda_sc.id == eda_sc.id
+
+    - name: Change auth_type for a service
+      ansible.platform.service_cluster:
+        name: "{{ eda_sc.id }}"
+        auth_type: "TOKEN"
+      register: change_eda_auth_type
+
+    - name: Assert that auth_type is changed
+      ansible.builtin.assert:
+        that:
+          - change_eda_auth_type is changed
 
   always:
     # Always Cleanup
@@ -173,4 +235,15 @@
         - "hub_sc"
         - "eda_sc"
       when: "item in vars and 'id' in vars[item]"
+
+    - name: Delete Service Types
+      ansible.platform.service_type:
+        name: "{{ item.name }}"
+        state: absent
+      loop: "{{ gateway_service_types }}"
+      vars:
+        gateway_service_types:
+          - name: "{{ test_id }}controller"
+          - name: "{{ test_id }}hub"
+          - name: "{{ test_id }}eda"
 ...
