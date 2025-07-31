@@ -28,3 +28,10 @@
     external_access_state: present
     external_access_namespace: "{{ cluster_working_namespace }}"
     external_access_ingress_internal_network: "network-{{ cluster_order.metadata.name }}"
+
+- name: Retrieve kubeconfig
+  ansible.builtin.include_role:
+    name: retrieve_kubeconfig
+  vars:
+    retrieve_kubeconfig_cluster_name: "{{ hosted_cluster_name }}"
+    retrieve_kubeconfig_namespace: "{{ cluster_working_namespace }}"
