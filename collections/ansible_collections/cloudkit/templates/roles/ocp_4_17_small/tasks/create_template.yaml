@@ -10,6 +10,8 @@
       ssh_public_key: "{{ template_parameters.ssh_public_key }}"
     hosted_cluster_node_requests: "{{ cluster_order.spec.nodeRequests|unique(attribute='resourceClass') }}"
     hosted_cluster_state: present
+  tags:
+    - install
 
 - name: Create cluster infrastructure
   ansible.builtin.import_role:
@@ -19,6 +21,8 @@
     cluster_infra_name: "{{ cluster_order.metadata.name }}"
     cluster_infra_namespace: "{{ cluster_working_namespace }}"
     cluster_infra_node_requests: "{{ cluster_order.spec.nodeRequests|unique(attribute='resourceClass') }}"
+  tags:
+    - install
 
 - name: Configure port forwarding
   ansible.builtin.import_role:
@@ -28,3 +32,14 @@
     external_access_state: present
     external_access_namespace: "{{ cluster_working_namespace }}"
     external_access_ingress_internal_network: "network-{{ cluster_order.metadata.name }}"
+  tags:
+    - install
+
+- name: Retrieve kubeconfig
+  ansible.builtin.include_role:
+    name: retrieve_kubeconfig
+  vars:
+    retrieve_kubeconfig_cluster_name: "{{ hosted_cluster_name }}"
+    retrieve_kubeconfig_namespace: "{{ cluster_working_namespace }}"
+  tags:
+    - install
