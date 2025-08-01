@@ -26,6 +26,7 @@ controller_templates:  # noqa: var-naming[no-role-prefix]
       - "{{ aap_prefix }}-cluster-fulfillment-ig"
     allow_simultaneous: true
     ask_variables_on_launch: true
+    job_tags: "untagged,install"
     verbosity: 0
   - name: "{{ aap_prefix }}-delete-hosted-cluster"
     project: "{{ aap_prefix }}"
@@ -70,6 +71,7 @@ controller_templates:  # noqa: var-naming[no-role-prefix]
       - "{{ aap_prefix }}-create-hosted-cluster-post-install-ig"
     allow_simultaneous: true
     ask_variables_on_launch: true
+    job_tags: "untagged,post-install"
     verbosity: 0
 
 controller_job_template_surveys:  # noqa: var-naming[no-role-prefix]

@@ -1,6 +1,8 @@
 - name: Create cluster
   ansible.builtin.import_role:
     name: cloudkit.templates.ocp_4_17_small
+  tags:
+    - install
 
 - name: Create github oauth secret
   kubernetes.core.k8s:
@@ -14,6 +16,8 @@
         namespace: openshift-config
       data:
         clientSecret: "{{ template_parameters.github_client_secret | b64encode }}"
+  tags:
+    - post-install
 
 - name: Patch oauth
   kubernetes.core.k8s:
@@ -35,3 +39,5 @@
               name: "github-oauth-secret"
             teams: "{{ template_parameters.github_teams|default([]) }}"
             organizations: "{{ template_parameters.github_organizations|default([]) }}"
+  tags:
+    - post-install
