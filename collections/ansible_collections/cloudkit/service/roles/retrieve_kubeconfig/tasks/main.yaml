@@ -1,5 +1,5 @@
 ---
-- name: Wait for HostedCluster to be ready
+- name: Wait for kubeconfig to be available
   kubernetes.core.k8s_info:
     api_version: hypershift.openshift.io/v1beta1
     kind: HostedCluster
@@ -7,45 +7,17 @@
     name: "{{ retrieve_kubeconfig_cluster_name }}"
   register: hosted_cluster_info
   until:
-    - hosted_cluster_info.resources | length == 1
-    - hosted_cluster_info.resources[0].status is defined
-    - hosted_cluster_info.resources[0].status.conditions is defined
-    - hosted_cluster_info.resources[0].status.conditions | selectattr('type', 'equalto', 'Available') | selectattr('status', 'equalto', 'True') | list | length > 0
+    - hosted_cluster_info.resources[0].status.kubeconfig.name is defined
   retries: "{{ retrieve_kubeconfig_wait_retries }}"
   delay: "{{ retrieve_kubeconfig_wait_delay }}"
-  failed_when: false
 
-- name: Fail if HostedCluster is not available
-  ansible.builtin.fail:
-    msg: "HostedCluster {{ retrieve_kubeconfig_cluster_name }} is not available after {{ retrieve_kubeconfig_wait_retries * retrieve_kubeconfig_wait_delay }} seconds"
-  when:
-    - hosted_cluster_info.resources | length == 0 or
-      hosted_cluster_info.resources[0].status is not defined or
-      hosted_cluster_info.resources[0].status.conditions is not defined or
-      hosted_cluster_info.resources[0].status.conditions | selectattr('type', 'equalto', 'Available') | selectattr('status', 'equalto', 'True') | list | length == 0
-
-- name: Wait for admin kubeconfig secret to be available
+- name: Retrieve kubeconfig secret
   kubernetes.core.k8s_info:
     api_version: v1
     kind: Secret
     namespace: "{{ retrieve_kubeconfig_namespace }}"
-    name: "{{ retrieve_kubeconfig_cluster_name }}-admin-kubeconfig"
+    name: "{{ hosted_cluster_info.resources[0].status.kubeconfig.name }}"
   register: admin_kubeconfig_secret
-  until:
-    - admin_kubeconfig_secret.resources | length == 1
-    - admin_kubeconfig_secret.resources[0].data is defined
-    - admin_kubeconfig_secret.resources[0].data.kubeconfig is defined
-  retries: "{{ retrieve_kubeconfig_wait_retries }}"
-  delay: "{{ retrieve_kubeconfig_wait_delay }}"
-  failed_when: false
-
-- name: Fail if admin kubeconfig secret is not available
-  ansible.builtin.fail:
-    msg: "Admin kubeconfig secret {{ retrieve_kubeconfig_cluster_name }}-admin-kubeconfig is not available after {{ retrieve_kubeconfig_wait_retries * retrieve_kubeconfig_wait_delay }} seconds"
-  when:
-    - admin_kubeconfig_secret.resources | length == 0 or
-      admin_kubeconfig_secret.resources[0].data is not defined or
-      admin_kubeconfig_secret.resources[0].data.kubeconfig is not defined
 
 - name: Extract and decode kubeconfig
   ansible.builtin.set_fact:
