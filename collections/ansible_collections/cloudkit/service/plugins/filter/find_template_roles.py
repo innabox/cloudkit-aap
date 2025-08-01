@@ -173,9 +173,9 @@ class Template(Base):
     name: str = pydantic.Field(..., exclude=True)
     title: str | None = None
     description: str | None = None
+    node_sets: list[NodeRequest] = pydantic.Field(validation_alias="default_node_request")
 
     # Not currently supported by the API
-    default_node_request: list[NodeRequest] = pydantic.Field(..., exclude=True)
     allowed_resource_classes: list[str] | None = pydantic.Field(None, exclude=True)
 
     parameters: list[TemplateParameter]
