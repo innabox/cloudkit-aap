@@ -21,6 +21,7 @@ dependencies:
     - python3.12-devel
     - git-core
     - bind-utils
+    - krb5-devel
 
 options:
   package_manager_path: /usr/bin/dnf
