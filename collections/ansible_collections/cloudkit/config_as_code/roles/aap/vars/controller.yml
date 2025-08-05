@@ -144,7 +144,6 @@ controller_instance_groups:  # noqa: var-naming[no-role-prefix]
       apiVersion: v1
       kind: Pod
       metadata:
-        namespace: fulfillment-aap
         labels:
           ansible_job: ''
       spec:
@@ -206,7 +205,6 @@ controller_instance_groups:  # noqa: var-naming[no-role-prefix]
       apiVersion: v1
       kind: Pod
       metadata:
-        namespace: fulfillment-aap
         labels:
           ansible_job: ''
       spec:
@@ -257,7 +255,6 @@ controller_instance_groups:  # noqa: var-naming[no-role-prefix]
       apiVersion: v1
       kind: Pod
       metadata:
-        namespace: fulfillment-aap
         labels:
           ansible_job: ''
       spec:

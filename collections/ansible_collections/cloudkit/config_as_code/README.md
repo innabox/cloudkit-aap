@@ -149,7 +149,7 @@ oc apply -f aap.yml
 
 ### Apply CloudKit configuration on AAP instance
 
-#### Config-as-code configauration
+#### Config-as-code configuration
 
 Create the secrets required for the configuration of AAP:
 
@@ -169,7 +169,7 @@ oc create secret generic <your AAP organization>-<your AAP project>-config-as-co
 oc create secret generic <your AAP organization>-<your AAP project>-config-as-code-manifest-ig --from-file=license.zip=/path/to/license.zip` -n fulfillment-aap
 ```
 
-#### Fulfilment operations configuration
+#### Fulfillment operations configuration
 
 Create service account and secret required for the fulfillment operations, such
 as AWS and OpenStack credentials:
