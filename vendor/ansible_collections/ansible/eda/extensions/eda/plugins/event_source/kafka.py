@@ -94,6 +94,14 @@ options:
     description:
       - Password for SASL PLAIN authentication.
     type: str
+  sasl_kerberos_service_name:
+    description:
+      - The service name, default is kafka
+    type: str
+  sasl_kerberos_domain_name:
+    description:
+      - The kerberos REALM
+    type: str
 """
 
 EXAMPLES = r"""
@@ -129,7 +137,7 @@ async def main(  # pylint: disable=R0914
     password = args.get("password")
     check_hostname = args.get("check_hostname", True)
     verify_mode = args.get("verify_mode", "CERT_REQUIRED")
-    group_id = args.get("group_id", None)
+    group_id = args.get("group_id")
     offset = args.get("offset", "latest")
     encoding = args.get("encoding", "utf-8")
     security_protocol = args.get("security_protocol", "PLAINTEXT")
@@ -173,6 +181,8 @@ async def main(  # pylint: disable=R0914
         sasl_mechanism=args.get("sasl_mechanism", "PLAIN"),
         sasl_plain_username=args.get("sasl_plain_username"),
         sasl_plain_password=args.get("sasl_plain_password"),
+        sasl_kerberos_service_name=args.get("sasl_kerberos_service_name"),
+        sasl_kerberos_domain_name=args.get("sasl_kerberos_domain_name"),
     )
 
     await kafka_consumer.start()

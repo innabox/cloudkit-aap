@@ -1,30 +1,31 @@
 {
- "collection_info": {
-  "namespace": "isaiahstapleton",
-  "name": "ai_cluster_ansible",
-  "version": "1.0.0",
-  "authors": [
-   "Isaiah Stapleton <istaplet@redhat.com>"
-  ],
-  "readme": "README.md",
-  "tags": [],
-  "description": "your collection description",
-  "license": [
-   "GPL-2.0-or-later"
-  ],
-  "license_file": null,
-  "dependencies": {},
-  "repository": "https://github.com/IsaiahStapleton/ai-cluster-ansible.git",
-  "documentation": "http://docs.example.com",
-  "homepage": "http://example.com",
-  "issues": "http://example.com/issue/tracker"
- },
- "file_manifest_file": {
-  "name": "FILES.json",
-  "ftype": "file",
-  "chksum_type": "sha256",
-  "chksum_sha256": "030de5dd7489b503ee71a4fd76a6554ac3cf1b8c7b524d8ee0e4056cf4dd424e",
+  "collection_info": {
+    "namespace": "isaiahstapleton",
+    "name": "ai_cluster_ansible",
+    "version": "1.0.0",
+    "authors": [
+      "Isaiah Stapleton <istaplet@redhat.com>"
+    ],
+    "readme": "README.md",
+    "tags": [],
+    "description": "your collection description",
+    "license": [
+      "GPL-2.0-or-later"
+    ],
+    "license_file": null,
+    "dependencies": {},
+    "repository": "https://github.com/IsaiahStapleton/ai-cluster-ansible.git",
+    "documentation": "http://docs.example.com",
+    "homepage": "http://example.com",
+    "issues": "http://example.com/issue/tracker"
+  },
+  "file_manifest_file": {
+    "name": "FILES.json",
+    "ftype": "file",
+    "chksum_type": "sha256",
+    "chksum_sha256": "030de5dd7489b503ee71a4fd76a6554ac3cf1b8c7b524d8ee0e4056cf4dd424e",
+    "format": 1
+  },
   "format": 1
- },
- "format": 1
 }
+

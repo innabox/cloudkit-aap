@@ -1,0 +1,45 @@
+download_url: https://console.redhat.com/api/automation-hub/v3/plugin/ansible/content/published/collections/artifacts/ansible-eda-2.8.2.tar.gz
+format_version: 1.0.0
+name: eda
+namespace: ansible
+server: https://console.redhat.com/api/automation-hub/content/published/
+signatures:
+- pubkey_fingerprint: 39B5D759361A97464C564A8FE1A4BD708A828AAD
+  pulp_created: '2025-07-23T07:48:23.903175Z'
+  signature: '-----BEGIN PGP SIGNATURE-----
+
+    Version: GnuPG v1
+
+
+    iQIcBAABCAAGBQJogJO6AAoJEOGkvXCKgoqt6L8QAKMdcU+fqryKTsBT4ZGIHfD/
+
+    rmlQcr3S61X3fw3k0yPr3JKhkMcWpr/wXJC7+T8y00EGM/zT+74iNcrBP3U6RQaM
+
+    wEkypOMTFWdvOt8XNSlhzbcxCFyGLcVZlD5kqV3DRi0EUgZ7qEm81k+lTACHIaZ6
+
+    dfmvXR4CqxcKWxJagBSytOaUEjWJ4d6DX6CLo0rB2B8XHE4lD2woEcFe8xtBfQBA
+
+    1Nd0w6CW5bfxMDctoRFuQIirssWiUH/mNc0AgFumZ3ws/5HumNZrb4HW43gGkRUi
+
+    pSkO12tUPTqhrNdGhUrLooI6dEo/N35bNxHs92F+PpP7fMPDwX13w1IRns4JQZCh
+
+    jwNkcVHATVhS1ordlmZEkAlXUnKxq4RxoESYWh4JpKrnK7aJxNzH+rdWwSCrdg7M
+
+    xi7gcNvuYJHXToLAs4WxKxxNcgB8d0PMa75D3ivsJLH6CWGs7P+oVScOaYsO6T8r
+
+    1ck5HcemVKHQ4EyL49GiJMqOroWTCP4rDkf83r723B3q7OpxMYl5Ui351vH1qdlN
+
+    BgcLcrlvie7/OsnkwonsAElPJqtGoqYQxXAmrM4KAMuEeDp2rzoLK0FKayQZu7aP
+
+    +8R2ga/aRrxGdBOKTO0eKbTYo+JCdwhSakaBAdo42MD3dcpT5IijolG36iP2cazL
+
+    HCnnyii9wthenDkFyjDS
+
+    =hgFr
+
+    -----END PGP SIGNATURE-----
+
+    '
+  signing_service: null
+version: 2.8.2
+version_url: /api/automation-hub/content/published/v3/plugin/ansible/content/published/collections/index/ansible/eda/versions/2.8.2/

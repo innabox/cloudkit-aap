@@ -7,10 +7,6 @@ An Ansible Role to create/update/remove Credential Types on Ansible Controller.
 ## Requirements
 
 ansible-galaxy collection install -r tests/collections/requirements.yml to be installed
-Currently:
-  awx.awx
-  or
-  ansible.controller
 
 ## Variables
 
@@ -112,7 +108,7 @@ The role will strip the double space between the curly bracket in order to provi
 
 ### Input and Injector Schema
 
-The following details the data format to use for inputs and injectors. These can be in either YAML or JSON For the most up to date information and more details see [Custom Credential Types - Ansible Controller Documentation](https://docs.ansible.com/automation-controller/latest/html/userguide/credential_plugins.html)
+The following details the data format to use for inputs and injectors. These can be in either YAML or JSON For the most up to date information and more details see [Custom Credential Types - Ansible Controller Documentation](https://docs.redhat.com/en/documentation/red_hat_ansible_automation_platform/2.5/html/using_automation_execution/assembly-controller-custom-credentials)
 
 #### Input Schema
 
