@@ -19,4 +19,4 @@
     - name: Post-install hosted cluster configuration
       ansible.builtin.include_role:
         name: "{{ template_id }}"
-        tasks_from: post_install.yaml
+        tasks_from: "post_install"

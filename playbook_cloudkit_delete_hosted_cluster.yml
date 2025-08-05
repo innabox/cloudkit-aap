@@ -27,5 +27,4 @@
     - name: Call the selected template
       ansible.builtin.include_role:
         name: "{{ template_id }}"
-      vars:
-        cluster_template_state: absent
+        tasks_from: "delete"

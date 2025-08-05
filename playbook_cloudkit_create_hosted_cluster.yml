@@ -82,8 +82,7 @@
         - name: Call the selected template
           ansible.builtin.include_role:
             name: "{{ template_id }}"
-          vars:
-            cluster_template_state: present
+            tasks_from: "install"
 
       rescue:
 

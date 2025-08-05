@@ -1,7 +1,4 @@
-- name: Create cluster
-  ansible.builtin.import_role:
-    name: cloudkit.templates.ocp_4_17_small
-
+---
 - name: Create github oauth secret
   kubernetes.core.k8s:
     state: present
