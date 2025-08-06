@@ -25,6 +25,9 @@ variables:
 - `AAP_PROJECT_GIT_URI`: the repository that is behind the AAP project
 - `AAP_PROJECT_GIT_BRANCH`: the git branch to use
 - `AAP_EE_IMAGE`: the registry URL to the execution environment image
+- `CLOUDKIT_FULFILLMENT_SERVICE_URI`: URI of the CloudKit fulfillment service
+- `CLOUDKIT_TEMPLATE_COLLECTIONS`: a comma-separated list of collections
+  containing CloudKit templates
 - `LICENSE_MANIFEST_PATH`: path to the license manifest file in order to
   register the AAP instance, your can allocate one from your [Red Hat
   account](https://access.redhat.com/management/subscription_allocations)
@@ -162,13 +165,14 @@ AAP_PROJECT_NAME=<the project name to be create in AAP>
 AAP_PROJECT_GIT_URI=<the git repository where your playbooks and rulebooks live>
 AAP_PROJECT_GIT_BRANCH=<the git branch to be tracked>
 AAP_EE_IMAGE=<the execution environment image>
+CLOUDKIT_FULFILLMENT_SERVICE_URI=<URI of the CloudKit fulfillment service>
+CLOUDKIT_TEMPLATE_COLLECTIONS=<collections containing CloudKit templates>
 EOF
 
 oc apply -f config-as-code -n fulfillment-aap
 oc create secret generic <your AAP organization>-<your AAP project>-config-as-code-ig --from-env-file=config-as-code -n fulfillment-aap
 oc create secret generic <your AAP organization>-<your AAP project>-config-as-code-manifest-ig --from-file=license.zip=/path/to/license.zip` -n fulfillment-aap
 ```
-
 #### Fulfillment operations configuration
 
 Create service account and secret required for the fulfillment operations, such

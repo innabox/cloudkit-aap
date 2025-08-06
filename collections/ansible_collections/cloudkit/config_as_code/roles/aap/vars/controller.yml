@@ -58,6 +58,9 @@ controller_templates:  # noqa: var-naming[no-role-prefix]
     execution_environment: "{{ aap_prefix }}-ee"
     instance_groups:
       - "{{ aap_prefix }}-publish-templates-ig"
+    extra_vars:
+      cloudkit_fulfillment_service_uri: "{{ cloudkit_fulfillment_service_uri }}"
+      cloudkit_template_collections: "{{ cloudkit_template_collections }}"
     verbosity: 0
 
 # Create cluster fulfillment and confg-as-code inventories. They are the same
