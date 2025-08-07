@@ -17,6 +17,7 @@ AAP itself, and one used for cluster fulfillment operations.
 In order to reconcile the configuration of AAP, we require the following
 variables:
 
+- `AAP_INSTANCE_NAME`: the name used to create your AAP instance
 - `AAP_HOSTNAME`: URL of the AAP instance to be configured
 - `AAP_VALIDATE_CERTS`: true if the SSL certificate behind `AAP_HOSTNAME`
   should be checked
@@ -58,7 +59,8 @@ These variables must be defined in a secret named:
 namespace where AAP is deployed.
 
 The cluster fulfillment needs to access the Kube API of the cluster it runs on,
-so we expect a service account `cloudkit-sa` to exists with enough rights (TBD).
+so we expect a service account ``${AAP_ORGANIZATION_NAME}-${AAP_PROJECT_NAME}-cloudkit-sa`
+to exists with enough rights (TBD).
 
 ## Deploy a local AAP installation using CRC
 
@@ -133,7 +135,7 @@ metadata:
 apiVersion: aap.ansible.com/v1alpha1
 kind: AnsibleAutomationPlatform
 metadata:
-  name: fulfillment
+  name: <your AAP instance name>
   namespace: fulfillment-aap
 spec:
   image_pull_policy: IfNotPresent
@@ -158,6 +160,7 @@ Create the secrets required for the configuration of AAP:
 
 ```
 cat << EOF > config-as-code
+AAP_INSTANCE_NAME=<name for the AAP instance>
 AAP_HOSTNAME=<your AAP hostname>
 AAP_VALIDATE_CERTS=true
 AAP_ORGANIZATION_NAME=<the organization name to be created in AAP>
@@ -184,19 +187,19 @@ cat << EOF > cloudkit_sa.yml
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: cloudkit-sa
+  name: <your AAP organization>-<your AAP project>-cloudkit-sa
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: cloudkit-sa
+  name: <your AAP organization>-<your AAP project>-cloudkit-sa
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
   name: cluster-admin
 subjects:
   - kind: ServiceAccount
-    name: cloudkit-sa
+    name: <your AAP organization>-<your AAP project>-cloudkit-sa
     namespace: fulfillment-aap
 EOF
 
@@ -223,7 +226,7 @@ cat << EOF > template-publisher
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: template-publisher
+  name: <your AAP organization>-<your AAP project>-template-publisher
   namespace: fulfillment-aap
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -248,7 +251,7 @@ roleRef:
   name: create-controller-token
 subjects:
   - kind: ServiceAccount
-    name: template-publisher
+    name: <your AAP organization>-<your AAP project>-template-publisher
     namespace: fulfillment-aap
 EOF
 
@@ -285,7 +288,7 @@ spec:
             - name: AAP_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: fulfillment-admin-password
+                  name: <your AAP instance name>-admin-password
                   key: password
               - name: LICENSE_MANIFEST_PATH
                 value: /var/secrets/config-as-code-manifest/license.zip
