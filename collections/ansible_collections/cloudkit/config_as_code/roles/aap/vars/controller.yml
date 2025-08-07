@@ -150,7 +150,7 @@ controller_instance_groups:  # noqa: var-naming[no-role-prefix]
         labels:
           ansible_job: ''
       spec:
-        serviceAccountName: cloudkit-sa
+        serviceAccountName: {{ aap_prefix }}-cloudkit-sa
         affinity:
           podAntiAffinity:
             preferredDuringSchedulingIgnoredDuringExecution:
@@ -261,7 +261,7 @@ controller_instance_groups:  # noqa: var-naming[no-role-prefix]
         labels:
           ansible_job: ''
       spec:
-        serviceAccountName: template-publisher
+        serviceAccountName: {{ aap_prefix }}-template-publisher
         affinity:
           podAntiAffinity:
             preferredDuringSchedulingIgnoredDuringExecution:
