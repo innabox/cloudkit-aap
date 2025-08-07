@@ -240,7 +240,7 @@ controller_instance_groups:  # noqa: var-naming[no-role-prefix]
               - name: AAP_PASSWORD
                 valueFrom:
                   secretKeyRef:
-                    name: fulfillment-admin-password
+                    name: {{ aap_instance_name }}-admin-password
                     key: password
               - name: LICENSE_MANIFEST_PATH
                 value: /var/secrets/config-as-code/license.zip

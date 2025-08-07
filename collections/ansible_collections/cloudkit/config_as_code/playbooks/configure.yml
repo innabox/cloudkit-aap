@@ -5,6 +5,7 @@
   gather_facts: false
 
   vars:
+    aap_instance_name: "{{ lookup('env', 'AAP_INSTANCE_NAME') }}"
     aap_hostname: "{{ lookup('env', 'AAP_HOSTNAME') }}"
     aap_username: "{{ lookup('env', 'AAP_USERNAME') }}"
     aap_password: "{{ lookup('env', 'AAP_PASSWORD') }}"
