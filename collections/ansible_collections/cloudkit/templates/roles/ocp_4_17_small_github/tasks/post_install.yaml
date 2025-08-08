@@ -1,19 +1,4 @@
-- name: Create cluster
-  ansible.builtin.import_role:
-    name: cloudkit.templates.ocp_4_17_small
-
-- name: Get admin kubeconfig secret
-  kubernetes.core.k8s_info:
-    api_version: v1
-    kind: Secret
-    namespace: "{{ cluster_working_namespace }}"
-    name: "{{ cluster_order.metadata.name }}-admin-kubeconfig"
-  register: admin_kubeconfig_secret
-
-- name: Extract kubeconfig
-  ansible.builtin.set_fact:
-    admin_kubeconfig: "{{ admin_kubeconfig_secret.resources[0].data.kubeconfig | b64decode | from_yaml }}"
-
+---
 - name: Create github oauth secret
   kubernetes.core.k8s:
     state: present
