@@ -284,6 +284,13 @@ controller_instance_groups:  # noqa: var-naming[no-role-prefix]
               - name: kube-api-access
                 mountPath: /var/run/secrets/kubernetes.io/serviceaccount
                 readOnly: true
+            env:
+              - name: CLOUDKIT_PUBLISH_TEMPLATES_NAMESPACE
+                fieldRef:
+                  fieldPath: metadata.namespace
+              - name: CLOUDKIT_PUBLISH_TEMPLATES_SERVICE_ACCOUNT
+                fieldRef:
+                  fieldPath: spec.serviceAccountName
         volumes:
           - name: kube-api-access
             projected:
