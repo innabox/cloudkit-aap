@@ -17,12 +17,13 @@ AAP itself, and one used for cluster fulfillment operations.
 In order to reconcile the configuration of AAP, we require the following
 variables:
 
-- `AAP_INSTANCE_NAME`: the name used to create your AAP instance
 - `AAP_HOSTNAME`: URL of the AAP instance to be configured
 - `AAP_VALIDATE_CERTS`: true if the SSL certificate behind `AAP_HOSTNAME`
   should be checked
 - `AAP_ORGANIZATION_NAME`: the AAP organization that should be created
 - `AAP_PROJECT_NAME`: the name of the project to be created
+- `AAP_PREFIX`: prefix used to create and reference objects in AAP
+   configuration (defaults to `${AAP_ORGANIZATION_NAME}-${AAP_PROJECT_NAME}`)
 - `AAP_PROJECT_GIT_URI`: the repository that is behind the AAP project
 - `AAP_PROJECT_GIT_BRANCH`: the git branch to use
 - `AAP_EE_IMAGE`: the registry URL to the execution environment image
@@ -34,12 +35,11 @@ variables:
   account](https://access.redhat.com/management/subscription_allocations)
 
 These variables must be defined in a secret named
-`${AAP_ORGANIZATION_NAME}-${AAP_PROJECT_NAME}-config-as-code-ig` in the
-namespace where AAP is deployed.
+`${AAP_PREFIX}-config-as-code-ig` in the namespace where AAP is deployed.
 
 The content of license manifest file must be set in a secret named
-`${AAP_ORGANIZATION_NAME}-${AAP_PROJECT_NAME}-config-as-code-manifest-ig` as
-`license.zip` in the namespace where AAP is deployed.
+`${AAP_PREFIX}-config-as-code-manifest-ig` as `license.zip` in the namespace
+where AAP is deployed.
 
 Note: since the container group is configured to run in the same namespace as
 the AAP instance, the admin credentials to log against AAP are injected into
@@ -55,12 +55,11 @@ use case, e.g.:
 - ...whatever in needed
 
 These variables must be defined in a secret named:
-`${AAP_ORGANIZATION_NAME}-${AAP_PROJECT_NAME}-cluster-fulfillment-ig` in the
-namespace where AAP is deployed.
+`${AAP_PREFIX}-cluster-fulfillment-ig` in the namespace where AAP is deployed.
 
 The cluster fulfillment needs to access the Kube API of the cluster it runs on,
-so we expect a service account ``${AAP_ORGANIZATION_NAME}-${AAP_PROJECT_NAME}-cloudkit-sa`
-to exists with enough rights (TBD).
+so we expect a service account `${AAP_PREFIX}-cloudkit-sa` to exists with
+enough rights.
 
 ## Deploy a local AAP installation using CRC
 
@@ -135,7 +134,7 @@ metadata:
 apiVersion: aap.ansible.com/v1alpha1
 kind: AnsibleAutomationPlatform
 metadata:
-  name: <your AAP instance name>
+  name: fulfillment
   namespace: fulfillment-aap
 spec:
   image_pull_policy: IfNotPresent
@@ -160,11 +159,11 @@ Create the secrets required for the configuration of AAP:
 
 ```
 cat << EOF > config-as-code
-AAP_INSTANCE_NAME=<name for the AAP instance>
 AAP_HOSTNAME=<your AAP hostname>
 AAP_VALIDATE_CERTS=true
 AAP_ORGANIZATION_NAME=<the organization name to be created in AAP>
 AAP_PROJECT_NAME=<the project name to be create in AAP>
+AAP_PREFIX=aap-prefix
 AAP_PROJECT_GIT_URI=<the git repository where your playbooks and rulebooks live>
 AAP_PROJECT_GIT_BRANCH=<the git branch to be tracked>
 AAP_EE_IMAGE=<the execution environment image>
@@ -173,8 +172,8 @@ CLOUDKIT_TEMPLATE_COLLECTIONS=<collections containing CloudKit templates>
 EOF
 
 oc apply -f config-as-code -n fulfillment-aap
-oc create secret generic <your AAP organization>-<your AAP project>-config-as-code-ig --from-env-file=config-as-code -n fulfillment-aap
-oc create secret generic <your AAP organization>-<your AAP project>-config-as-code-manifest-ig --from-file=license.zip=/path/to/license.zip` -n fulfillment-aap
+oc create secret generic aap-prefix-config-as-code-ig --from-env-file=config-as-code -n fulfillment-aap
+oc create secret generic aap-prefix-config-as-code-manifest-ig --from-file=license.zip=/path/to/license.zip` -n fulfillment-aap
 ```
 #### Fulfillment operations configuration
 
@@ -187,19 +186,19 @@ cat << EOF > cloudkit_sa.yml
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: <your AAP organization>-<your AAP project>-cloudkit-sa
+  name: aap-prefix-cloudkit-sa
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: <your AAP organization>-<your AAP project>-cloudkit-sa
+  name: aap-prefix-cloudkit-sa
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
   name: cluster-admin
 subjects:
   - kind: ServiceAccount
-    name: <your AAP organization>-<your AAP project>-cloudkit-sa
+    name: aap-prefix-cloudkit-sa
     namespace: fulfillment-aap
 EOF
 
@@ -212,7 +211,7 @@ OS_PROJECT_NAME=...
 ...
 EOF
 
-oc create secret generic <your AAP organization>-<your AAP project>-cluster-fulfillment-ig --from-env-file=fufillment_creds -n fulfillment-aap
+oc create secret generic aap-prefix-cluster-fulfillment-ig --from-env-file=fufillment_creds -n fulfillment-aap
 ```
 
 #### Template publisher configuration
@@ -226,7 +225,7 @@ cat << EOF > template-publisher
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: <your AAP organization>-<your AAP project>-template-publisher
+  name: aap-prefix-template-publisher
   namespace: fulfillment-aap
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -251,7 +250,7 @@ roleRef:
   name: create-controller-token
 subjects:
   - kind: ServiceAccount
-    name: <your AAP organization>-<your AAP project>-template-publisher
+    name: aap-prefix-template-publisher
     namespace: fulfillment-aap
 EOF
 
@@ -281,14 +280,14 @@ spec:
             - "cloudkit.config_as_code.configure"
           envFrom:
             - secretRef:
-                name: <your AAP organization>-<your AAP project>-config-as-code-ig
+                name: aap-prefix-config-as-code-ig
           env:
             - name: AAP_USERNAME
               value: admin
             - name: AAP_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: <your AAP instance name>-admin-password
+                  name: fulfillment-admin-password
                   key: password
               - name: LICENSE_MANIFEST_PATH
                 value: /var/secrets/config-as-code-manifest/license.zip
@@ -299,7 +298,7 @@ spec:
         volumes:
           - name: config-as-code-manifest-volume
             secret:
-              secretName: <your AAP organization>-<your AAP project>-config-as-code-manifest-ig
+              secretName: aap-prefix-config-as-code-manifest-ig
       restartPolicy: Never
   backoffLimit: 4
 EOF

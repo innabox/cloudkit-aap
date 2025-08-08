@@ -12,6 +12,7 @@
     aap_validate_certs: "{{ lookup('env', 'AAP_VALIDATE_CERTS') | bool }}"
     aap_organization_name: "{{ lookup('env', 'AAP_ORGANIZATION_NAME') }}"
     aap_project_name: "{{ lookup('env', 'AAP_PROJECT_NAME') }}"
+    aap_prefix: "{{ lookup('env', 'AAP_PREFIX') | default(aap_organization_name + '-' + aap_project_name) }}"
     aap_project_git_uri: "{{ lookup('env', 'AAP_PROJECT_GIT_URI')}}"
     aap_project_git_branch: "{{ lookup('env', 'AAP_PROJECT_GIT_BRANCH') }}"
     aap_ee_image: "{{ lookup('env', 'AAP_EE_IMAGE') }}"
