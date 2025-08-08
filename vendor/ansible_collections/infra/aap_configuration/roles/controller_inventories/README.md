@@ -7,10 +7,6 @@ An Ansible Role to create/update/remove inventories on Ansible Controller.
 ## Requirements
 
 ansible-galaxy collection install -r tests/collections/requirements.yml to be installed
-Currently:
-  awx.awx
-  or
-  ansible.controller
 
 ## Variables
 
@@ -127,6 +123,13 @@ The role will strip the double space between the curly bracket in order to provi
       "description": "created by Ansible Playbook",
       "kind": "smart",
       "host_filter": "name__icontains=localhost"
+    },
+    {
+      "name": "All RHEL 7 Hosts",
+      "organization": "Default",
+      "description": "created by Ansible Playbook - Constructed Inventory",
+      "kind": "constructed",
+      "input_inventories": "Satellite"
     }
   ]
 }
@@ -146,7 +149,11 @@ controller_inventories:
     description: created by Ansible Playbook
     kind: smart
     host_filter:  "name__icontains=localhost"
-
+  - name: All RHEL 7 Hosts
+    organization: Default
+    description: created by Ansible Playbook - Constructed Inventory
+    kind: constructed
+    input_inventories: Satellite
 ```
 
 ## Playbook Examples

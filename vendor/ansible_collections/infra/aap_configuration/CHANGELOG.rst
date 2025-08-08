@@ -4,6 +4,49 @@ infra.aap\_configuration Release Notes
 
 .. contents:: Topics
 
+v3.4.1
+======
+
+Bugfixes
+--------
+
+- Reverts the aap_token being applied to hub roles. Instead hub_token is now used.
+
+v3.4.0
+======
+
+Minor Changes
+-------------
+
+- Defaulted the new variables 'hub_state', 'hub_path_prefix', 'hub_token' to the old ones for backward compatibility.
+- Dependent collections added to galaxy.yml
+- Moved some docs to the docs folder
+- Removed all references to awx.awx because we no longer support that officially
+- Renamed 'ah_state', 'ah_path_prefix', 'ah_token' variables to 'hub_state', 'hub_path_prefix', 'hub_token' in hub roles.
+- Updated links to use FQDN vs short links so they will work outside of github
+
+Bugfixes
+--------
+
+- The 'auto_migrate_users_to' field can't be 'false' as default. Omit instead.
+- changes the 2 places that authenticator_maps_list was used vs gateway_authenticator_maps
+
+v3.3.0
+======
+
+Minor Changes
+-------------
+
+- The creation order for the workflows is 'workflow -> workflow nodes'. The deletion order is the same one, but in reverse.
+- added auto_migrate_users_to option to the gateway authenticator role.
+- added dependencies to our galaxy.yml, the lowest version has been set to collections compatible with AAP 2.5, which this collection already requires, This should not be a breaking or major change for anyone, just codifies our dependencies, now that a bug in console.redhat.com has been fixed.
+- added scm_branch option to the eda_projects role, this requires ansible.eda >2.8.0, and fixes
+
+Breaking Changes / Porting Guide
+--------------------------------
+
+- In order to comply with stricter linting rules and to make the collection more explicit, controller roles were chagned to be explicit with ansible.controller. awx.awx was not compatible and this just codifies the change. Please transition to using the certified ansible.controller collection to continue using this collection.
+
 v3.2.0
 ======
 
