@@ -16,8 +16,6 @@
     aap_project_git_uri: "{{ lookup('env', 'AAP_PROJECT_GIT_URI')}}"
     aap_project_git_branch: "{{ lookup('env', 'AAP_PROJECT_GIT_BRANCH') }}"
     aap_ee_image: "{{ lookup('env', 'AAP_EE_IMAGE') }}"
-    cloudkit_fulfillment_service_uri: "{{ lookup('env', 'CLOUDKIT_FULFILLMENT_SERVICE_URI') }}"
-    cloudkit_template_collections: "{{ lookup('env', 'CLOUDKIT_TEMPLATE_COLLECTIONS') | split(',') }}"
 
   tasks:
     - name: Configure AAP

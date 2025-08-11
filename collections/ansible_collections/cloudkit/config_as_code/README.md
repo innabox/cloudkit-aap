@@ -27,9 +27,6 @@ variables:
 - `AAP_PROJECT_GIT_URI`: the repository that is behind the AAP project
 - `AAP_PROJECT_GIT_BRANCH`: the git branch to use
 - `AAP_EE_IMAGE`: the registry URL to the execution environment image
-- `CLOUDKIT_FULFILLMENT_SERVICE_URI`: URI of the CloudKit fulfillment service
-- `CLOUDKIT_TEMPLATE_COLLECTIONS`: a comma-separated list of collections
-  containing CloudKit templates
 - `LICENSE_MANIFEST_PATH`: path to the license manifest file in order to
   register the AAP instance, your can allocate one from your [Red Hat
   account](https://access.redhat.com/management/subscription_allocations)
@@ -236,7 +233,10 @@ metadata:
 rules:
   - apiGroups: [""]
     resources: ["serviceaccounts/token"]
-    resourceNames: ["controller"] # here is the name of the service account to authenticate against the fulfillment-service
+
+    # here is the name of the service account to authenticate against the
+    # fulfillment-service
+    resourceNames: ["controller"]
     verbs: ["create"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -252,6 +252,23 @@ subjects:
   - kind: ServiceAccount
     name: aap-prefix-template-publisher
     namespace: fulfillment-aap
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: my-prefix-publish-templates-ig
+  namespace: fulfillment-aap
+data:
+  CLOUDKIT_FULFILLMENT_SERVICE_URI: https://fulfillment-service.example.uri
+  CLOUDKIT_TEMPLATE_COLLECTIONS: cloudkit.templates,example.templates
+
+  # this is the service account used to login against fulfillment service (see
+  # RBAC above)
+  CLOUDKIT_PUBLISH_TEMPLATES_SERVICE_ACCOUNT: controller
+
+  # this is the namespace where the service account used to login against
+  # fulfillment service lives ("controller" in this example)
+  CLOUDKIT_PUBLISH_TEMPLATES_NAMESPACE: innabox
 EOF
 
 oc apply -f template-publisher

@@ -2,8 +2,11 @@
   hosts: localhost
   gather_facts: false
   vars:
+    publish_templates_namespace_default: "{{ lookup('env', 'CLOUDKIT_PUBLISH_TEMPLATES_NAMESPACE_DEFAULT') }}"
+    publish_templates_namespace: "{{ lookup('env', 'CLOUDKIT_PUBLISH_TEMPLATES_NAMESPACE') | default(publish_templates_namespace_default) }}"
     publish_templates_service_account: "{{ lookup('env', 'CLOUDKIT_PUBLISH_TEMPLATES_SERVICE_ACCOUNT') }}"
-    publish_templates_namespace: "{{ lookup('env', 'CLOUDKIT_PUBLISH_TEMPLATES_NAMESPACE') }}"
+    cloudkit_fulfillment_service_uri: "{{ lookup('env', 'CLOUDKIT_FULFILLMENT_SERVICE_URI') }}"
+    cloudkit_template_collections: "{{ lookup('env', 'CLOUDKIT_TEMPLATE_COLLECTIONS') | split(',') }}"
   tasks:
   - name: Get client token
     ansible.builtin.command:
@@ -11,7 +14,7 @@
         oc create token -n {{ publish_templates_namespace }}
         {{ publish_templates_service_account }}
         --duration=10m
-    register: innabox_client_token
+    register: fulfillment_service_client_token
     changed_when: false
 
   - name: Discover templates
@@ -22,4 +25,4 @@
     ansible.builtin.include_role:
       name: cloudkit.service.publish_templates
     vars:
-      cloudkit_fulfillment_service_token: "{{ innabox_client_token.stdout }}"
+      cloudkit_fulfillment_service_token: "{{ fulfillment_service_client_token.stdout }}"

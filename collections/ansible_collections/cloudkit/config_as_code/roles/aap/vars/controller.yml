@@ -58,9 +58,6 @@ controller_templates:  # noqa: var-naming[no-role-prefix]
     execution_environment: "{{ aap_prefix }}-ee"
     instance_groups:
       - "{{ aap_prefix }}-publish-templates-ig"
-    extra_vars:
-      cloudkit_fulfillment_service_uri: "{{ cloudkit_fulfillment_service_uri }}"
-      cloudkit_template_collections: "{{ cloudkit_template_collections }}"
     verbosity: 0
 
 # Create cluster fulfillment and confg-as-code inventories. They are the same
@@ -284,13 +281,13 @@ controller_instance_groups:  # noqa: var-naming[no-role-prefix]
               - name: kube-api-access
                 mountPath: /var/run/secrets/kubernetes.io/serviceaccount
                 readOnly: true
+            envFrom:
+              - configMapRef:
+                  name: {{ aap_prefix }}-publish-templates-ig
             env:
-              - name: CLOUDKIT_PUBLISH_TEMPLATES_NAMESPACE
+              - name: CLOUDKIT_PUBLISH_TEMPLATES_NAMESPACE_DEFAULT
                 fieldRef:
                   fieldPath: metadata.namespace
-              - name: CLOUDKIT_PUBLISH_TEMPLATES_SERVICE_ACCOUNT
-                fieldRef:
-                  fieldPath: spec.serviceAccountName
         volumes:
           - name: kube-api-access
             projected:
