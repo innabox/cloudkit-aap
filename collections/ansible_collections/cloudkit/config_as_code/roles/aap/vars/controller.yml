@@ -147,7 +147,7 @@ controller_instance_groups:  # noqa: var-naming[no-role-prefix]
         labels:
           ansible_job: ''
       spec:
-        serviceAccountName: {{ aap_prefix }}-cloudkit-sa
+        serviceAccountName: cloudkit-sa
         affinity:
           podAntiAffinity:
             preferredDuringSchedulingIgnoredDuringExecution:
@@ -172,7 +172,7 @@ controller_instance_groups:  # noqa: var-naming[no-role-prefix]
                 readOnly: true
             envFrom:
               - secretRef:
-                  name: {{ aap_prefix }}-cluster-fulfillment-ig
+                  name: cluster-fulfillment-ig
         volumes:
         - name: kube-api-access
           projected:
@@ -230,14 +230,14 @@ controller_instance_groups:  # noqa: var-naming[no-role-prefix]
               - '--private-data-dir=/runner'
             envFrom:
               - secretRef:
-                  name: {{ aap_prefix }}-config-as-code-ig
+                  name: config-as-code-ig
             env:
               - name: AAP_USERNAME
                 value: admin
               - name: AAP_PASSWORD
                 valueFrom:
                   secretKeyRef:
-                    name: {{ aap_instance_name }}-admin-password
+                    name: innabox-aap-admin-password
                     key: password
               - name: LICENSE_MANIFEST_PATH
                 value: /var/secrets/config-as-code/license.zip
@@ -248,7 +248,7 @@ controller_instance_groups:  # noqa: var-naming[no-role-prefix]
         volumes:
           - name: config-as-code-manifest-volume
             secret:
-              secretName: {{ aap_prefix }}-config-as-code-manifest-ig
+              secretName: config-as-code-manifest-ig
   - name: "{{ aap_prefix }}-publish-templates-ig"
     is_container_group: true
     pod_spec_override: |
@@ -258,7 +258,7 @@ controller_instance_groups:  # noqa: var-naming[no-role-prefix]
         labels:
           ansible_job: ''
       spec:
-        serviceAccountName: {{ aap_prefix }}-template-publisher
+        serviceAccountName: template-publisher
         affinity:
           podAntiAffinity:
             preferredDuringSchedulingIgnoredDuringExecution:
@@ -283,7 +283,7 @@ controller_instance_groups:  # noqa: var-naming[no-role-prefix]
                 readOnly: true
             envFrom:
               - configMapRef:
-                  name: {{ aap_prefix }}-publish-templates-ig
+                  name: publish-templates-ig
             env:
               - name: CLOUDKIT_PUBLISH_TEMPLATES_NAMESPACE_DEFAULT
                 fieldRef:

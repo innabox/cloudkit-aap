@@ -22,7 +22,7 @@ variables:
   should be checked
 - `AAP_ORGANIZATION_NAME`: the AAP organization that should be created
 - `AAP_PROJECT_NAME`: the name of the project to be created
-- `AAP_PREFIX`: prefix used to create and reference objects in AAP
+- `AAP_PREFIX`: prefix used to create ressources in AAP
    configuration (defaults to `${AAP_ORGANIZATION_NAME}-${AAP_PROJECT_NAME}`)
 - `AAP_PROJECT_GIT_URI`: the repository that is behind the AAP project
 - `AAP_PROJECT_GIT_BRANCH`: the git branch to use
@@ -32,10 +32,10 @@ variables:
   account](https://access.redhat.com/management/subscription_allocations)
 
 These variables must be defined in a secret named
-`${AAP_PREFIX}-config-as-code-ig` in the namespace where AAP is deployed.
+`config-as-code-ig` in the namespace where AAP is deployed.
 
 The content of license manifest file must be set in a secret named
-`${AAP_PREFIX}-config-as-code-manifest-ig` as `license.zip` in the namespace
+`config-as-code-manifest-ig` as `license.zip` in the namespace
 where AAP is deployed.
 
 Note: since the container group is configured to run in the same namespace as
@@ -52,10 +52,10 @@ use case, e.g.:
 - ...whatever in needed
 
 These variables must be defined in a secret named:
-`${AAP_PREFIX}-cluster-fulfillment-ig` in the namespace where AAP is deployed.
+`cluster-fulfillment-ig` in the namespace where AAP is deployed.
 
 The cluster fulfillment needs to access the Kube API of the cluster it runs on,
-so we expect a service account `${AAP_PREFIX}-cloudkit-sa` to exists with
+so we expect a service account `cloudkit-sa` to exists with
 enough rights.
 
 ## Deploy a local AAP installation using CRC
@@ -169,8 +169,8 @@ CLOUDKIT_TEMPLATE_COLLECTIONS=<collections containing CloudKit templates>
 EOF
 
 oc apply -f config-as-code -n fulfillment-aap
-oc create secret generic aap-prefix-config-as-code-ig --from-env-file=config-as-code -n fulfillment-aap
-oc create secret generic aap-prefix-config-as-code-manifest-ig --from-file=license.zip=/path/to/license.zip` -n fulfillment-aap
+oc create secret generic config-as-code-ig --from-env-file=config-as-code -n fulfillment-aap
+oc create secret generic config-as-code-manifest-ig --from-file=license.zip=/path/to/license.zip` -n fulfillment-aap
 ```
 #### Fulfillment operations configuration
 
@@ -183,19 +183,19 @@ cat << EOF > cloudkit_sa.yml
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: aap-prefix-cloudkit-sa
+  name: cloudkit-sa
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: aap-prefix-cloudkit-sa
+  name: cloudkit-sa
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
   name: cluster-admin
 subjects:
   - kind: ServiceAccount
-    name: aap-prefix-cloudkit-sa
+    name: cloudkit-sa
     namespace: fulfillment-aap
 EOF
 
@@ -208,7 +208,7 @@ OS_PROJECT_NAME=...
 ...
 EOF
 
-oc create secret generic aap-prefix-cluster-fulfillment-ig --from-env-file=fufillment_creds -n fulfillment-aap
+oc create secret generic cluster-fulfillment-ig --from-env-file=fufillment_creds -n fulfillment-aap
 ```
 
 #### Template publisher configuration
@@ -222,7 +222,7 @@ cat << EOF > template-publisher
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: aap-prefix-template-publisher
+  name: template-publisher
   namespace: fulfillment-aap
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -250,7 +250,7 @@ roleRef:
   name: create-controller-token
 subjects:
   - kind: ServiceAccount
-    name: aap-prefix-template-publisher
+    name: template-publisher
     namespace: fulfillment-aap
 ---
 apiVersion: v1
@@ -297,7 +297,7 @@ spec:
             - "cloudkit.config_as_code.configure"
           envFrom:
             - secretRef:
-                name: aap-prefix-config-as-code-ig
+                name: config-as-code-ig
           env:
             - name: AAP_USERNAME
               value: admin
@@ -315,7 +315,7 @@ spec:
         volumes:
           - name: config-as-code-manifest-volume
             secret:
-              secretName: aap-prefix-config-as-code-manifest-ig
+              secretName: config-as-code-manifest-ig
       restartPolicy: Never
   backoffLimit: 4
 EOF
