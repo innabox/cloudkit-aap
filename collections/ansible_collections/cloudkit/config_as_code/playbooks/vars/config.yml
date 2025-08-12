@@ -1,11 +1,12 @@
 ---
+current_namespace: "{{ lookup('file', '/var/run/secrets/kubernetes.io/serviceaccount/namespace') }}"
 aap_instance_name: "{{ lookup('env', 'AAP_INSTANCE_NAME', default='innabox-aap') }}"
 aap_hostname: "{{ lookup('env', 'AAP_HOSTNAME', default='http://' + aap_instance_name) }}"
 aap_username: "{{ lookup('env', 'AAP_USERNAME', default='admin') }}"
 aap_password: "{{ lookup('env', 'AAP_PASSWORD', default=Undefined) }}"
 aap_validate_certs: "{{ lookup('env', 'AAP_VALIDATE_CERTS', default='true') | bool }}"
 aap_organization_name: "{{ lookup('env', 'AAP_ORGANIZATION_NAME', default='innabox') }}"
-aap_project_name: "{{ lookup('env', 'AAP_PROJECT_NAME', default='cloudkit') }}"
+aap_project_name: "{{ lookup('env', 'AAP_PROJECT_NAME', default=current_namespace) }}"
 aap_prefix: "{{ lookup('env', 'AAP_PREFIX', default=aap_organization_name + '-' + aap_project_name) }}"
 aap_project_git_uri: "{{ lookup('env', 'AAP_PROJECT_GIT_URI', default='https://github.com/innabox/cloudkit-aap.git') }}"
 aap_project_git_branch: "{{ lookup('env', 'AAP_PROJECT_GIT_BRANCH', default='main') }}"
