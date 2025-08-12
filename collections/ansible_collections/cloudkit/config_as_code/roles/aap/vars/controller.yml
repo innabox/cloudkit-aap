@@ -79,11 +79,11 @@ controller_job_template_surveys:  # noqa: var-naming[no-role-prefix]
       name: "Create hosted cluster post-install survey"
       description: "Provide kubeconfig for post-install hosted cluster configuration"
       spec:
-        - question_name: "kubeconfig"
+        - question_name: "admin_kubeconfig"
           question_description: "Kubeconfig file content for the hosted cluster"
           required: true
           type: "textarea"
-          variable: "kubeconfig"
+          variable: "admin_kubeconfig"
           min: 0
           max: 65535
           default: ""
