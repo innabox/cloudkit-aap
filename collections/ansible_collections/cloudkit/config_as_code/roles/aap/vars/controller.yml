@@ -231,9 +231,8 @@ controller_instance_groups:  # noqa: var-naming[no-role-prefix]
             envFrom:
               - secretRef:
                   name: config-as-code-ig
+                  optional: true
             env:
-              - name: AAP_USERNAME
-                value: admin
               - name: AAP_PASSWORD
                 valueFrom:
                   secretKeyRef:
@@ -284,6 +283,7 @@ controller_instance_groups:  # noqa: var-naming[no-role-prefix]
             envFrom:
               - configMapRef:
                   name: publish-templates-ig
+                  optional: true
             env:
               - name: CLOUDKIT_PUBLISH_TEMPLATES_NAMESPACE_DEFAULT
                 fieldRef:

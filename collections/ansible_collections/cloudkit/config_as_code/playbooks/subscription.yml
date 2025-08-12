@@ -1,13 +1,10 @@
+---
 - name: Setup subscription
   hosts: localhost
   connection: local
 
-  vars:
-    aap_hostname: "{{ lookup('env', 'AAP_HOSTNAME') }}"
-    aap_username: "{{ lookup('env', 'AAP_USERNAME') }}"
-    aap_password: "{{ lookup('env', 'AAP_PASSWORD') }}"
-    aap_validate_certs: "{{ lookup('env', 'AAP_VALIDATE_CERTS') | bool }}"
-    license_manifest_path: "{{ lookup('env', 'LICENSE_MANIFEST_PATH') }}"
+  vars_files:
+    - vars/config.yml
 
   tasks:
     - name: Enable AAP license

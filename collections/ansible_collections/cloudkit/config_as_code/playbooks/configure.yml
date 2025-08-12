@@ -4,18 +4,8 @@
   connection: local
   gather_facts: false
 
-  vars:
-    aap_instance_name: "{{ lookup('env', 'AAP_INSTANCE_NAME') }}"
-    aap_hostname: "{{ lookup('env', 'AAP_HOSTNAME') }}"
-    aap_username: "{{ lookup('env', 'AAP_USERNAME') }}"
-    aap_password: "{{ lookup('env', 'AAP_PASSWORD') }}"
-    aap_validate_certs: "{{ lookup('env', 'AAP_VALIDATE_CERTS') | bool }}"
-    aap_organization_name: "{{ lookup('env', 'AAP_ORGANIZATION_NAME') }}"
-    aap_project_name: "{{ lookup('env', 'AAP_PROJECT_NAME') }}"
-    aap_prefix: "{{ lookup('env', 'AAP_PREFIX') | default(aap_organization_name + '-' + aap_project_name) }}"
-    aap_project_git_uri: "{{ lookup('env', 'AAP_PROJECT_GIT_URI')}}"
-    aap_project_git_branch: "{{ lookup('env', 'AAP_PROJECT_GIT_BRANCH') }}"
-    aap_ee_image: "{{ lookup('env', 'AAP_EE_IMAGE') }}"
+  vars_files:
+    - vars/config.yml
 
   tasks:
     - name: Configure AAP
