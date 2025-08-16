@@ -2,7 +2,7 @@
  "collection_info": {
   "namespace": "infra",
   "name": "aap_configuration",
-  "version": "3.2.0",
+  "version": "3.4.1",
   "authors": [
    "Andrew Huffman",
    "Adebisi Oyawale @aoyawale",
@@ -24,7 +24,12 @@
    "GPL-3.0-or-later"
   ],
   "license_file": null,
-  "dependencies": {},
+  "dependencies": {
+   "ansible.platform": ">=2.5.0",
+   "ansible.hub": ">=1.0.0",
+   "ansible.controller": ">=4.6.0",
+   "ansible.eda": ">=2.5.0"
+  },
   "repository": "https://github.com/redhat-cop/aap_configuration/",
   "documentation": null,
   "homepage": null,
@@ -34,7 +39,7 @@
   "name": "FILES.json",
   "ftype": "file",
   "chksum_type": "sha256",
-  "chksum_sha256": "29be34c9615b8fa365f99e82b6f1a5e0894f08f942b68787e962ae5445eebd53",
+  "chksum_sha256": "1db34029c48301a3fb8d7d392b897fd9c4feb827bc110d4bcdcf7df507963ae8",
   "format": 1
  },
  "format": 1

@@ -5,7 +5,7 @@
 <!-- markdownlint-disable-line MD033 MD034 --><a href="https://raw.githubusercontent.com/redhat-cop/infra.controller_configuration/devel/docs/aap_config_as_code_public_meeting.ics"><img border="0" alt="Google Calendar invite" width="60" src="https://ssl.gstatic.com/calendar/images/dynamiclogo_2020q4/calendar_20_2x.png"></a>
 <!-- Further CI badges go here as above -->
 
-This Ansible collection allows for easy interaction with AAP via Ansible roles using the modules from the certified collections.
+This Ansible collection allows for easy interaction with AAP 2.5+ via Ansible roles using the modules from the certified collections.
 
 ## Getting Help
 
@@ -41,12 +41,14 @@ collections:
 
 ## Links to other Validated Configuration Collections for Ansible Automation Platform
 
-|                                      Collection Name                                       |                      Purpose                      |
-|:------------------------------------------------------------------------------------------:|:-------------------------------------------------:|
-| [AAP Configuration Extended](https://github.com/redhat-cop/aap_configuration_extended)     | Where other useful roles that don't fit here live |
-| [EE Utilities](https://github.com/redhat-cop/ee_utilities)                                 | Execution Environment creation utilities          |
-| [AAP installation Utilities](https://github.com/redhat-cop/aap_utilities)                  | Ansible Automation Platform Utilities             |
-| [AAP Configuration Template](https://github.com/redhat-cop/aap_configuration_template)     | Configuration Template for this suite             |
+|                                      Collection Name                                                  |                      Purpose                      |
+|:-----------------------------------------------------------------------------------------------------:|:-------------------------------------------------:|
+| [AAP Configuration Extended](https://github.com/redhat-cop/aap_configuration_extended)                | Where other useful roles that don't fit here live |
+| [EE Utilities](https://github.com/redhat-cop/ee_utilities)                                            | Execution Environment creation utilities          |
+| [AAP installation Utilities](https://github.com/redhat-cop/aap_utilities)                             | Ansible Automation Platform Utilities             |
+| [AAP Configuration Template](https://github.com/redhat-cop/aap_configuration_template)                | Configuration Template for this suite             |
+| [Ansible Validated Gitlab Workflows](https://gitlab.com/redhat-cop/infra/ansible_validated_workflows) | Gitlab CI/CD Workflows for ansible content        |
+| [Ansible Validated Github Workflows](https://github.com/redhat-cop/infra.ansible_validated_workflows) | Github CI/CD Workflows for ansible content        |
 
 ## Included content
 
@@ -70,39 +72,42 @@ collections:
     # version: ...
 ```
 
-## Conversion from tower_configuration
+## Conversion from controller_configuration
 
-If you were using a version of redhat_cop.tower_configuration, please refer to our Conversion Guide here: [Conversion Guide](docs/CONVERSION_GUIDE.md)
+If you were using a version of infra.controller_configuration, please refer to our Conversion Guide here: [Conversion Guide](https://github.com/redhat-cop/infra.aap_configuration/blob/devel/docs/CONVERSION_GUIDE.md)
 
-## Using this collection
+## Using This Collection
 
-The awx.awx or ansible.controller collection must be invoked in the playbook in order for Ansible to pick up the correct modules to use.
+**Install This Collection:**
+Ensure this collection (`infra.aap_configuration`) is installed:
 
-The following command will invoke the collection playbook. This is considered a starting point for the collection.
+```bash
+ansible-galaxy collection install infra.aap_configuration
+```
+
+**Run Playbooks from This Collection:**
+To execute a playbook packaged within this collection (e.g., `configure_aap.yml`):
 
 ```console
 ansible-playbook infra.aap_configuration.configure_aap.yml
 ```
 
-Otherwise it will look for the modules only in your base installation. If there are errors complaining about "couldn't resolve module/action" this is the most likely cause.
+**Troubleshooting "couldn't resolve module/action":**
+This error usually means the required Ansible collection (e.g., `infra.aap_configuration` or a dependency like ansible.controller) is:
 
-```yaml
-- name: Playbook to configure ansible controller post installation
-  hosts: localhost
-  connection: local
-  vars:
-    aap_validate_certs: true
-  collections:
-    - awx.awx
-```
+* Not installed.
+* Incorrectly named in the playbook.
+* Not found in Ansible's configured collection paths.
+
+Verify installation with `ansible-galaxy collection list` and that you have all the stated dependencies listed above in the requirements section.
 
 Define following vars here, or in `aap_configs/controller_auth.yml`
 `aap_hostname: ansible-controller-web-svc-test-project.example.com`
 
 You can also specify authentication by a combination of either:
 
-- `aap_hostname`, `aap_username`, `aap_password`
-- `aap_hostname`, `aap_token`
+* `aap_hostname`, `aap_username`, `aap_password`
+* `aap_hostname`, `aap_token`
 
 The OAuth2 token is the preferred method. You can obtain the token through the preferred `controller_token` module, or through the
 AWX CLI [login](https://docs.ansible.com/automation-controller/latest/html/controllerapi/authentication.html)
@@ -110,11 +115,11 @@ command.
 
 These can be specified via (from highest to lowest precedence):
 
-- direct role variables as mentioned above
-- environment variables (most useful when running against localhost)
-- a config file path specified by the `controller_config_file` parameter
-- a config file at `~/.controller_cli.cfg`
-- a config file at `/etc/controller/controller_cli.cfg`
+* direct role variables as mentioned above
+* environment variables (most useful when running against localhost)
+* a config file path specified by the `controller_config_file` parameter
+* a config file at `~/.controller_cli.cfg`
+* a config file at `/etc/controller/controller_cli.cfg`
 
 Config file syntax looks like this:
 
@@ -129,7 +134,7 @@ Controller token module would be invoked with this code:
 
 ```yaml
     - name: Create a new token using controller username/password
-      awx.awx.token:
+      ansible.controller.token:
         description: 'Creating token to test controller jobs'
         scope: "write"
         state: present
@@ -150,20 +155,20 @@ The input data can be organized in a very flexible way, letting the user use any
 ### Controller Export
 
 The awx command line can export json that is compatible with this collection.
-In addition there is an awx.awx/ansible.controller export module that use the awx command line to export.
-More details can be found [here](EXPORT_README.md)
+In addition there is an ansible.controller export module that use the awx command line to export.
+[More details can be found here](https://github.com/redhat-cop/infra.aap_configuration/blob/devel/docs/EXPORT_README.md)
 
 ### Template Example
 
-A Template to use in order to start using the collections can be found [here](https://github.com/redhat-cop/aap_configuration_template)
+A [Template to use in order to start using the collections can be found here](https://github.com/redhat-cop/aap_configuration_template)
 
 ### See Also
 
-- [Ansible Using collections](https://docs.ansible.com/ansible/latest/user_guide/collections_using.html) for more details.
+[Ansible Using collections](https://docs.ansible.com/ansible/latest/user_guide/collections_using.html) for more details.
 
 ## Release and Upgrade Notes
 
-For details on changes between versions, please see [the changelog for this collection](CHANGELOG.rst).
+For details on changes between versions, please see [the changelog for this collection](https://github.com/redhat-cop/infra.aap_configuration/blob/devel/CHANGELOG.rst).
 
 ## Releasing, Versioning and Deprecation
 
@@ -182,7 +187,7 @@ Adding the ability to use direct output from the awx export command in the roles
 We welcome community contributions to this collection. If you find problems, please open an issue or create a PR against the [Controller Configuration collection repository](https://github.com/redhat-cop/aap_configuration).
 More information about contributing can be found in our [Contribution Guidelines.](https://github.com/redhat-cop/aap_configuration/blob/devel/.github/CONTRIBUTING.md)
 
-We have a community meeting every 4 weeks. Find the agenda in the [issues](https://github.com/redhat-cop/infra.controller_configuration/issues) and the calendar invitation here:<a target="_blank" href="https://raw.githubusercontent.com/redhat-cop/infra.controller_configuration/devel/docs/aap_config_as_code_public_meeting.ics"><img border="0" alt="Google Calendar invite" width="20" src="https://ssl.gstatic.com/calendar/images/dynamiclogo_2020q4/calendar_20_2x.png"></a>
+<!-- markdownlint-disable-line MD033 MD034 -->We have a community meeting every 4 weeks. Find the agenda in the [issues](https://github.com/redhat-cop/infra.controller_configuration/issues) and the calendar invitation here:<a target="_blank" href="https://raw.githubusercontent.com/redhat-cop/infra.controller_configuration/devel/docs/aap_config_as_code_public_meeting.ics"><img border="0" alt="Google Calendar invite" width="20" src="https://ssl.gstatic.com/calendar/images/dynamiclogo_2020q4/calendar_20_2x.png"></a>
 
 ## Code of Conduct
 
@@ -194,4 +199,4 @@ Please read and familiarize yourself with this document.
 
 GNU General Public License v3.0 or later.
 
-See [LICENSE](LICENSE) to see the full text.
+See [LICENSE](https://github.com/redhat-cop/infra.aap_configuration/blob/devel/LICENSE) to see the full text.
