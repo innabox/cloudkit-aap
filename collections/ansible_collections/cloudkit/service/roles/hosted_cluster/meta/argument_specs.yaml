@@ -17,10 +17,10 @@ argument_specs:
         type: list
         elements: dict
         options:
-          number_of_nodes:
+          numberOfNodes:
             type: int
             required: true
-          resource_class:
+          resourceClass:
             type: str
             required: true
       hosted_cluster_settings:
