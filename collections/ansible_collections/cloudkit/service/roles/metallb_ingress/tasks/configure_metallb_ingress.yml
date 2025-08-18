@@ -56,9 +56,11 @@
         name: metallb
         namespace: "{{ metallb_namespace }}"
   register: metallb_ingress_instance
+
+  # retry once every 30 seconds for 30 minutes
   until: metallb_ingress_instance is successful
-  retries: 20
-  delay: 5
+  retries: 60
+  delay: 30
 
 - name: Create metallb ip address pool
   kubernetes.core.k8s:

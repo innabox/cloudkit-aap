@@ -57,6 +57,28 @@
   - "api.{{ external_access_name }}.{{ external_access_base_domain }}"
   - "api-int.{{ external_access_name }}.{{ external_access_base_domain }}"
 
+- name: Allocate ingress floating ip
+  ansible.builtin.include_role:
+    name: massopencloud.esi.floating_ip
+  vars:
+    floating_ip_state: present
+    floating_ip_name: "{{ external_access_name }}-ingress"  # noqa:var-naming[no-role-prefix]
+
+- name: Set external_access_ingress_floating_ip
+  ansible.builtin.set_fact:
+    external_access_ingress_floating_ip: "{{ allocate_floating_ip_result }}"
+
+- name: Create ingress dns record
+  amazon.aws.route53:
+    state: present
+    zone: "{{ external_access_base_domain }}"
+    record: "*.apps.{{ external_access_name }}.{{ external_access_base_domain }}"
+    type: A
+    ttl: "{{ external_access_dns_ttl }}"
+    value: "{{ external_access_ingress_floating_ip }}"
+    wait: true
+    overwrite: true
+
 - name: Wait until agents are available
   kubernetes.core.k8s_info:
     api_version: agent-install.openshift.io/v1beta1
@@ -107,17 +129,6 @@
     metallb_ingress_admin_kubeconfig: "{{ managed_cluster_admin_kubeconfig }}"
     metallb_ingress_ip: "{{ external_access_metallb_ingress_ip }}"
 
-- name: Allocate ingress floating ip
-  ansible.builtin.include_role:
-    name: massopencloud.esi.floating_ip
-  vars:
-    floating_ip_state: present
-    floating_ip_name: "{{ external_access_name }}-ingress"  # noqa:var-naming[no-role-prefix]
-
-- name: Set external_access_ingress_floating_ip
-  ansible.builtin.set_fact:
-    external_access_ingress_floating_ip: "{{ allocate_floating_ip_result }}"
-
 - name: Create port forwarding for ingress endpoint  # noqa:no-changed-when
   ansible.builtin.include_role:
     name: massopencloud.esi.floating_ip
@@ -130,14 +141,3 @@
     - "80"
     - "443"
     description: "{{ external_access_name }}-ingress"
-
-- name: Create ingress dns record
-  amazon.aws.route53:
-    state: present
-    zone: "{{ external_access_base_domain }}"
-    record: "*.apps.{{ external_access_name }}.{{ external_access_base_domain }}"
-    type: A
-    ttl: "{{ external_access_dns_ttl }}"
-    value: "{{ external_access_ingress_floating_ip }}"
-    wait: true
-    overwrite: true
