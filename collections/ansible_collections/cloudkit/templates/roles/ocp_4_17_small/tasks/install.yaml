@@ -31,7 +31,7 @@
 
 - name: Retrieve kubeconfig
   ansible.builtin.include_role:
-    name: retrieve_kubeconfig
+    name: cloudkit.service.retrieve_kubeconfig
   vars:
     retrieve_kubeconfig_cluster_name: "{{ hosted_cluster_name }}"
     retrieve_kubeconfig_namespace: "{{ cluster_working_namespace }}"
