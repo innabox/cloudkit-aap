@@ -57,10 +57,11 @@
         namespace: "{{ metallb_namespace }}"
   register: metallb_ingress_instance
 
-  # retry once every 30 seconds for 30 minutes
+  # this can fail if the operator install has not completed
+  # retry once every 10 seconds for 10 minutes
   until: metallb_ingress_instance is successful
   retries: 60
-  delay: 30
+  delay: 10
 
 - name: Create metallb ip address pool
   kubernetes.core.k8s:
@@ -76,6 +77,13 @@
         autoAssign: false
         addresses:
           - "{{ metallb_ingress_ip }}-{{ metallb_ingress_ip }}"
+  register: metallb_ingress_ip_address_pool
+
+  # this can fail if the metallb webhook isn't active yet
+  # retry once every 10 seconds for 10 minutes
+  until: metallb_ingress_ip_address_pool is successful
+  retries: 60
+  delay: 10
 
 - name: Create metallb l2advertisement
   kubernetes.core.k8s:

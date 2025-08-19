@@ -79,18 +79,29 @@
     wait: true
     overwrite: true
 
-- name: Wait until agents are available
+- name: Get managed cluster admin kubeconfig secret
   kubernetes.core.k8s_info:
-    api_version: agent-install.openshift.io/v1beta1
-    kind: Agent
+    api_version: v1
+    kind: Secret
+    namespace: "{{ cluster_working_namespace }}"
+    name: "{{ cluster_order.metadata.name }}-admin-kubeconfig"
+  register: managed_cluster_admin_kubeconfig_secret
 
-    namespace: "{{ external_access_agent_namespace }}"
-    label_selectors:
-    - "cloudkit.openshift.io/clusterorder={{ external_access_name }}"
-  register: agents
+- name: Extract managed cluster kubeconfig
+  ansible.builtin.set_fact:
+    managed_cluster_admin_kubeconfig: "{{ managed_cluster_admin_kubeconfig_secret.resources[0].data.kubeconfig | b64decode | from_yaml }}"
 
-  # wait until agents are assigned to the cluster
-  until: agents.resources
+- name: Wait until cluster is available
+  kubernetes.core.k8s_info:
+    api_version: config.openshift.io/v1
+    kind: ClusterOperator
+    name: network
+    kubeconfig: "{{ managed_cluster_admin_kubeconfig }}"
+  register: network_cluster_operator
+
+  # wait until cluster network operator is available
+  until: >-
+    network_cluster_operator.resources[0]|json_query("status.conditions[?type=='Available'].status")|default(["False"])|first == "True"
   retries: "{{ external_access_resource_wait_retries }}"
   delay: "{{ external_access_resource_wait_delay }}"
 
@@ -108,18 +119,6 @@
 - name: Set external_access_metallb_ingress_ip
   ansible.builtin.set_fact:
     external_access_metallb_ingress_ip: "{{ subnet_info.cidr | ansible.utils.nthhost(-10) }}"
-
-- name: Get managed cluster admin kubeconfig secret
-  kubernetes.core.k8s_info:
-    api_version: v1
-    kind: Secret
-    namespace: "{{ cluster_working_namespace }}"
-    name: "{{ cluster_order.metadata.name }}-admin-kubeconfig"
-  register: managed_cluster_admin_kubeconfig_secret
-
-- name: Extract kubeconfig
-  ansible.builtin.set_fact:
-    managed_cluster_admin_kubeconfig: "{{ managed_cluster_admin_kubeconfig_secret.resources[0].data.kubeconfig | b64decode | from_yaml }}"
 
 - name: Configure metallb for ingress
   ansible.builtin.include_role:
