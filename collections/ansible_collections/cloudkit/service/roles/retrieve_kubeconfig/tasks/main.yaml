@@ -21,7 +21,7 @@
 
 - name: Extract and decode kubeconfig
   ansible.builtin.set_fact:
-    admin_kubeconfig: "{{ admin_kubeconfig_secret.resources[0].data.kubeconfig | b64decode }}"
+    admin_kubeconfig: "{{ admin_kubeconfig_secret.resources[0].data.kubeconfig | b64decode | from_yaml }}"
 
 - name: Set kubeconfig stats for access by other playbooks
   ansible.builtin.set_stats:
