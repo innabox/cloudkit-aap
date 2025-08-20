@@ -2,7 +2,6 @@
 - name: Create github oauth secret
   kubernetes.core.k8s:
     state: present
-    kubeconfig: "{{ admin_kubeconfig }}"
     definition:
       apiVersion: v1
       kind: Secret
@@ -15,7 +14,6 @@
 - name: Patch oauth
   kubernetes.core.k8s:
     state: present
-    kubeconfig: "{{ admin_kubeconfig }}"
     definition:
       apiVersion: config.openshift.io/v1
       kind: OAuth
