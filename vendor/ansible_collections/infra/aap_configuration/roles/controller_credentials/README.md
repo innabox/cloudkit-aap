@@ -7,10 +7,6 @@ An Ansible Role to create/update/remove Credentials on Ansible Controller.
 ## Requirements
 
 ansible-galaxy collection install -r tests/collections/requirements.yml to be installed
-Currently:
-  awx.awx
-  or
-  ansible.controller
 
 ## Variables
 
@@ -90,7 +86,7 @@ This also speeds up the overall role.
 
 ### Credential types
 
-To get a list of all the available builtin credential types, checkout the ansible doc's link [here](https://docs.ansible.com/automation-controller/latest/html/userguide/credentials.html#credential-types)
+To get a list of all the available builtin credential types, [checkout the ansible doc's link here](https://docs.ansible.com/automation-controller/latest/html/userguide/credentials.html#credential-types)
 
 ### Standard Credential Data Structure
 
