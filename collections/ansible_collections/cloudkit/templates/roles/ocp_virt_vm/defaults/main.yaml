@@ -1,0 +1,128 @@
+---
+# Default VM configuration values
+
+# VM Resource Defaults
+default_vm_cpu_cores: 2
+default_vm_memory: "2Gi"
+default_vm_disk_size: "20Gi"
+
+# Default OS and Image Configuration
+default_vm_os_type: "linux"
+default_vm_image_source: "quay.io/containerdisks/fedora:latest"
+
+# Alternative image sources for common distributions
+vm_image_registry:
+  fedora_latest: "quay.io/containerdisks/fedora:latest"
+  fedora_39: "quay.io/containerdisks/fedora:39" 
+  ubuntu_22_04: "quay.io/containerdisks/ubuntu:22.04"
+  ubuntu_20_04: "quay.io/containerdisks/ubuntu:20.04"
+  centos_stream_9: "quay.io/containerdisks/centos-stream:9"
+  rhel_9: "registry.redhat.io/ubi9/ubi:latest"
+
+# Network Configuration Defaults
+default_vm_network_type: "pod"
+default_vm_expose_service: false
+default_vm_service_type: "ClusterIP"
+
+# Default service ports for common applications
+default_service_ports:
+  ssh:
+    - name: "ssh"
+      port: 22
+      target_port: 22
+      protocol: "TCP"
+  http:
+    - name: "http" 
+      port: 80
+      target_port: 80
+      protocol: "TCP"
+  https:
+    - name: "https"
+      port: 443
+      target_port: 443  
+      protocol: "TCP"
+  web_dev:
+    - name: "http"
+      port: 80
+      target_port: 8080
+      protocol: "TCP"
+
+# Storage Defaults
+default_storage_class: ""  # Use cluster default
+default_additional_disks: []
+
+# Cloud-init template for basic Linux VM setup
+default_cloud_init_linux:
+  user: fedora
+  password: changeme
+  chpasswd:
+    expire: false
+  ssh_pwauth: true
+  package_upgrade: true
+  packages:
+    - curl
+    - wget
+    - vim
+    - git
+  runcmd:
+    - systemctl enable --now sshd
+
+# Cloud-init template with SSH key setup
+cloud_init_with_ssh_template: |
+  #cloud-config
+  user: fedora
+  ssh_authorized_keys:
+    - {{ template_parameters.ssh_public_key }}
+  package_upgrade: true
+  packages:
+    - curl
+    - wget
+    - vim
+    - git
+  runcmd:
+    - systemctl enable --now sshd
+
+# VM wait timeouts (in seconds)
+vm_creation_timeout: 600
+vm_ready_timeout: 300
+vm_deletion_timeout: 300
+datavolume_timeout: 600
+
+# Labels applied to all VM resources
+default_vm_labels:
+  cloudkit.template: "ocp_virt_vm"
+  cloudkit.component: "virtualization"
+
+# Common VM feature configurations by OS type
+vm_features_by_os:
+  linux:
+    acpi: {}
+    apic: {}
+    smm:
+      enabled: true
+    hyperv:
+      relaxed: {}
+      vapic: {}
+      spinlocks:
+        spinlocks: 8191
+  windows:
+    acpi: {}
+    apic: {}
+    smm:
+      enabled: true
+    hyperv:
+      relaxed: {}
+      vapic: {}
+      spinlocks:
+        spinlocks: 8191
+      synic: {}
+      stimer: {}
+      reset: {}
+      vendor_id:
+        vendor_id: "1234567890ab"
+
+# Device bus types for different disk configurations
+disk_bus_types:
+  performance: "virtio"
+  compatibility: "sata" 
+  scsi: "scsi"

@@ -1,0 +1,60 @@
+---
+- name: Get template parameters from VM order
+  ansible.builtin.set_fact:
+    vm_settings_template_parameters: "{{ vm_order.spec.templateParameters | from_json }}"
+
+- name: Generate random root password if cloud_init_config is missing
+  when: vm_settings_template_parameters.cloud_init_config is not defined
+  block:
+    - name: Generate word-based password
+      ansible.builtin.set_fact:
+        vm_generated_password: "{{ vm_password_adjectives | random }}-{{ vm_password_nouns | random }}"
+
+    - name: Create cloud_init_config with generated password
+      ansible.builtin.set_fact:
+        vm_settings_template_defaults: >-
+          {{ vm_settings_template_defaults | combine({
+              'cloud_init_config': {
+                'user': 'root',
+                'password': vm_generated_password,
+                'chpasswd': {
+                  'expire': false
+                },
+                'ssh_pwauth': true
+              }
+            })
+          }}
+
+    - name: Display generated credentials (for debugging)
+      ansible.builtin.debug:
+        msg: "Generated root password for VM {{ vm_order.metadata.name }}: {{ vm_generated_password }}"
+
+- name: Merge default template parameters with user-provided template parameters
+  ansible.builtin.set_fact:
+    vm_settings_template_defaults: >-
+      {{ vm_settings_template_defaults | combine(vm_settings_template_parameters) }}
+
+- name: Update template parameters in VM order
+  ansible.builtin.set_fact:
+    vm_order: >-
+      {{
+      vm_order | combine({
+        "spec": {
+          "templateParameters": vm_settings_template_defaults|to_json,
+        }
+      }, recursive=true)
+      }}
+
+- name: Store generated credentials in VM order metadata (for retrieval)
+  when: vm_generated_password is defined
+  ansible.builtin.set_fact:
+    vm_order: >-
+      {{
+      vm_order | combine({
+        "metadata": {
+          "annotations": {
+            "cloudkit.openshift.io/root-password": vm_generated_password
+          }
+        }
+      }, recursive=true)
+      }}

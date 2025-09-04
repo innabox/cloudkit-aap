@@ -1,0 +1,68 @@
+---
+apiVersion: fulfillment.cloudkit.io/v1
+kind: VMOrder
+metadata:
+  name: web-server-vm
+  namespace: cloudkit-vms
+  labels:
+    cloudkit.template: ocp_virt_vm
+    cloudkit.component: virtualization
+    workload.type: web-server
+spec:
+  templateID: ocp_virt_vm
+  templateParameters: |
+    {
+      "vm_name": "web-server-01",
+      "vm_cpu_cores": 2,
+      "vm_memory": "4Gi",
+      "vm_disk_size": "40Gi",
+      "vm_image_source": "quay.io/containerdisks/centos-stream:9",
+      "vm_os_type": "linux",
+      "vm_expose_service": true,
+      "vm_service_type": "LoadBalancer",
+      "vm_service_ports": [
+        {
+          "name": "http",
+          "port": 80,
+          "target_port": 80,
+          "protocol": "TCP"
+        },
+        {
+          "name": "https",
+          "port": 443,
+          "target_port": 443,
+          "protocol": "TCP"
+        },
+        {
+          "name": "ssh",
+          "port": 22,
+          "target_port": 22,
+          "protocol": "TCP"
+        }
+      ],
+      "cloud_init_config": {
+        "user": "centos",
+        "ssh_pwauth": false,
+        "package_upgrade": true,
+        "packages": [
+          "nginx",
+          "certbot",
+          "python3-certbot-nginx"
+        ],
+        "runcmd": [
+          "systemctl enable --now nginx",
+          "systemctl enable --now sshd",
+          "firewall-cmd --permanent --add-service=http",
+          "firewall-cmd --permanent --add-service=https",
+          "firewall-cmd --reload"
+        ]
+      },
+      "ssh_public_key": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC... admin@company.com",
+      "additional_disks": [
+        {
+          "name": "www-data",
+          "size": "100Gi",
+          "storage_class": "fast-ssd"
+        }
+      ]
+    }

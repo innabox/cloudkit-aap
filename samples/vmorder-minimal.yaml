@@ -1,0 +1,23 @@
+---
+apiVersion: fulfillment.cloudkit.io/v1
+kind: VMOrder
+metadata:
+  name: minimal-vm
+  namespace: cloudkit-vms
+  labels:
+    cloudkit.template: ocp_virt_vm
+    cloudkit.component: virtualization
+spec:
+  templateID: ocp_virt_vm
+  templateParameters: |
+    {
+      "metadata": {
+        "name": "minimal-test-vm"
+      },
+      "vm_name": "minimal-test-vm",
+      "vm_cpu_cores": 2,
+      "vm_memory": "2Gi",
+      "vm_disk_size": "20Gi",
+      "vm_image_source": "quay.io/containerdisks/fedora:latest",
+      "vm_os_type": "linux"
+    }

@@ -1,0 +1,17 @@
+---
+# Minimal VM order example - will generate random credentials
+vm_order:
+  metadata:
+    name: minimal-vm
+    namespace: vm-orders
+  spec:
+    templateID: ocp_virt_vm
+    templateParameters: |
+      {
+        "vm_name": "minimal-test-vm",
+        "vm_cpu_cores": 2,
+        "vm_memory": "2Gi",
+        "vm_disk_size": "20Gi",
+        "vm_image_source": "quay.io/containerdisks/fedora:latest",
+        "vm_os_type": "linux"
+      }

@@ -1,0 +1,145 @@
+argument_specs:
+  main:
+    options:
+      cluster_order:
+        type: dict
+        required: true
+        description: The cluster order containing VM configuration
+      cluster_working_namespace:
+        type: str
+        required: true
+        description: The namespace where VM resources will be created
+      template_parameters:
+        type: dict
+        description: VM configuration parameters
+        options:
+          vm_name:
+            description: >
+              Name of the virtual machine to create. If not specified,
+              will use the cluster order name.
+            type: str
+            required: false
+          vm_namespace:
+            description: >
+              Kubernetes namespace where the VM will be created.
+              Defaults to cluster_working_namespace.
+            type: str
+            required: false
+          vm_cpu_cores:
+            description: >
+              Number of CPU cores to allocate to the VM.
+            type: int
+            required: true
+            default: 2
+          vm_memory:
+            description: >
+              Amount of memory to allocate to the VM (e.g., "2Gi", "4096Mi").
+            type: str
+            required: true
+            default: "2Gi"
+          vm_disk_size:
+            description: >
+              Size of the root disk for the VM (e.g., "20Gi", "50Gi").
+            type: str
+            required: true
+            default: "20Gi"
+          vm_image_source:
+            description: >
+              Container disk image or data source for the VM root disk.
+              Can be a container image URL or PVC reference.
+            type: str
+            required: true
+            default: "quay.io/containerdisks/fedora:latest"
+          vm_os_type:
+            description: >
+              Operating system type for VM optimization and features.
+            type: str
+            required: false
+            default: "linux"
+            choices:
+              - linux
+              - windows
+          storage_class:
+            description: >
+              StorageClass to use for VM persistent volumes.
+            type: str
+            required: false
+          cloud_init_config:
+            description: >
+              Cloud-init configuration for VM initialization.
+              Can include user data, network config, etc.
+            type: dict
+            required: false
+          vm_expose_service:
+            description: >
+              Whether to create a Kubernetes service to expose the VM.
+            type: bool
+            required: false
+            default: false
+          vm_service_type:
+            description: >
+              Type of Kubernetes service to create if vm_expose_service is true.
+            type: str
+            required: false
+            default: "ClusterIP"
+            choices:
+              - ClusterIP
+              - NodePort
+              - LoadBalancer
+          vm_service_ports:
+            description: >
+              List of ports to expose in the VM service.
+            type: list
+            elements: dict
+            required: false
+            options:
+              name:
+                description: Name of the port
+                type: str
+                required: true
+              port:
+                description: Service port number
+                type: int
+                required: true
+              target_port:
+                description: VM port number to forward to
+                type: int
+                required: true
+              protocol:
+                description: Protocol (TCP/UDP)
+                type: str
+                required: false
+                default: "TCP"
+          additional_disks:
+            description: >
+              List of additional disks to attach to the VM.
+            type: list
+            elements: dict
+            required: false
+            options:
+              name:
+                description: Name of the additional disk
+                type: str
+                required: true
+              size:
+                description: Size of the disk (e.g., "10Gi")
+                type: str
+                required: true
+              storage_class:
+                description: StorageClass for this disk
+                type: str
+                required: false
+          vm_network_type:
+            description: >
+              Network attachment type for the VM.
+            type: str
+            required: false
+            default: "pod"
+            choices:
+              - pod
+              - multus
+          ssh_public_key:
+            description: >
+              SSH public key to inject into the VM for remote access.
+            type: str
+            required: false

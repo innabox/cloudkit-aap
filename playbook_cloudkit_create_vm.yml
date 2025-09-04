@@ -1,0 +1,107 @@
+---
+- name: Create a virtual machine from a VMOrder
+  hosts: localhost
+  gather_facts: false
+
+  vars:
+    vm_order: "{{ ansible_eda.event.payload.payload }}"
+
+  pre_tasks:
+    - name: Debug ansible_eda structure
+      ansible.builtin.debug:
+        var: ansible_eda
+
+    - name: Debug vm_order variable
+      ansible.builtin.debug:
+        var: vm_order
+
+    - name: Set VM order name
+      ansible.builtin.set_fact:
+        vm_order_name: "{{ vm_order.metadata.name }}"
+
+    - name: Set lock name and holder identity
+      ansible.builtin.set_fact:
+        vm_order_lock_name: "{{ vm_order_name }}-lock"
+        vm_order_holder_id: >-
+          {{ vm_order_name }}-{{ awx_job_id | default("unknown") }}-{{
+            lookup('community.general.random_string', special=false, numbers=false, upper=false)
+          }}
+
+    - name: VM order before defaults
+      ansible.builtin.debug:
+        var: vm_order
+
+    - name: Apply default VM settings
+      ansible.builtin.include_role:
+        name: cloudkit.service.vm_settings
+
+    - name: VM order after defaults
+      ansible.builtin.debug:
+        var: vm_order
+
+    - name: Extract VM template info
+      ansible.builtin.include_role:
+        name: cloudkit.service.extract_vm_template_info
+
+    - name: Set VM target namespace
+      ansible.builtin.set_fact:
+        vm_target_namespace: "cloudkit-vms"
+
+  tasks:
+    - name: Create virtual machine
+      block:
+
+        # VM locking mechanism similar to cluster locking
+        - name: Acquire VM lock
+          kubernetes.core.k8s:
+            state: present
+            apply: true
+            server_side_apply:
+              field_manager: "{{ vm_order_holder_id }}"
+            definition:
+              apiVersion: coordination.k8s.io/v1
+              kind: Lease
+              metadata:
+                name: "{{ vm_order_lock_name }}"
+                namespace: "{{ vm_target_namespace }}"
+                labels:
+                  cloudkit.openshift.io/aap-job-id: "job-{{ awx_job_id | default('unknown') }}"
+                  cloudkit.openshift.io/resource-type: "vm"
+              spec:
+                holderIdentity: "{{ vm_order_holder_id }}"
+
+        - name: Set lock_acquired
+          ansible.builtin.set_fact:
+            lock_acquired: true
+
+        - name: Display VM order information
+          ansible.builtin.debug:
+            msg:
+              - "VM order: {{ vm_order_name }}"
+              - "VM target namespace: {{ vm_target_namespace }}"
+              - "Template ID: {{ template_id }}"
+
+        - name: Call the selected VM template
+          ansible.builtin.include_role:
+            name: "{{ template_id }}"
+            tasks_from: "install"
+
+      rescue:
+
+        # Propagate failure from VM creation
+        - name: Propagate failure
+          ansible.builtin.fail:
+            msg: Propagating earlier failure from rescue block
+
+      always:
+
+        - name: Delete VM lock
+          when: lock_acquired | default(false)
+          kubernetes.core.k8s:
+            state: absent
+            definition:
+              apiVersion: coordination.k8s.io/v1
+              kind: Lease
+              metadata:
+                name: "{{ vm_order_lock_name }}"
+                namespace: "{{ vm_target_namespace }}"

@@ -1,0 +1,21 @@
+# Define the display name and description of the template
+title: Virtualed VM Template
+description: >
+  This template provisions a virtual machine using OpenShift Virtualization 
+  (KubeVirt) on an existing OpenShift cluster. It creates the VM with 
+  configurable CPU, memory, and storage resources.
+
+# This sets the nodeRequest field in the ClusterOrder manifest. For VM templates,
+# this represents the underlying OpenShift cluster requirements rather than 
+# bare metal nodes.
+default_node_request:
+- resourceClass: ocp_cluster
+  numberOfNodes: 1
+
+# This declares that for a VM built from this template, only the resource
+# classes listed here may be used. For VMs, this represents different
+# types of OpenShift clusters (standard, GPU-enabled, etc.)
+allowed_resource_classes:
+- ocp_cluster
+- ocp_virt_enabled
+- ocp_gpu_enabled
