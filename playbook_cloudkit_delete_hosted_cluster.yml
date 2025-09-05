@@ -26,3 +26,9 @@
       ansible.builtin.include_role:
         name: "{{ template_id }}"
         tasks_from: "delete"
+
+    - name: Remove finalizer from clusterorder
+      ansible.builtin.include_role:
+        name: cloudkit.service.manage_finalizer
+      vars:
+        manage_finalizer_state: absent

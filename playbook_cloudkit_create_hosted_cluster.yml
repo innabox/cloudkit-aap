@@ -44,7 +44,6 @@
   tasks:
     - name: Create cluster
       block:
-
         # By using service_side_apply and registering this job run as the
         # field manager, we ensure that future attempts to create/modify
         # this lock will fail (because of the conflict setting
@@ -77,13 +76,18 @@
               - "Cluster working namespace: {{ cluster_working_namespace }}"
               - "Template ID: {{ template_id }}"
 
+        - name: Add finalizer to clusterorder
+          include_role:
+            name: cloudkit.service.manage_finalizer
+          vars:
+            manage_finalizer_state: present
+
         - name: Call the selected template
           ansible.builtin.include_role:
             name: "{{ template_id }}"
             tasks_from: "install"
 
       rescue:
-
         # Without this, a failure in the template would show up as
         # a successful job run.
         - name: Propagate failure
@@ -91,7 +95,6 @@
             msg: Propagating earlier failure from rescue block
 
       always:
-
         - name: Delete lock
           when: lock_acquired | default(false)
           kubernetes.core.k8s:
