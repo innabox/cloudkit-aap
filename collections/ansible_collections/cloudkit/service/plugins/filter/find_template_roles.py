@@ -160,6 +160,7 @@ class Metadata(Base):
 
     title: str
     description: str | None = None
+    template_type: str | None = None  # "cluster" or "vm"
     default_node_request: list[NodeRequest]
     allowed_resource_classes: list[str] | None = None
 
@@ -173,6 +174,7 @@ class Template(Base):
     name: str = pydantic.Field(..., exclude=True)
     title: str | None = None
     description: str | None = None
+    template_type: str | None = pydantic.Field(None, exclude=True)  # "cluster" or "vm"
 
     # Not currently supported by the API
     default_node_request: list[NodeRequest] = pydantic.Field(..., exclude=True)
@@ -247,6 +249,7 @@ class Collection(Base):
                     name=path.name,
                     title=metadata.title,
                     description=metadata.description,
+                    template_type=metadata.template_type,
                     default_node_request=metadata.default_node_request,
                     allowed_resource_classes=metadata.allowed_resource_classes,
                     parameters=params,
@@ -294,10 +297,32 @@ def find_template_roles_filter(requested: list[str]):
     ]
 
 
+def find_cluster_template_roles_filter(requested: list[str]):
+    """Transform the return values from find_template_roles into something
+    that makes Ansible happy, but only for cluster templates."""
+    return [
+        role.model_dump(by_alias=True, exclude_none=True)
+        for role in find_template_roles(requested)
+        if role.template_type == "cluster" or role.template_type is None  # Default to cluster for backward compatibility
+    ]
+
+
+def find_vm_template_roles_filter(requested: list[str]):
+    """Transform the return values from find_template_roles into something
+    that makes Ansible happy, but only for VM templates."""
+    return [
+        role.model_dump(by_alias=True, exclude_none=True)
+        for role in find_template_roles(requested)
+        if role.template_type == "vm"
+    ]
+
+
 class FilterModule:
     def filters(self):
         return {
             "find_template_roles": find_template_roles_filter,
+            "find_cluster_template_roles": find_cluster_template_roles_filter,
+            "find_vm_template_roles": find_vm_template_roles_filter,
         }
 
 

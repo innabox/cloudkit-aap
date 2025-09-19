@@ -1,0 +1,71 @@
+---
+apiVersion: fulfillment.cloudkit.io/v1
+kind: VMOrder
+metadata:
+  name: example-vm
+  namespace: cloudkit-vms
+  labels:
+    cloudkit.template: ocp_virt_vm
+    cloudkit.component: virtualization
+    environment: development
+  annotations:
+    description: "Full-featured VM with networking and additional storage"
+spec:
+  templateID: ocp_virt_vm
+  templateParameters: |
+    {
+      "vm_name": "my-test-vm",
+      "vm_cpu_cores": 4,
+      "vm_memory": "4Gi",
+      "vm_disk_size": "30Gi",
+      "vm_image_source": "quay.io/containerdisks/fedora:latest",
+      "vm_os_type": "linux",
+      "vm_expose_service": true,
+      "vm_service_type": "NodePort",
+      "vm_service_ports": [
+        {
+          "name": "ssh",
+          "port": 22,
+          "target_port": 22,
+          "protocol": "TCP"
+        },
+        {
+          "name": "http",
+          "port": 80,
+          "target_port": 8080,
+          "protocol": "TCP"
+        }
+      ],
+      "cloud_init_config": {
+        "user": "fedora",
+        "password": "changeme",
+        "chpasswd": {
+          "expire": false
+        },
+        "ssh_pwauth": true,
+        "package_upgrade": true,
+        "packages": [
+          "curl",
+          "wget",
+          "vim",
+          "git",
+          "httpd"
+        ],
+        "runcmd": [
+          "systemctl enable --now sshd",
+          "systemctl enable --now httpd"
+        ]
+      },
+      "ssh_public_key": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC... user@example.com",
+      "additional_disks": [
+        {
+          "name": "data-disk",
+          "size": "50Gi"
+        },
+        {
+          "name": "logs-disk",
+          "size": "20Gi",
+          "storage_class": "fast-ssd"
+        }
+      ]
+    }

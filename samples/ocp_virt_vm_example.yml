@@ -1,0 +1,70 @@
+---
+# Example configuration for OCP Virtualization VM template
+cluster_order:
+  metadata:
+    name: example-vm
+    namespace: vm-orders
+  spec:
+    templateID: ocp.virt.vm
+    nodeRequests: []
+    templateParameters: |
+      {
+        "vm_name": "my-test-vm",
+        "vm_cpu_cores": 4,
+        "vm_memory": "4Gi",
+        "vm_disk_size": "30Gi",
+        "vm_image_source": "quay.io/containerdisks/fedora:latest",
+        "vm_os_type": "linux",
+        "vm_expose_service": true,
+        "vm_service_type": "NodePort",
+        "vm_service_ports": [
+          {
+            "name": "ssh",
+            "port": 22,
+            "target_port": 22,
+            "protocol": "TCP"
+          },
+          {
+            "name": "http",
+            "port": 80,
+            "target_port": 8080,
+            "protocol": "TCP"
+          }
+        ],
+        "cloud_init_config": {
+          "user": "fedora",
+          "password": "changeme",
+          "chpasswd": {
+            "expire": false
+          },
+          "ssh_pwauth": true,
+          "package_upgrade": true,
+          "packages": [
+            "curl",
+            "wget",
+            "vim",
+            "git",
+            "httpd"
+          ],
+          "runcmd": [
+            "systemctl enable --now sshd",
+            "systemctl enable --now httpd"
+          ]
+        },
+        "ssh_public_key": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC... user@example.com",
+        "additional_disks": [
+          {
+            "name": "data-disk",
+            "size": "50Gi"
+          },
+          {
+            "name": "logs-disk",
+            "size": "20Gi",
+            "storage_class": "fast-ssd"
+          }
+        ]
+      }
+
+cluster_settings_default_credentials_secret_namespace: "default"
+hosted_cluster_default_infraenv: "vm-infra"
+hosted_cluster_default_agent_namespace: "vm-agents"

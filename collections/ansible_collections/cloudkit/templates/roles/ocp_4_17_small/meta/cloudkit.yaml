@@ -3,6 +3,9 @@ title: Simple OpenShift 4.17 Cluster
 description: >
   This template will build a minimally configured OpenShift 4.17 cluster.
 
+# Specify this is a cluster template
+template_type: cluster
+
 # This sets the nodeRequest field in the ClusterOrder manifest. There must be at
 # least one entry in this list.
 default_node_request:

@@ -1,0 +1,19 @@
+---
+- name: Retrieve working vm namespace unless it is already set
+  when: vm_working_namespace is not defined
+  block:
+  - name: Retrieve working vm namespace from VirtualMachine name and namespace
+    kubernetes.core.k8s_info:
+      kind: Namespace
+      label_selectors:
+        - "{{ vm_order_label }}={{ vm_working_namespace_vm_order_name }}"
+    register: vm_working_namespace_list
+
+  - name: Check if the working vm namespace is found
+    ansible.builtin.fail:
+      msg: "Working cluster namespace was not found."
+    when: vm_working_namespace_list.resources | length != 1
+
+  - name: Set working vm namespace as result
+    ansible.builtin.set_fact:
+      vm_working_namespace: "{{ vm_working_namespace_list.resources[0].metadata.name }}"

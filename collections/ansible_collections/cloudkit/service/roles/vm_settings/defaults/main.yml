@@ -1,0 +1,68 @@
+---
+vm_settings_template_defaults: {}
+vm_settings_default_password_length: 16
+
+# Word lists for generating human-readable passwords (like LXC container names)
+vm_password_adjectives:
+  - happy
+  - brave
+  - clever
+  - gentle
+  - swift
+  - bright
+  - calm
+  - bold
+  - kind
+  - wise
+  - quick
+  - smart
+  - cool
+  - warm
+  - safe
+  - strong
+  - light
+  - dark
+  - fast
+  - slow
+  - big
+  - small
+  - tall
+  - short
+  - wide
+  - thin
+  - old
+  - new
+  - fresh
+  - clean
+
+vm_password_nouns:
+  - elephant
+  - tiger
+  - lion
+  - bear
+  - wolf
+  - fox
+  - deer
+  - rabbit
+  - eagle
+  - hawk
+  - owl
+  - dove
+  - swan
+  - duck
+  - whale
+  - shark
+  - dolphin
+  - turtle
+  - frog
+  - snake
+  - horse
+  - cow
+  - sheep
+  - goat
+  - pig
+  - cat
+  - dog
+  - mouse
+  - bird
+  - fish

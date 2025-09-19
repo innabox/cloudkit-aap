@@ -3,9 +3,24 @@ argument_specs:
     options:
       cloudkit_templates:
         type: list
+        description: All templates (deprecated, use cloudkit_cluster_templates)
+      cloudkit_cluster_templates:
+        type: list
+        description: Cluster templates to publish to the cluster_templates endpoint
+      cloudkit_vm_templates:
+        type: list
+        description: VM templates (for future VM template endpoint)
       cloudkit_fulfillment_service_uri:
         type: str
         required: true
       cloudkit_fulfillment_service_token:
         type: str
         required: true
+      publish_templates_api_endpoint:
+        type: str
+        description: API endpoint for cluster templates
+        default: "{{ cloudkit_fulfillment_service_uri }}/api/fulfillment/v1/cluster_templates"
+      publish_vm_templates_api_endpoint:
+        type: str
+        description: API endpoint for VM templates
+        default: "{{ cloudkit_fulfillment_service_uri }}/api/fulfillment/v1/virtual_machine_templates"
