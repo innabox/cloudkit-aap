@@ -2,7 +2,7 @@
 - name: Retrieve working vm namespace unless it is already set
   when: vm_working_namespace is not defined
   block:
-  - name: Retrieve working vm namespace from VirtualMachine name and namespace
+  - name: Retrieve namespace created for the VirtualMachine
     kubernetes.core.k8s_info:
       kind: Namespace
       label_selectors:

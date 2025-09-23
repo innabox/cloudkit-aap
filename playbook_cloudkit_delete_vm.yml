@@ -5,6 +5,7 @@
 
   vars:
     vm_order: "{{ ansible_eda.event.payload }}"
+    vm_settings_cloudkit_finalizer: "cloudkit.openshift.io/finalizer"
 
   pre_tasks:
     - name: Set VM order name
@@ -31,14 +32,20 @@
       ansible.builtin.include_role:
         name: cloudkit.service.extract_vm_template_info
 
-    - name: Set VM target namespace
-      ansible.builtin.set_fact:
-        vm_target_namespace: "cloudkit-vms"
+    - name: Determine target namespace
+      ansible.builtin.include_role:
+        name: cloudkit.service.vm_working_namespace
+
+    - name: Register VM Namespace Object
+      kubernetes.core.k8s_info:
+        api_version: v1
+        kind: Namespace
+        name: "{{ vm_target_namespace }}"
+      register: target_vm_ns_object
 
   tasks:
     - name: Delete virtual machine
       block:
-
         - name: Acquire VM lock for deletion
           kubernetes.core.k8s:
             state: present
@@ -73,15 +80,26 @@
           ansible.builtin.include_role:
             name: "{{ template_id }}"
             tasks_from: "delete"
+          vars:
+            template_parameters:
+              vm_name: "{{ vm_order_name }}"
+              vm_namespace: "{{ vm_target_namespace }}"
 
+        - name: "Remove the finalizer on the VM namespace {{ vm_target_namespace }}"
+          kubernetes.core.k8s:
+            state: present
+            definition:
+              apiVersion: v1
+              kind: Namespace
+              metadata:
+                name: "{{ vm_target_namespace }}"
+                finalizers: "{{ (target_vm_ns_object.resources[0].metadata.finalizers | default([])) | difference([vm_settings_cloudkit_finalizer]) }}"
       rescue:
-
         - name: Propagate failure
           ansible.builtin.fail:
             msg: Propagating earlier failure from rescue block
 
       always:
-
         - name: Delete VM lock
           when: lock_acquired | default(false)
           kubernetes.core.k8s:
