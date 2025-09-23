@@ -19,13 +19,6 @@ argument_specs:
               will generate a random name using adjective-noun pairs.
             type: str
             required: false
-          vm_namespace:
-            description: >
-              Kubernetes namespace where the VM will be created.
-              Defaults to 'vmaas' namespace.
-            type: str
-            required: false
-            default: "vmaas"
           vm_cpu_cores:
             description: >
               Number of CPU cores to allocate to the VM.
