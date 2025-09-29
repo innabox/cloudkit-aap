@@ -1,0 +1,77 @@
+---
+- name: Create a virtual machine from a VMOrder
+  hosts: localhost
+  gather_facts: false
+
+  vars:
+    vm_order: "{{ ansible_eda.event.payload }}"
+    vm_settings_cloudkit_finalizer: "cloudkit.openshift.io/finalizer"
+  pre_tasks:
+    - name: Set VM order name
+      ansible.builtin.set_fact:
+        vm_order_name: "{{ vm_order.metadata.name }}"
+
+    - name: Set lock name and holder identity
+      ansible.builtin.set_fact:
+        vm_order_lock_name: "{{ vm_order_name }}-lock"
+        vm_order_holder_id: >-
+          {{ vm_order_name }}-{{ awx_job_id | default("unknown") }}-{{
+            lookup('community.general.random_string', special=false, numbers=false, upper=false)
+          }}
+
+    - name: VM order before defaults
+      ansible.builtin.debug:
+        var: vm_order
+
+    - name: Apply default VM settings
+      ansible.builtin.include_role:
+        name: cloudkit.service.vm_settings
+
+    - name: VM order after defaults
+      ansible.builtin.debug:
+        var: vm_order
+
+    - name: Extract VM template info
+      ansible.builtin.include_role:
+        name: cloudkit.service.extract_vm_template_info
+
+    - name: Determine working namespace
+      ansible.builtin.include_role:
+        name: cloudkit.service.vm_working_namespace
+
+  tasks:
+    - name: Create virtual machine
+      block:
+        - name: Display VM order information
+          ansible.builtin.debug:
+            msg:
+              - "VM order: {{ vm_order_name }}"
+              - "VM target namespace: {{ vm_target_namespace }}"
+              - "Template ID: {{ template_id }}"
+
+        - name: Register VM Namespace Object
+          kubernetes.core.k8s_info:
+            api_version: v1
+            kind: Namespace
+            name: "{{ vm_target_namespace }}"
+          register: target_vm_ns_object
+
+        - name: "Set the finalizer on the VM namespace {{ vm_target_namespace }}"
+          kubernetes.core.k8s:
+            state: present
+            definition:
+              apiVersion: v1
+              kind: Namespace
+              metadata:
+                name: "{{ vm_target_namespace }}"
+                finalizers: "{{ (target_vm_ns_object.resources[0].metadata.finalizers | default([])) | union([vm_settings_cloudkit_finalizer]) }}"
+
+        - name: Call the selected VM template
+          ansible.builtin.include_role:
+            name: "{{ template_id }}"
+            tasks_from: "create"
+
+      rescue:
+        - name: Propagate failure
+          ansible.builtin.fail:
+            msg: Propagating earlier failure from rescue block
