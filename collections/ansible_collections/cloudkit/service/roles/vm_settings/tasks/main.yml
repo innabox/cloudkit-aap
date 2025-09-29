@@ -1,0 +1,49 @@
+---
+- name: Get template parameters from VM order
+  ansible.builtin.set_fact:
+    vm_settings_template_parameters: "{{ vm_order.spec.templateParameters | from_json }}"
+
+- name: Create cloud_init_config with generated password
+  ansible.builtin.set_fact:
+    vm_settings_template_defaults: >-
+      {{ vm_settings_template_defaults | combine({
+          'cloud_init_config': {
+            'user': 'root',
+            'password': 'changeme',
+            'chpasswd': {
+              'expire': false
+            },
+            'ssh_pwauth': true
+          }
+        })
+      }}
+
+- name: Merge default template parameters with user-provided template parameters
+  ansible.builtin.set_fact:
+    vm_settings_template_defaults: >-
+      {{ vm_settings_template_defaults | combine(vm_settings_template_parameters) }}
+
+- name: Update template parameters in VM order
+  ansible.builtin.set_fact:
+    vm_order: >-
+      {{
+      vm_order | combine({
+        "spec": {
+          "templateParameters": vm_settings_template_defaults|to_json,
+        }
+      }, recursive=true)
+      }}
+
+- name: Store generated credentials in VM order metadata (for retrieval)
+  when: vm_generated_password is defined
+  ansible.builtin.set_fact:
+    vm_order: >-
+      {{
+      vm_order | combine({
+        "metadata": {
+          "annotations": {
+            "cloudkit.openshift.io/root-password": vm_generated_password
+          }
+        }
+      }, recursive=true)
+      }}
