@@ -1,1 +1,2 @@
 publish_templates_api_endpoint: "{{ cloudkit_fulfillment_service_uri }}/api/fulfillment/v1/cluster_templates"
+publish_vm_templates_api_endpoint: "{{ cloudkit_fulfillment_service_uri }}/api/fulfillment/v1/virtual_machine_templates"
