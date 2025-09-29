@@ -20,3 +20,17 @@
         run_job_template:
           name: "{{ job_template_prefix }}-delete-hosted-cluster"
           organization: "{{ job_template_organization }}"
+
+    - name: Create virtual machine
+      condition: event.meta.endpoint == "create-vm"
+      action:
+        run_job_template:
+          name: "{{ job_template_prefix }}-create-vm"
+          organization: "{{ job_template_organization }}"
+
+    - name: Delete virtual machine
+      condition: event.meta.endpoint == "delete-vm"
+      action:
+        run_job_template:
+          name: "{{ job_template_prefix }}-delete-vm"
+          organization: "{{ job_template_organization }}"
