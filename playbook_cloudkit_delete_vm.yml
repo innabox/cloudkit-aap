@@ -5,7 +5,7 @@
 
   vars:
     vm_order: "{{ ansible_eda.event.payload }}"
-    vm_settings_cloudkit_finalizer: "cloudkit.openshift.io/finalizer"
+    vm_settings_cloudkit_finalizer: "cloudkit-aap.openshift.io/finalizer"
 
   pre_tasks:
     - name: Set VM order name
@@ -85,14 +85,22 @@
               vm_name: "{{ vm_order_name }}"
               vm_namespace: "{{ vm_target_namespace }}"
 
-        - name: "Remove the finalizer on the VM namespace {{ vm_target_namespace }}"
+        - name: Delete VM namespace
+          kubernetes.core.k8s:
+            state: absent
+            api_version: v1
+            kind: Namespace
+            name: "{{ vm_target_namespace }}"
+
+        - name: "Remove the finalizer on the Cloudkit VM {{ vm_order.metadata.name }}"
           kubernetes.core.k8s:
             state: present
             definition:
-              apiVersion: v1
-              kind: Namespace
+              apiVersion: cloudkit.openshift.io/v1alpha1
+              kind: VirtualMachine
               metadata:
-                name: "{{ vm_target_namespace }}"
+                namespace: "{{ vm_order.metadata.namespace }}"
+                name: "{{ vm_order.metadata.name }}"
                 finalizers: "{{ (target_vm_ns_object.resources[0].metadata.finalizers | default([])) | difference([vm_settings_cloudkit_finalizer]) }}"
       rescue:
         - name: Propagate failure
