@@ -1,0 +1,123 @@
+---
+- name: Set VM facts
+  ansible.builtin.set_fact:
+    vm_name: "{{ template_parameters.vm_name }}"
+    vm_namespace: "{{ template_parameters.vm_namespace }}"
+    additional_disks: "{{ template_parameters.additional_disks | default([]) }}"
+    vm_expose_service: "{{ template_parameters.vm_expose_service | default(true) }}"
+
+- name: Stop VirtualMachine
+  kubernetes.core.k8s:
+    api_version: kubevirt.io/v1
+    kind: VirtualMachine
+    name: "{{ vm_name }}"
+    namespace: "{{ vm_namespace }}"
+    state: present
+    definition:
+      spec:
+        running: false
+  ignore_errors: true
+
+- name: Wait for VM to stop
+  kubernetes.core.k8s_info:
+    api_version: kubevirt.io/v1
+    kind: VirtualMachine
+    name: "{{ vm_name }}"
+    namespace: "{{ vm_namespace }}"
+    wait: true
+    wait_condition:
+      type: Ready
+      status: "False"
+    wait_timeout: 300
+  ignore_errors: true
+
+- name: Delete VirtualMachine
+  kubernetes.core.k8s:
+    api_version: kubevirt.io/v1
+    kind: VirtualMachine
+    name: "{{ vm_name }}"
+    namespace: "{{ vm_namespace }}"
+    state: absent
+    wait: true
+    wait_timeout: 300
+
+- name: Delete VM service (if it exists)
+  kubernetes.core.k8s:
+    api_version: v1
+    kind: Service
+    name: "{{ vm_name }}-service"
+    namespace: "{{ vm_namespace }}"
+    state: absent
+  when: vm_expose_service
+  ignore_errors: true
+
+- name: Delete root disk DataVolume
+  kubernetes.core.k8s:
+    api_version: cdi.kubevirt.io/v1beta1
+    kind: DataVolume
+    name: "{{ vm_name }}-root-disk"
+    namespace: "{{ vm_namespace }}"
+    state: absent
+    wait: true
+    wait_timeout: 300
+
+- name: Delete additional disk DataVolumes
+  kubernetes.core.k8s:
+    api_version: cdi.kubevirt.io/v1beta1
+    kind: DataVolume
+    name: "{{ vm_name }}-{{ disk.name }}"
+    namespace: "{{ vm_namespace }}"
+    state: absent
+    wait: true
+    wait_timeout: 300
+  loop: "{{ additional_disks }}"
+  loop_control:
+    loop_var: disk
+  ignore_errors: true
+
+- name: Delete cloud-init secret
+  kubernetes.core.k8s:
+    api_version: v1
+    kind: Secret
+    name: "{{ vm_name }}-cloud-init"
+    namespace: "{{ vm_namespace }}"
+    state: absent
+  ignore_errors: true
+
+- name: Delete SSH key secret
+  kubernetes.core.k8s:
+    api_version: v1
+    kind: Secret
+    name: "{{ vm_name }}-ssh-keys"
+    namespace: "{{ vm_namespace }}"
+    state: absent
+  ignore_errors: true
+
+- name: Check for remaining VM resources
+  kubernetes.core.k8s_info:
+    api_version: v1
+    kind: PersistentVolumeClaim
+    namespace: "{{ vm_namespace }}"
+    label_selectors:
+      - "app={{ vm_name }}"
+  register: remaining_pvcs
+
+- name: Delete remaining PVCs
+  kubernetes.core.k8s:
+    api_version: v1
+    kind: PersistentVolumeClaim
+    name: "{{ pvc.metadata.name }}"
+    namespace: "{{ vm_namespace }}"
+    state: absent
+  loop: "{{ remaining_pvcs.resources }}"
+  loop_control:
+    loop_var: pvc
+  when: remaining_pvcs.resources | length > 0
+  ignore_errors: true
+
+- name: Display deletion status
+  ansible.builtin.debug:
+    msg:
+      - "Virtual Machine '{{ vm_name }}' deletion completed"
+      - "Namespace: {{ vm_namespace }}"
+      - "All associated resources have been removed"
