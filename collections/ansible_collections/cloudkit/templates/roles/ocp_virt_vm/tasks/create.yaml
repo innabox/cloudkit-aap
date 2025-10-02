@@ -26,7 +26,7 @@
         namespace: "{{ vm_namespace }}"
       type: Opaque
       data:
-        userdata: "{{ template_parameters.cloud_init_config | to_nice_yaml | b64encode }}"
+        userdata: "{{ ('#cloud-config\n' + (template_parameters.cloud_init_config | to_nice_yaml)) | b64encode }}"
     state: present
   when: template_parameters.cloud_init_config is defined
 
