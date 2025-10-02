@@ -13,7 +13,8 @@
             'chpasswd': {
               'expire': false
             },
-            'ssh_pwauth': true
+            'ssh_pwauth': true,
+            'runcmd': ['systemctl enable --now sshd']
           }
         })
       }}
