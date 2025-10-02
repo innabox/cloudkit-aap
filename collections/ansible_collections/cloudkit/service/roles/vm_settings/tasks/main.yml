@@ -5,19 +5,25 @@
 
 - name: Create cloud_init_config with generated password
   ansible.builtin.set_fact:
-    vm_settings_template_defaults: >-
-      {{ vm_settings_template_defaults | combine({
-          'cloud_init_config': {
-            'user': 'root',
-            'password': 'changeme',
-            'chpasswd': {
-              'expire': false
-            },
-            'ssh_pwauth': true,
-            'runcmd': ['systemctl enable --now sshd']
-          }
-        })
-      }}
+    vm_settings_template_defaults: "{{ vm_settings_template_defaults | combine(cloud_init_extension) }}"
+  vars:
+    cloud_init_extension:
+      cloud_init_config:
+        users:
+          - name: fedora
+            sudo: "ALL=(ALL) NOPASSWD:ALL"
+            groups:
+              - wheel
+              - sudo
+            shell: /bin/bash
+            lock_passwd: false
+        chpasswd:
+          list:
+            - "fedora:fedora"
+          expire: false
+        ssh_pwauth: true
+        runcmd:
+          - "systemctl enable --now sshd"
 
 - name: Merge default template parameters with user-provided template parameters
   ansible.builtin.set_fact:

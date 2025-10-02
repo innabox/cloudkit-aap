@@ -57,14 +57,14 @@
               cloudkit.openshift.io/aap-job-id: "job-{{ awx_job_id | default('unknown') }}"
           spec:
             holderIdentity: "{{ vm_order_holder_id }}"
+            
+    - name: Set lock_acquired
+      ansible.builtin.set_fact:
+        lock_acquired: true
 
     - name: Determine working namespace
       ansible.builtin.include_role:
         name: cloudkit.service.vm_working_namespace
-
-    - name: Set lock_acquired
-      ansible.builtin.set_fact:
-        lock_acquired: true
 
     - name: Create virtual machine
       block:
