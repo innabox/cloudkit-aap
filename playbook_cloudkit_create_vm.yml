@@ -114,4 +114,4 @@
               kind: Lease
               metadata:
                 name: "{{ vm_order_lock_name }}"
-                namespace: "{{ vm.metadata.namespace }}"
+                namespace: "{{ vm_order.metadata.namespace }}"
