@@ -3,6 +3,20 @@
   ansible.builtin.include_vars:
     dir: vars/
 
+- name: Disable rulebook activations in configuration
+  ansible.builtin.set_fact:
+    rulebook_activations_disabled: >
+      {{ rulebook_activations_disabled | default([]) + [item | combine({'state': 'disabled'})] }}
+  loop: "{{ eda_rulebook_activations }}"
+
+- name: Disable rulebook activations
+  ansible.builtin.include_role:
+    name: infra.aap_configuration.eda_rulebook_activations
+    apply:
+      ignore_errors: true  # rulebook activations may not be present yet
+  vars:
+    eda_rulebook_activations: "{{ rulebook_activations_disabled }}"
+
 - name: Cloudkit AAP
   ansible.builtin.include_role:
     name: infra.aap_configuration.dispatch
