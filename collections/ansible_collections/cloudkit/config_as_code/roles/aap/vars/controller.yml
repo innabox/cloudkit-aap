@@ -152,7 +152,7 @@ controller_inventories:  # noqa: var-naming[no-role-prefix]
     description: "Publish templates inventory"
     organization: "{{ aap_organization_name }}"
   - name: "{{ aap_prefix }}-vm-operations"
-    description: "VM Operational Inventory - Dedicated BM Hypervisors"
+    description: "VM Operational Inventory"
     organization: "{{ aap_organization_name }}"
 
 controller_inventory_sources:  # noqa: var-naming[no-role-prefix]
