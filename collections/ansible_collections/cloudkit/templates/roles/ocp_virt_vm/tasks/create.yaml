@@ -16,34 +16,6 @@
     vm_network_type: "{{ template_parameters.vm_network_type | default('pod') }}"
     ssh_public_key: "{{ template_parameters.ssh_public_key | default(default_ssh_public_key) }}"
 
-- name: Create cloud-init secret (if cloud_init_config provided)
-  kubernetes.core.k8s:
-    definition:
-      apiVersion: v1
-      kind: Secret
-      metadata:
-        name: "{{ vm_name }}-cloud-init"
-        namespace: "{{ vm_namespace }}"
-      type: Opaque
-      data:
-        userdata: "{{ ('#cloud-config\n' + (template_parameters.cloud_init_config | to_nice_yaml)) | b64encode }}"
-    state: present
-  when: template_parameters.cloud_init_config is defined
-
-- name: Create SSH key secret (if ssh_public_key provided)
-  kubernetes.core.k8s:
-    definition:
-      apiVersion: v1
-      kind: Secret
-      metadata:
-        name: "{{ vm_name }}-ssh-keys"
-        namespace: "{{ vm_namespace }}"
-      type: Opaque
-      data:
-        key: "{{ ssh_public_key | b64encode }}"
-    state: present
-  when: ssh_public_key is defined and ssh_public_key != ""
-
 - name: Create DataVolume for VM root disk
   kubernetes.core.k8s:
     definition:
@@ -58,53 +30,17 @@
             url: "docker://{{ vm_image_source }}"
         pvc:
           accessModes:
-          #   - ReadWriteMany  # Required for VM live migration
-          # resources:
-          #   requests:
-          #     storage: "{{ vm_disk_size }}"
-          # storageClassName: "{{ storage_class if storage_class else omit }}"
+            #   - ReadWriteMany  # Required for VM live migration
+            # resources:
+            #   requests:
+            #     storage: "{{ vm_disk_size }}"
+            # storageClassName: "{{ storage_class if storage_class else omit }}"
             - ReadWriteOnce
           resources:
             requests:
               storage: "{{ vm_disk_size }}"
+          storageClassName: "{{ default_storage_class }}"
     state: present
-
-- name: Create DataVolumes for additional disks
-  kubernetes.core.k8s:
-    definition:
-      apiVersion: cdi.kubevirt.io/v1beta1
-      kind: DataVolume
-      metadata:
-        name: "{{ vm_name }}-{{ disk.name }}"
-        namespace: "{{ vm_namespace }}"
-      spec:
-        source:
-          blank: {}
-        pvc:
-          accessModes:
-          #   - ReadWriteMany  # Required for VM live migration
-          # resources:
-          #   requests:
-          #     storage: "{{ disk.size }}"
-          # storageClassName: "{{ disk.storage_class | default(storage_class) if (disk.storage_class | default(storage_class)) else omit }}"
-            - ReadWriteOnce
-          resources:
-            requests:
-              storage: "{{ disk.size }}"
-    state: present
-  loop: "{{ additional_disks }}"
-  loop_control:
-    loop_var: disk
-
-- name: Initialize additional disk volumes list
-  ansible.builtin.set_fact:
-    additional_disk_volumes: []
-
-- name: Build additional disk volumes
-  ansible.builtin.set_fact:
-    additional_disk_volumes: "{{ additional_disk_volumes + [{'name': vm_name + '-' + item.name, 'dataVolume': {'name': vm_name + '-' + item.name}}] }}"
-  loop: "{{ additional_disks }}"
-  when: additional_disks | length > 0
 
 - name: Create VirtualMachine
   kubernetes.core.k8s:
