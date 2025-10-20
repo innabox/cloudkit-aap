@@ -15,6 +15,19 @@
     vm_network_type: "{{ template_parameters.vm_network_type | default('pod') }}"
     ssh_public_key: "{{ template_parameters.ssh_public_key | default(default_ssh_public_key) }}"
 
+- name: Create cloud-init secret
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: "{{ vm_name }}-cloud-init"
+        namespace: "{{ vm_namespace }}"
+      type: Opaque
+      data:
+        userData: "{{ ('#cloud-config\n' + (template_parameters.cloud_init_config | to_nice_yaml)) | b64encode }}"
+    state: present
+
 - name: Create DataVolume for VM root disk
   kubernetes.core.k8s:
     definition:
@@ -98,6 +111,10 @@
         cloudInitNoCloud:
           secretRef:
             name: "{{ vm_name }}-cloud-init"
+
+- name: Show VM Namespace and Name
+  debug:
+    msg: "Namespace {{ vm_namespace }} - Name: {{ vm_name }}"
 
 - name: Wait for VM to be ready
   kubernetes.core.k8s_info:
