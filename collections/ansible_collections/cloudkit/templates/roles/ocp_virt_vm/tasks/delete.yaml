@@ -3,7 +3,6 @@
   ansible.builtin.set_fact:
     vm_name: "{{ template_parameters.vm_name }}"
     vm_namespace: "{{ template_parameters.vm_namespace }}"
-    additional_disks: "{{ template_parameters.additional_disks | default([]) }}"
     vm_expose_service: "{{ template_parameters.vm_expose_service | default(true) }}"
 
 - name: Stop VirtualMachine
@@ -60,29 +59,6 @@
     state: absent
     wait: true
     wait_timeout: 300
-
-- name: Delete additional disk DataVolumes
-  kubernetes.core.k8s:
-    api_version: cdi.kubevirt.io/v1beta1
-    kind: DataVolume
-    name: "{{ vm_name }}-{{ disk.name }}"
-    namespace: "{{ vm_namespace }}"
-    state: absent
-    wait: true
-    wait_timeout: 300
-  loop: "{{ additional_disks }}"
-  loop_control:
-    loop_var: disk
-  ignore_errors: true
-
-- name: Delete cloud-init secret
-  kubernetes.core.k8s:
-    api_version: v1
-    kind: Secret
-    name: "{{ vm_name }}-cloud-init"
-    namespace: "{{ vm_namespace }}"
-    state: absent
-  ignore_errors: true
 
 - name: Delete SSH key secret
   kubernetes.core.k8s:
