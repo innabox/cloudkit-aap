@@ -60,11 +60,11 @@
     wait: true
     wait_timeout: 300
 
-- name: Delete SSH key secret
+- name: Delete cloud-init secret
   kubernetes.core.k8s:
     api_version: v1
     kind: Secret
-    name: "{{ vm_name }}-ssh-keys"
+    name: "{{ vm_name }}-cloud-init"
     namespace: "{{ vm_namespace }}"
     state: absent
   ignore_errors: true
