@@ -11,30 +11,16 @@
       ansible.builtin.set_fact:
         vm_order_name: "{{ vm_order.metadata.name }}"
 
-    - name: Set lock name and holder identity
-      ansible.builtin.set_fact:
-        vm_order_lock_name: "{{ vm_order_name }}-lock"
-        vm_order_holder_id: >-
-          {{ vm_order_name }}-{{ awx_job_id | default("unknown") }}-{{
-            lookup('community.general.random_string', special=false, numbers=false, upper=false)
-          }}
-
-    - name: VM order before defaults
-      ansible.builtin.debug:
-        var: vm_order
-
     - name: Apply default VM settings
       ansible.builtin.include_role:
         name: cloudkit.service.vm_settings
-
-    - name: VM order after defaults
-      ansible.builtin.debug:
-        var: vm_order
 
     - name: Extract VM template info
       ansible.builtin.include_role:
         name: cloudkit.service.extract_vm_template_info
 
+
+  tasks:
     - name: Determine working namespace
       ansible.builtin.include_role:
         name: cloudkit.service.vm_working_namespace
