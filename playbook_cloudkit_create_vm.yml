@@ -25,7 +25,6 @@
       ansible.builtin.include_role:
         name: cloudkit.service.vm_working_namespace
 
-  tasks:
     - name: Create virtual machine
       block:
         - name: Display VM order information
