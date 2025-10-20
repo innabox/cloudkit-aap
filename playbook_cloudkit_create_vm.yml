@@ -11,25 +11,9 @@
       ansible.builtin.set_fact:
         vm_order_name: "{{ vm_order.metadata.name }}"
 
-    - name: Set lock name and holder identity
-      ansible.builtin.set_fact:
-        vm_order_lock_name: "{{ vm_order_name }}-lock"
-        vm_order_holder_id: >-
-          {{ vm_order_name }}-{{ awx_job_id | default("unknown") }}-{{
-            lookup('community.general.random_string', special=false, numbers=false, upper=false)
-          }}
-
-    - name: VM order before defaults
-      ansible.builtin.debug:
-        var: vm_order
-
     - name: Apply default VM settings
       ansible.builtin.include_role:
         name: cloudkit.service.vm_settings
-
-    - name: VM order after defaults
-      ansible.builtin.debug:
-        var: vm_order
 
     - name: Extract VM template info
       ansible.builtin.include_role:
@@ -37,31 +21,6 @@
 
 
   tasks:
-    # By using service_side_apply and registering this job run as the
-    # field manager, we ensure that future attempts to create/modify
-    # this lock will fail (because of the conflict setting
-    # spec.holderIdentity).
-    - name: Acquire lock
-      kubernetes.core.k8s:
-        state: present
-        apply: true
-        server_side_apply:
-          field_manager: "{{ vm_order_holder_id }}"
-        definition:
-          apiVersion: coordination.k8s.io/v1
-          kind: Lease
-          metadata:
-            name: "{{ vm_order_lock_name }}"
-            namespace: "{{ vm_order.metadata.namespace }}"
-            labels:
-              cloudkit.openshift.io/aap-job-id: "job-{{ awx_job_id | default('unknown') }}"
-          spec:
-            holderIdentity: "{{ vm_order_holder_id }}"
-            
-    - name: Set lock_acquired
-      ansible.builtin.set_fact:
-        lock_acquired: true
-
     - name: Determine working namespace
       ansible.builtin.include_role:
         name: cloudkit.service.vm_working_namespace
