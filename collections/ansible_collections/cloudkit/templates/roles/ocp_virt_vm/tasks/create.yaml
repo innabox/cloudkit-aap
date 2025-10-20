@@ -12,7 +12,6 @@
     vm_expose_service: "{{ template_parameters.vm_expose_service | default(false) }}"
     vm_service_type: "{{ template_parameters.vm_service_type | default('ClusterIP') }}"
     vm_service_ports: "{{ template_parameters.vm_service_ports | default([]) }}"
-    additional_disks: "{{ template_parameters.additional_disks | default(default_additional_disks) }}"
     vm_network_type: "{{ template_parameters.vm_network_type | default('pod') }}"
     ssh_public_key: "{{ template_parameters.ssh_public_key | default(default_ssh_public_key) }}"
 
@@ -88,7 +87,7 @@
             networks:
               - name: default
                 pod: {}
-            volumes: "{{ base_volumes + additional_disk_volumes }}"
+            volumes: "{{ base_volumes }}"
     state: present
   vars:
     base_volumes:
