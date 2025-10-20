@@ -12,14 +12,6 @@
       ansible.builtin.set_fact:
         vm_order_name: "{{ vm_order.metadata.name }}"
 
-    - name: Set lock name and holder identity
-      ansible.builtin.set_fact:
-        vm_order_lock_name: "{{ vm_order_name }}-lock"
-        vm_order_holder_id: >-
-          {{ vm_order_name }}-{{ awx_job_id | default("unknown") }}-{{
-            lookup('community.general.random_string', special=false, numbers=false, upper=false)
-          }}
-
     - name: VM order for deletion
       ansible.builtin.debug:
         var: vm_order
@@ -46,29 +38,6 @@
   tasks:
     - name: Delete virtual machine
       block:
-        - name: Acquire VM lock for deletion
-          kubernetes.core.k8s:
-            state: present
-            apply: true
-            server_side_apply:
-              field_manager: "{{ vm_order_holder_id }}"
-            definition:
-              apiVersion: coordination.k8s.io/v1
-              kind: Lease
-              metadata:
-                name: "{{ vm_order_lock_name }}"
-                namespace: "{{ vm_target_namespace }}"
-                labels:
-                  cloudkit.openshift.io/aap-job-id: "job-{{ awx_job_id | default('unknown') }}"
-                  cloudkit.openshift.io/resource-type: "vm"
-                  cloudkit.openshift.io/operation: "delete"
-              spec:
-                holderIdentity: "{{ vm_order_holder_id }}"
-
-        - name: Set lock_acquired
-          ansible.builtin.set_fact:
-            lock_acquired: true
-
         - name: Display VM deletion information
           ansible.builtin.debug:
             msg:
@@ -107,14 +76,3 @@
           ansible.builtin.fail:
             msg: Propagating earlier failure from rescue block
 
-      always:
-        - name: Delete VM lock
-          when: lock_acquired | default(false)
-          kubernetes.core.k8s:
-            state: absent
-            definition:
-              apiVersion: coordination.k8s.io/v1
-              kind: Lease
-              metadata:
-                name: "{{ vm_order_lock_name }}"
-                namespace: "{{ vm_target_namespace }}"
