@@ -4,6 +4,7 @@ import json
 import subprocess
 import yaml
 
+from enum import Enum
 from typing import Any
 from typing import cast
 from typing import Literal
@@ -145,14 +146,16 @@ class TemplateParameter(Base):
             try:
                 return ProtobufAnyValue(type=TypeMapping[type(value)], value=value)
             except KeyError as err:
-                raise ValueError(f"Default values must be scalar type, not {err}")
+                raise ValueError(
+                    f"Default values must be scalar type, not {err}")
 
 
 class NodeRequest(Base):
     """NodeRequest represents the bare metal resources requested for a cluster"""
 
     resource_class: str = pydantic.Field(..., validation_alias="resourceClass")
-    number_of_nodes: int = pydantic.Field(..., validation_alias="numberOfNodes")
+    number_of_nodes: int = pydantic.Field(...,
+                                          validation_alias="numberOfNodes")
 
 
 class NodeSet(Base):
@@ -160,6 +163,11 @@ class NodeSet(Base):
 
     host_class: str
     size: int
+
+
+class TemplateTypeEnum(Enum):
+    cluster = "cluster"
+    vm = "vm"
 
 
 class Metadata(Base):
@@ -182,10 +190,13 @@ class Template(Base):
     title: str | None = None
     description: str | None = None
     default_node_request: list[NodeRequest] = pydantic.Field(exclude=True)
-    template_type: str | None = pydantic.Field(None, exclude=True)  # "cluster" or "vm"
+    template_type: TemplateTypeEnum | None = pydantic.Field(
+        None, default=TemplateTypeEnum.cluster, exclude=True
+    )
 
     # Not currently supported by the API
-    allowed_resource_classes: list[str] | None = pydantic.Field(None, exclude=True)
+    allowed_resource_classes: list[str] | None = pydantic.Field(
+        None, exclude=True)
 
     parameters: list[TemplateParameter]
 
@@ -236,7 +247,8 @@ class Collection(Base):
             return []
 
         with argspec_file.open("r") as fd:
-            argspec: AnsibleArgumentSpec = cast(AnsibleArgumentSpec, yaml.safe_load(fd))
+            argspec: AnsibleArgumentSpec = cast(
+                AnsibleArgumentSpec, yaml.safe_load(fd))
 
         template_params: list[TemplateParameter] = []
 
@@ -265,7 +277,6 @@ class Collection(Base):
                     name=path.name,
                     title=metadata.title,
                     description=metadata.description,
-                    template_type=metadata.template_type,
                     default_node_request=metadata.default_node_request,
                     allowed_resource_classes=metadata.allowed_resource_classes,
                     parameters=params,
@@ -297,7 +308,8 @@ def find_template_roles(requested: list[str]) -> Generator[Template, None, None]
             # If `ansible-galaxy collection list` find multiple collections with the given name,
             # we will select the first one.
             collections.append(
-                Collection(parent_path=Path(list(info.keys())[0]), name=collection)
+                Collection(parent_path=Path(
+                    list(info.keys())[0]), name=collection)
             )
 
     for collection in collections:

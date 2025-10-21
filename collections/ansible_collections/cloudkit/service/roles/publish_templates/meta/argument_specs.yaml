@@ -1,15 +1,12 @@
 argument_specs:
   main:
     options:
-      cloudkit_templates:
-        type: list
-        description: All templates (deprecated, use cloudkit_cluster_templates)
       cloudkit_cluster_templates:
         type: list
         description: Cluster templates to publish to the cluster_templates endpoint
       cloudkit_vm_templates:
         type: list
-        description: VM templates (for future VM template endpoint)
+        description: VM templates 
       cloudkit_fulfillment_service_uri:
         type: str
         required: true
