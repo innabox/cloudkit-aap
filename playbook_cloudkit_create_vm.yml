@@ -21,6 +21,10 @@
 
 
   tasks:
+    - name: Show EDA Event
+      ansible.builtin.debug:
+        msg: "{{ ansible_eda.event.payload }}"
+
     - name: Determine working namespace
       ansible.builtin.include_role:
         name: cloudkit.service.vm_working_namespace
