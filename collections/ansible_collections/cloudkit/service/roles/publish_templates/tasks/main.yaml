@@ -1,16 +1,16 @@
-- name: Get list of existing templates
+- name: Get list of existing cluster templates
   ansible.builtin.uri:
     url: "{{ publish_cluster_templates_api_endpoint }}"
     validate_certs: "{{ publish_templates_validate_certs|default(true)|bool }}"
     headers:
       authorization: Bearer {{ cloudkit_fulfillment_service_token }}
-  register: template_check
+  register: cluster_template_check
 
-- name: Create list of existing template template ids    # noqa: jinja[invalid]
+- name: Create list of existing cluster template template ids    # noqa: jinja[invalid]
   ansible.builtin.set_fact:
     template_ids: >-
       {{
-      template_check | json_query("json.items[].id")
+      cluster_template_check | json_query("json.items[].id")
       }}
 
 - name: Update existing cluster template
@@ -47,10 +47,10 @@
 - name: Get list of existing VM templates
   ansible.builtin.uri:
     url: "{{ publish_vm_templates_api_endpoint }}"
+    validate_certs: "{{ publish_templates_validate_certs|default(true)|bool }}"
     headers:
       authorization: Bearer {{ cloudkit_fulfillment_service_token }}
   register: vm_template_check
-  when: cloudkit_vm_templates is defined and cloudkit_vm_templates | length > 0
 
 - name: Create list of existing VM template IDs
   ansible.builtin.set_fact:
@@ -58,24 +58,16 @@
       {{
       vm_template_check | json_query("json.items[].id") | default([])
       }}
-  when: vm_template_check is defined and not vm_template_check.skipped | default(false)
-
-- name: Initialize empty VM template IDs list if not set
-  ansible.builtin.set_fact:
-    vm_template_ids: []
-  when: vm_template_ids is not defined or vm_template_ids is none
 
 - name: Update existing VM template
   loop: "{{ cloudkit_vm_templates }}"
   loop_control:
     label: "{{ template.id }}"
     loop_var: template
-  when: 
-    - cloudkit_vm_templates is defined and cloudkit_vm_templates | length > 0
-    - vm_template_ids is defined
-    - template.id in vm_template_ids
+  when: template.id in vm_template_ids
   ansible.builtin.uri:
     url: "{{ publish_vm_templates_api_endpoint }}/{{ template.id }}"
+    validate_certs: "{{ publish_templates_validate_certs|default(true)|bool }}"
     method: PATCH
     headers:
       authorization: Bearer {{ cloudkit_fulfillment_service_token }}
@@ -87,70 +79,13 @@
   loop_control:
     label: "{{ template.id }}"
     loop_var: template
-  when: 
-    - cloudkit_vm_templates is defined and cloudkit_vm_templates | length > 0
-    - vm_template_ids is defined
-    - template.id not in vm_template_ids
+  when: template.id not in vm_template_ids
   ansible.builtin.uri:
     url: "{{ publish_vm_templates_api_endpoint }}"
+    validate_certs: "{{ publish_templates_validate_certs|default(true)|bool }}"
     method: POST
     headers:
       authorization: Bearer {{ cloudkit_fulfillment_service_token }}
     body_format: json
     body: "{{ template }}"
 
-# VM Template Publishing
-- name: Get list of existing VM templates
-  ansible.builtin.uri:
-    url: "{{ publish_vm_templates_api_endpoint }}"
-    headers:
-      authorization: Bearer {{ cloudkit_fulfillment_service_token }}
-  register: vm_template_check
-  when: cloudkit_vm_templates is defined and cloudkit_vm_templates | length > 0
-
-- name: Create list of existing VM template IDs
-  ansible.builtin.set_fact:
-    vm_template_ids: >-
-      {{
-      vm_template_check | json_query("json.items[].id") | default([])
-      }}
-  when: vm_template_check is defined and not vm_template_check.skipped | default(false)
-
-- name: Initialize empty VM template IDs list if not set
-  ansible.builtin.set_fact:
-    vm_template_ids: []
-  when: vm_template_ids is not defined or vm_template_ids is none
-
-- name: Update existing VM template
-  loop: "{{ cloudkit_vm_templates }}"
-  loop_control:
-    label: "{{ template.id }}"
-    loop_var: template
-  when: 
-    - cloudkit_vm_templates is defined and cloudkit_vm_templates | length > 0
-    - vm_template_ids is defined
-    - template.id in vm_template_ids
-  ansible.builtin.uri:
-    url: "{{ publish_vm_templates_api_endpoint }}/{{ template.id }}"
-    method: PATCH
-    headers:
-      authorization: Bearer {{ cloudkit_fulfillment_service_token }}
-    body_format: json
-    body: "{{ template }}"
-
-- name: Create new VM template
-  loop: "{{ cloudkit_vm_templates }}"
-  loop_control:
-    label: "{{ template.id }}"
-    loop_var: template
-  when: 
-    - cloudkit_vm_templates is defined and cloudkit_vm_templates | length > 0
-    - vm_template_ids is defined
-    - template.id not in vm_template_ids
-  ansible.builtin.uri:
-    url: "{{ publish_vm_templates_api_endpoint }}"
-    method: POST
-    headers:
-      authorization: Bearer {{ cloudkit_fulfillment_service_token }}
-    body_format: json
-    body: "{{ template }}"
