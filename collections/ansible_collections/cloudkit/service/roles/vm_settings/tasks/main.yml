@@ -6,4 +6,4 @@
 - name: Update template parameters in VM order
   ansible.builtin.set_fact:
     vm_order: "{{ vm_order | combine({'spec': {'templateParameters': vm_settings_template_default | to_json}}, recursive=true) }}"
-  when: (vm_order.spec.templateParameters.cloudInit | default({})) | length == 0
+  when: (vm_order.spec.templateParameters.cloud_init_config | default({})) | length == 0
