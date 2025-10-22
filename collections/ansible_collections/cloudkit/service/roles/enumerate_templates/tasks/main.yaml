@@ -6,6 +6,3 @@
   ansible.builtin.set_fact:
     cloudkit_vm_templates: "{{ cloudkit_template_collections | cloudkit.service.find_vm_template_roles }}"
 
-- name: Enumerate all templates (backward compatibility)
-  ansible.builtin.set_fact:
-    cloudkit_templates: "{{ cloudkit_template_collections | cloudkit.service.find_template_roles }}"

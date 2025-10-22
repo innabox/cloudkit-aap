@@ -1,0 +1,46 @@
+# VM Template Publishing
+- name: Get list of existing VM templates
+  ansible.builtin.uri:
+    url: "{{ publish_vm_templates_api_endpoint }}"
+    validate_certs: "{{ publish_templates_validate_certs|default(true)|bool }}"
+    headers:
+      authorization: Bearer {{ cloudkit_fulfillment_service_token }}
+  register: vm_template_check
+
+- name: Create list of existing VM template IDs
+  ansible.builtin.set_fact:
+    vm_template_ids: >-
+      {{
+      vm_template_check | json_query("json.items[].id") | default([])
+      }}
+
+- name: Update existing VM template
+  loop: "{{ cloudkit_vm_templates }}"
+  loop_control:
+    label: "{{ template.id }}"
+    loop_var: template
+  when: template.id in vm_template_ids
+  ansible.builtin.uri:
+    url: "{{ publish_vm_templates_api_endpoint }}/{{ template.id }}"
+    validate_certs: "{{ publish_templates_validate_certs|default(true)|bool }}"
+    method: PATCH
+    headers:
+      authorization: Bearer {{ cloudkit_fulfillment_service_token }}
+    body_format: json
+    body: "{{ template }}"
+
+- name: Create new VM template
+  loop: "{{ cloudkit_vm_templates }}"
+  loop_control:
+    label: "{{ template.id }}"
+    loop_var: template
+  when: template.id not in vm_template_ids
+  ansible.builtin.uri:
+    url: "{{ publish_vm_templates_api_endpoint }}"
+    validate_certs: "{{ publish_templates_validate_certs|default(true)|bool }}"
+    method: POST
+    headers:
+      authorization: Bearer {{ cloudkit_fulfillment_service_token }}
+    body_format: json
+    body: "{{ template }}"
+
