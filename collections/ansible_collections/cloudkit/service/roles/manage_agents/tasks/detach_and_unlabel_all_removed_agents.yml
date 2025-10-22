@@ -26,7 +26,13 @@
     label: "Detach agent {{ agent.metadata.name }}"
     loop_var: agent
 
-- name: Un-label agents
+- name: Determine which agents have cluster_order_label
+  ansible.builtin.set_fact:
+    agents_with_cluster_order_label: "{{ agents_with_cluster_order_label | default([]) + [item] }}"
+  with_items: "{{ manage_agents_removed }}"
+  when: cluster_order_label in item.metadata.labels
+
+- name: Remove cluster_order_label from agents
   kubernetes.core.k8s_json_patch:
     api_version: agent-install.openshift.io/v1beta1
     kind: Agent
@@ -35,10 +41,28 @@
     patch:
       - op: remove
         path: /metadata/labels/{{ cluster_order_label | cloudkit.service.json_pointer_escape }}
-      - op: remove
-        path: /metadata/labels/agentMachineRef
-  loop: "{{ manage_agents_removed }}"
+  loop: "{{ agents_with_cluster_order_label | default([]) }}"
   loop_control:
     loop_var: agent
-    label: "Un-label agent {{ agent.metadata.name }}"
-  register: manage_agents_removed_result
+    label: "Un-label agent {{ agent.metadata.name }} with label {{ cluster_order_label }}"
+  register: manage_agents_cluster_order_label_removed_result
+
+- name: Determine which agents have agentMachineRef label
+  ansible.builtin.set_fact:
+    agents_with_agent_machine_ref_label: >
+      {{ manage_agents_removed | selectattr('metadata.labels.agentMachineRef', 'defined') }}
+
+- name: Remove agentMachineRef label from agents
+  kubernetes.core.k8s_json_patch:
+    api_version: agent-install.openshift.io/v1beta1
+    kind: Agent
+    name: "{{ agent.metadata.name }}"
+    namespace: "{{ default_agent_namespace }}"
+    patch:
+      - op: remove
+        path: /metadata/labels/agentMachineRef
+  loop: "{{ agents_with_agent_machine_ref_label }}"
+  loop_control:
+    loop_var: agent
+    label: "Un-label agent {{ agent.metadata.name }} with label agentMachineRef"
+  register: manage_agents_agent_machine_ref_label_removed_result
