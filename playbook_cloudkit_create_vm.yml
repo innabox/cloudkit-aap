@@ -1,0 +1,48 @@
+---
+- name: Create a virtual machine from a VMOrder
+  hosts: localhost
+  gather_facts: false
+
+  vars:
+    vm_order: "{{ ansible_eda.event.payload }}"
+
+  pre_tasks:
+    - name: Set VM order name
+      ansible.builtin.set_fact:
+        vm_order_name: "{{ vm_order.metadata.name }}"
+
+    - name: Apply default VM settings
+      ansible.builtin.include_role:
+        name: cloudkit.service.vm_settings
+
+    - name: Extract VM template info
+      ansible.builtin.include_role:
+        name: cloudkit.service.extract_vm_template_info
+
+  tasks:
+    - name: Determine working namespace
+      ansible.builtin.include_role:
+        name: cloudkit.service.vm_working_namespace
+
+    - name: Display VM order information
+      ansible.builtin.debug:
+        msg:
+          - "VM order: {{ vm_order_name }}"
+          - "VM target namespace: {{ vm_target_namespace }}"
+          - "Template ID: {{ template_id }}"
+
+    - name: "Set the finalizer on the Cloudkit VM  {{ vm_order.metadata.name }}"
+      kubernetes.core.k8s_json_patch:
+        kind: VirtualMachine
+        namespace: "{{ vm_order.metadata.namespace }}"
+        name: "{{ vm_order.metadata.name }}"
+        api_version: cloudkit.openshift.io/v1alpha1
+        patch:
+          - op: add
+            path: /metadata/finalizers/0
+            value: "{{ vm_settings_cloudkit_finalizer }}"
+
+    - name: Call the selected VM template
+      ansible.builtin.include_role:
+        name: "{{ template_id }}"
+        tasks_from: "create"

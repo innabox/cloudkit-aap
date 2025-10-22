@@ -1,0 +1,56 @@
+---
+- name: Delete a virtual machine from a VMOrder
+  hosts: localhost
+  gather_facts: false
+
+  vars:
+    vm_order: "{{ ansible_eda.event.payload }}"
+
+  pre_tasks:
+    - name: Set VM order name
+      ansible.builtin.set_fact:
+        vm_order_name: "{{ vm_order.metadata.name }}"
+
+    - name: VM order for deletion
+      ansible.builtin.debug:
+        var: vm_order
+
+    - name: Apply default VM settings
+      ansible.builtin.include_role:
+        name: cloudkit.service.vm_settings
+
+    - name: Extract VM template info
+      ansible.builtin.include_role:
+        name: cloudkit.service.extract_vm_template_info
+
+    - name: Determine target namespace
+      ansible.builtin.include_role:
+        name: cloudkit.service.vm_working_namespace
+
+  tasks:
+    - name: Display VM deletion information
+      ansible.builtin.debug:
+        msg:
+          - "Deleting VM order: {{ vm_order_name }}"
+          - "VM target namespace: {{ vm_target_namespace }}"
+          - "Template ID: {{ template_id }}"
+
+    - name: Call the selected VM template for deletion
+      ansible.builtin.include_role:
+        name: "{{ template_id }}"
+        tasks_from: "delete"
+      vars:
+        template_parameters:
+          vm_name: "{{ vm_order_name }}"
+          vm_namespace: "{{ vm_target_namespace }}"
+
+    - name: "Remove the finalizer on the Cloudkit VM {{ vm_order.metadata.name }}"
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: cloudkit.openshift.io/v1alpha1
+          kind: VirtualMachine
+          metadata:
+            namespace: "{{ vm_order.metadata.namespace }}"
+            name: "{{ vm_order.metadata.name }}"
+            finalizers: "{{ (vm_order.metadata.finalizers | default([])) | difference([vm_settings_cloudkit_finalizer]) }}"
