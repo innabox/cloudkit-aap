@@ -5,20 +5,11 @@
 
   vars:
     vm_order: "{{ ansible_eda.event.payload }}"
-    vm_settings_cloudkit_finalizer: "cloudkit.openshift.io/finalizer"
 
   pre_tasks:
     - name: Set VM order name
       ansible.builtin.set_fact:
         vm_order_name: "{{ vm_order.metadata.name }}"
-
-    - name: Set lock name and holder identity
-      ansible.builtin.set_fact:
-        vm_order_lock_name: "{{ vm_order_name }}-lock"
-        vm_order_holder_id: >-
-          {{ vm_order_name }}-{{ awx_job_id | default("unknown") }}-{{
-            lookup('community.general.random_string', special=false, numbers=false, upper=false)
-          }}
 
     - name: VM order for deletion
       ansible.builtin.debug:
@@ -36,77 +27,30 @@
       ansible.builtin.include_role:
         name: cloudkit.service.vm_working_namespace
 
-    - name: Register VM Namespace Object
-      kubernetes.core.k8s_info:
-        api_version: v1
-        kind: Namespace
-        name: "{{ vm_target_namespace }}"
-      register: target_vm_ns_object
-
   tasks:
-    - name: Delete virtual machine
-      block:
-        - name: Acquire VM lock for deletion
-          kubernetes.core.k8s:
-            state: present
-            apply: true
-            server_side_apply:
-              field_manager: "{{ vm_order_holder_id }}"
-            definition:
-              apiVersion: coordination.k8s.io/v1
-              kind: Lease
-              metadata:
-                name: "{{ vm_order_lock_name }}"
-                namespace: "{{ vm_target_namespace }}"
-                labels:
-                  cloudkit.openshift.io/aap-job-id: "job-{{ awx_job_id | default('unknown') }}"
-                  cloudkit.openshift.io/resource-type: "vm"
-                  cloudkit.openshift.io/operation: "delete"
-              spec:
-                holderIdentity: "{{ vm_order_holder_id }}"
+    - name: Display VM deletion information
+      ansible.builtin.debug:
+        msg:
+          - "Deleting VM order: {{ vm_order_name }}"
+          - "VM target namespace: {{ vm_target_namespace }}"
+          - "Template ID: {{ template_id }}"
 
-        - name: Set lock_acquired
-          ansible.builtin.set_fact:
-            lock_acquired: true
+    - name: Call the selected VM template for deletion
+      ansible.builtin.include_role:
+        name: "{{ template_id }}"
+        tasks_from: "delete"
+      vars:
+        template_parameters:
+          vm_name: "{{ vm_order_name }}"
+          vm_namespace: "{{ vm_target_namespace }}"
 
-        - name: Display VM deletion information
-          ansible.builtin.debug:
-            msg:
-              - "Deleting VM order: {{ vm_order_name }}"
-              - "VM target namespace: {{ vm_target_namespace }}"
-              - "Template ID: {{ template_id }}"
-
-        - name: Call the selected VM template for deletion
-          ansible.builtin.include_role:
-            name: "{{ template_id }}"
-            tasks_from: "delete"
-          vars:
-            template_parameters:
-              vm_name: "{{ vm_order_name }}"
-              vm_namespace: "{{ vm_target_namespace }}"
-
-        - name: "Remove the finalizer on the VM namespace {{ vm_target_namespace }}"
-          kubernetes.core.k8s:
-            state: present
-            definition:
-              apiVersion: v1
-              kind: Namespace
-              metadata:
-                name: "{{ vm_target_namespace }}"
-                finalizers: "{{ (target_vm_ns_object.resources[0].metadata.finalizers | default([])) | difference([vm_settings_cloudkit_finalizer]) }}"
-      rescue:
-        - name: Propagate failure
-          ansible.builtin.fail:
-            msg: Propagating earlier failure from rescue block
-
-      always:
-        - name: Delete VM lock
-          when: lock_acquired | default(false)
-          kubernetes.core.k8s:
-            state: absent
-            definition:
-              apiVersion: coordination.k8s.io/v1
-              kind: Lease
-              metadata:
-                name: "{{ vm_order_lock_name }}"
-                namespace: "{{ vm_target_namespace }}"
+    - name: "Remove the finalizer on the Cloudkit VM {{ vm_order.metadata.name }}"
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: cloudkit.openshift.io/v1alpha1
+          kind: VirtualMachine
+          metadata:
+            namespace: "{{ vm_order.metadata.namespace }}"
+            name: "{{ vm_order.metadata.name }}"
+            finalizers: "{{ (vm_order.metadata.finalizers | default([])) | difference([vm_settings_cloudkit_finalizer]) }}"
