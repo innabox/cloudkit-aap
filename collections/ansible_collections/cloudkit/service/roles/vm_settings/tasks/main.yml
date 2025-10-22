@@ -1,7 +1,7 @@
 ---
 - name: Display template parameters
   debug:
-    msg: "{{ vm_order.spec.templateParameters | to_nice_json }}"
+    msg: "{{ vm_order.spec.templateParameters | to_nice_yaml }}"
 
 - name: Update template parameters in VM order
   ansible.builtin.set_fact:
