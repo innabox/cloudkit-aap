@@ -61,6 +61,10 @@
       ansible.builtin.debug:
         msg: "We have {{ manage_agents_allocated.resources | length }} agents, we want {{ manage_agents_desired_count }}"
 
+    - name: Select agents to add to the cluster
+      ansible.builtin.set_fact:
+        manage_agents_add_to_cluster: "{{ manage_agents_available[: (manage_agents_selected_count | int)] }}"
+
     - name: Add selected agents to the cluster
       kubernetes.core.k8s_json_patch:
         api_version: agent-install.openshift.io/v1beta1
@@ -74,7 +78,7 @@
           - op: add
             path: /spec/approved
             value: false
-      loop: "{{ manage_agents_available[: (manage_agents_selected_count | int)] }}"
+      loop: "{{ manage_agents_add_to_cluster | default([]) }}"
       loop_control:
         loop_var: agent
         label: "Adding agent {{ agent.metadata.name }}"
