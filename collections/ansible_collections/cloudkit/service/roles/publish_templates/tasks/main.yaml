@@ -1,7 +1,7 @@
 ---
 - name: Apply templates for clusters
-  ansible.builtin.import_tasks: clusters.yaml
+  ansible.builtin.include_tasks: clusters.yaml
 
 - name: Apply templates for volumes
-  ansible.builtin.import_tasks: vms.yaml
+  ansible.builtin.include_tasks: vms.yaml
 
