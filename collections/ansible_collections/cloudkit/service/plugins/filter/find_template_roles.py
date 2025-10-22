@@ -275,7 +275,6 @@ class Collection(Base):
                     name=path.name,
                     title=metadata.title,
                     description=metadata.description,
-                    template_type=metadata.template_type,
                     default_node_request=metadata.default_node_request,
                     allowed_resource_classes=metadata.allowed_resource_classes,
                     parameters=params,
