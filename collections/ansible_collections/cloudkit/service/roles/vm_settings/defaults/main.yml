@@ -11,6 +11,4 @@ vm_settings_template_default:
         lock_passwd: true
         ssh_authorized_keys: "{{ vm_settings_template_parameters.ssh_public_key | default([]) }}"
     ssh_pwauth: false
-    runcmd:
-      - "systemctl enable --now sshd"
 
