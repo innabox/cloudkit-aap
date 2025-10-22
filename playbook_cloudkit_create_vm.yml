@@ -5,7 +5,7 @@
 
   vars:
     vm_order: "{{ ansible_eda.event.payload }}"
-    vm_settings_cloudkit_finalizer: "cloudkit-aap.openshift.io/finalizer"
+
   pre_tasks:
     - name: Set VM order name
       ansible.builtin.set_fact:
