@@ -1,32 +1,9 @@
 ---
-- name: Get template parameters from VM order
-  ansible.builtin.set_fact:
-    vm_settings_template_parameters: "{{ vm_order.spec.templateParameters | from_json }}"
-
-- name: Create minimal cloud_init_config following cloud provider standards
-  ansible.builtin.set_fact:
-    vm_settings_template_defaults: "{{ vm_settings_template_defaults | combine(cloud_init_extension) }}"
-  vars:
-    cloud_init_extension:
-      cloud_init_config:
-        users:
-          - name: fedora
-            sudo: "ALL=(ALL) NOPASSWD:ALL"
-            groups:
-              - wheel
-              - sudo
-            shell: /bin/bash
-            lock_passwd: true
-            ssh_authorized_keys: "{{ vm_settings_template_parameters.ssh_public_key | default([]) }}"
-        ssh_pwauth: false
-        runcmd:
-          - "systemctl enable --now sshd"
-
-- name: Merge default template parameters with user-provided template parameters
-  ansible.builtin.set_fact:
-    vm_settings_template_defaults: "{{ vm_settings_template_defaults | combine(vm_settings_template_parameters) }}"
+- name: Display template parameters
+  debug:
+    msg: "{{ vm_order.spec.templateParameters | from_nice_json }}"
 
 - name: Update template parameters in VM order
   ansible.builtin.set_fact:
-    vm_order: "{{ vm_order | combine({'spec': {'templateParameters': vm_settings_template_defaults | to_json}}, recursive=true) }}"
-
+    vm_order: "{{ vm_order | combine({'spec': {'templateParameters': vm_settings_template_default | to_json}}, recursive=true) }}"
+  when: (vm_order.spec.templateParameters.cloudInit | default({})) | length == 0
