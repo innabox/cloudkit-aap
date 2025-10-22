@@ -190,9 +190,7 @@ class Template(Base):
     title: str | None = None
     description: str | None = None
     default_node_request: list[NodeRequest] = pydantic.Field(exclude=True)
-    template_type: TemplateTypeEnum | None = pydantic.Field(
-        None, default=TemplateTypeEnum.cluster, exclude=True
-    )
+    template_type: TemplateTypeEnum | None = pydantic.Field(default=TemplateTypeEnum.cluster, exclude=True)
 
     # Not currently supported by the API
     allowed_resource_classes: list[str] | None = pydantic.Field(
