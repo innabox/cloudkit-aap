@@ -1,2 +1,3 @@
 ---
 cluster_order_label: "cloudkit.openshift.io/clusterorder"
+vm_order_label: "cloudkit.openshift.io/virtualmachine"
