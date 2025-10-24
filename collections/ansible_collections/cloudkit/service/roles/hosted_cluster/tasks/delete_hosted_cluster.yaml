@@ -26,7 +26,7 @@
   kubernetes.core.k8s:
     state: absent
     api_version: hypershift.openshift.io/v1beta1
-    kind: HostedCluster
+    kind: NodePool
     namespace: "{{ hosted_cluster_namespace }}"
     name: "nodepool-{{ hosted_cluster_name }}-{{ item.resourceClass }}"
   loop: "{{ hosted_cluster_node_requests }}"
