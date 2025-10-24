@@ -44,13 +44,14 @@
           vm_name: "{{ vm_order_name }}"
           vm_namespace: "{{ vm_target_namespace }}"
 
-    - name: "Remove the finalizer on the Cloudkit VM {{ vm_order.metadata.name }}"
-      kubernetes.core.k8s:
-        state: present
-        definition:
-          apiVersion: cloudkit.openshift.io/v1alpha1
+    - name: "Remove the finalizer on the Cloudkit VM  {{ vm_order.metadata.name }}"
+      ansible.builtin.include_role:
+        name: cloudkit.service.finalizer
+      vars:
+        finalizer_state: absent
+        finalizer_name: "{{ vm_settings_cloudkit_finalizer }}"
+        finalizer_target:
+          api_version: cloudkit.openshift.io/v1alpha1
           kind: VirtualMachine
-          metadata:
-            namespace: "{{ vm_order.metadata.namespace }}"
-            name: "{{ vm_order.metadata.name }}"
-            finalizers: "{{ (vm_order.metadata.finalizers | default([])) | difference([vm_settings_cloudkit_finalizer]) }}"
+          namespace: "{{ vm_order.metadata.namespace }}"
+          name: "{{ vm_order.metadata.name }}"

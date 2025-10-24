@@ -32,15 +32,16 @@
           - "Template ID: {{ template_id }}"
 
     - name: "Set the finalizer on the Cloudkit VM  {{ vm_order.metadata.name }}"
-      kubernetes.core.k8s_json_patch:
-        kind: VirtualMachine
-        namespace: "{{ vm_order.metadata.namespace }}"
-        name: "{{ vm_order.metadata.name }}"
-        api_version: cloudkit.openshift.io/v1alpha1
-        patch:
-          - op: add
-            path: /metadata/finalizers/0
-            value: "{{ vm_settings_cloudkit_finalizer }}"
+      ansible.builtin.include_role:
+        name: cloudkit.service.finalizer
+      vars:
+        finalizer_state: present
+        finalizer_name: "{{ vm_settings_cloudkit_finalizer }}"
+        finalizer_target:
+          api_version: cloudkit.openshift.io/v1alpha1
+          kind: VirtualMachine
+          namespace: "{{ vm_order.metadata.namespace }}"
+          name: "{{ vm_order.metadata.name }}"
 
     - name: Call the selected VM template
       ansible.builtin.include_role:
