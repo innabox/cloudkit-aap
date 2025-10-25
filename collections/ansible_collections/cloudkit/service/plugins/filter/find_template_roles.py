@@ -4,7 +4,6 @@ import json
 import subprocess
 import yaml
 
-from enum import Enum
 from typing import Any
 from typing import cast
 from typing import Literal
@@ -165,7 +164,7 @@ class NodeSet(Base):
     size: int
 
 
-class TemplateTypeEnum(Enum):
+class TemplateTypeEnum(StrEnum):
     cluster = "cluster"
     vm = "vm"
 
@@ -175,7 +174,9 @@ class Metadata(Base):
 
     title: str
     description: str | None = None
-    template_type: str | None = None  # "cluster" or "vm"
+    template_type: TemplateTypeEnum = pydantic.Field(
+        default=TemplateTypeEnum.cluster, exclude=True
+    )
     default_node_request: list[NodeRequest]
     allowed_resource_classes: list[str] | None = None
 
@@ -190,8 +191,8 @@ class Template(Base):
     title: str | None = None
     description: str | None = None
     default_node_request: list[NodeRequest] = pydantic.Field(exclude=True)
-    template_type: TemplateTypeEnum | None = pydantic.Field(
-        None, default=TemplateTypeEnum.cluster, exclude=True
+    template_type: TemplateTypeEnum = pydantic.Field(
+        default=TemplateTypeEnum.cluster, exclude=True
     )
 
     # Not currently supported by the API
@@ -316,15 +317,6 @@ def find_template_roles(requested: list[str]) -> Generator[Template, None, None]
         yield from collection.templates()
 
 
-def find_template_roles_filter(requested: list[str]):
-    """Transform the return values from find_template_roles into something
-    that makes Ansible happy."""
-    return [
-        role.model_dump(by_alias=True, exclude_none=True)
-        for role in find_template_roles(requested)
-    ]
-
-
 def find_cluster_template_roles_filter(requested: list[str]):
     """Transform the return values from find_template_roles into something
     that makes Ansible happy, but only for cluster templates."""
@@ -346,17 +338,8 @@ def find_vm_template_roles_filter(requested: list[str]):
     ]
 
 
-class FilterModule:
-    def filters(self):
-        return {
-            "find_template_roles": find_template_roles_filter,
-            "find_cluster_template_roles": find_cluster_template_roles_filter,
-            "find_vm_template_roles": find_vm_template_roles_filter,
-        }
-
-
 if __name__ == "__main__":
     import sys
 
-    found = find_template_roles_filter(sys.argv[1:])
+    found = find_cluster_template_roles_filter(sys.argv[1:])
     print(json.dumps(list(found)))

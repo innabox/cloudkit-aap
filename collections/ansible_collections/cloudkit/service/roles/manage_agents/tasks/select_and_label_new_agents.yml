@@ -15,25 +15,14 @@
     # Since there is only one global pool of agents, we need to make sure that
     # the selection of new agents is serialized by resource class
     - name: Acquire agent lock
-      kubernetes.core.k8s:
-        state: present
-        apply: true
-        server_side_apply:
-          field_manager: "{{ cluster_order_holder_id }}"
-        definition:
-          apiVersion: coordination.k8s.io/v1
-          kind: Lease
-          metadata:
-            name: "agent-{{ manage_agents_resource_class }}-lock"
-            namespace: "{{ default_agent_namespace }}"
-            labels:
-              cloudkit.openshift.io/aap-job-id: "job-{{ awx_job_id | default('unknown') }}"
-          spec:
-            holderIdentity: "{{ cluster_order_holder_id }}"
-      register: manage_agents_lease
-      until: manage_agents_lease is successful
-      retries: 20
-      delay: 5
+      ansible.builtin.include_role:
+        name: cloudkit.service.lease
+      vars:
+        lease_state: present
+        lease_name: "agent-{{ manage_agents_resource_class }}-lock"
+        lease_holder: "{{ cluster_order_holder_id }}"
+        lease_retries: 20
+        lease_delay: 5
 
     - name: Retrieve the list of available agents with a matching machine resource class
       kubernetes.core.k8s_info:
@@ -95,13 +84,10 @@
       when: manage_agents_added | length != manage_agents_selected_count | int
 
   always:
-
     - name: Delete agent lock
-      kubernetes.core.k8s:
-        state: absent
-        definition:
-          apiVersion: coordination.k8s.io/v1
-          kind: Lease
-          metadata:
-            name: "agent-{{ manage_agents_resource_class }}-lock"
-            namespace: "{{ default_agent_namespace }}"
+      ansible.builtin.include_role:
+        name: cloudkit.service.lease
+      vars:
+        lease_state: absent
+        lease_name: "agent-{{ manage_agents_resource_class }}-lock"
+        lease_holder: "{{ cluster_order_holder_id }}"
