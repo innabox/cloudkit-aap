@@ -1,0 +1,162 @@
+---
+- name: Set VM facts
+  ansible.builtin.set_fact:
+    vm_name: "{{ vm_order.metadata.name }}"
+    vm_cpu_cores: "2"
+    vm_memory: "2Gi"
+    vm_disk_size: "10Gi"
+    vm_image_source: "{{ template_parameters.vm_image_source | default(default_vm_image_source) }}"
+    vm_os_type: "{{ template_parameters.vm_os_type | default(default_vm_os_type) }}"
+    storage_class: "{{ default_vm_storage_class }}"
+    vm_expose_service: "{{ default_vm_expose_service }}"
+    vm_service_type: "{{ default_vm_service_type }}"
+    vm_service_ports: "{{ default_vm_service_ports }}"
+    vm_network_type: "{{ template_parameters.vm_network_type | default(default_vm_network_type) }}"
+    ssh_public_key: "{{ template_parameters.ssh_public_key | default(default_ssh_public_key) }}"
+
+- name: Create cloud-init secret
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: "{{ vm_name }}-cloud-init"
+        namespace: "{{ vm_target_namespace }}"
+      type: Opaque
+      data:
+        userData: "{{ (template_parameters.cloud_init_config | to_nice_yaml) | b64encode }}"
+    state: present
+
+- name: Append 'docker://' if needed
+  ansible.builtin.set_fact:
+    vm_os_type: "docker://{{ vm_os_type }}"
+  when: not vm_os_type.startswith('docker://')
+
+- name: Create DataVolume for VM root disk
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: cdi.kubevirt.io/v1beta1
+      kind: DataVolume
+      metadata:
+        name: "{{ vm_name }}-root-disk"
+        namespace: "{{ vm_target_namespace }}"
+      spec:
+        source:
+          registry:
+            url: "docker://{{ vm_image_source }}"
+        pvc:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: "{{ vm_disk_size }}"
+          storageClassName: "{{ storage_class }}"
+    state: present
+
+- name: Create VirtualMachine
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: kubevirt.io/v1
+      kind: VirtualMachine
+      metadata:
+        name: "{{ vm_name }}"
+        namespace: "{{ vm_target_namespace }}"
+        labels: "{{ default_vm_labels }}"
+      spec:
+        running: true
+        template:
+          metadata:
+            labels: "{{ default_vm_labels }}"
+          spec:
+            domain:
+              cpu:
+                cores: "{{ vm_cpu_cores }}"
+              memory:
+                guest: "{{ vm_memory }}"
+              devices:
+                disks:
+                  - name: root-disk
+                    disk:
+                      bus: virtio
+                  - name: cloud-init-disk
+                    disk:
+                      bus: virtio
+                    serial: cloud-init
+                interfaces:
+                  - name: default
+                    masquerade: {}
+                rng: {}
+              features:
+                smm:
+                  enabled: true
+                acpi: {}
+                apic: {}
+                hyperv:
+                  relaxed: {}
+                  vapic: {}
+                  spinlocks:
+                    spinlocks: 8191
+            networks:
+              - name: default
+                pod: {}
+            volumes: "{{ base_volumes }}"
+    state: present
+  vars:
+    base_volumes:
+      - name: root-disk
+        dataVolume:
+          name: "{{ vm_name }}-root-disk"
+      - name: cloud-init-disk
+        cloudInitNoCloud:
+          secretRef:
+            name: "{{ vm_name }}-cloud-init"
+
+- name: Show VM Namespace and VM Name
+  debug:
+    msg: "Namespace {{ vm_target_namespace }} - Name: {{ vm_name }}"
+
+- name: Wait for VM to be ready
+  kubernetes.core.k8s_info:
+    api_version: kubevirt.io/v1
+    kind: VirtualMachine
+    name: "{{ vm_name }}"
+    namespace: "{{ vm_target_namespace }}"
+    wait: true
+    wait_condition:
+      type: Ready
+      status: "True"
+    wait_timeout: 600
+
+- name: Create VM service
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: "{{ vm_name }}-service"
+        namespace: "{{ vm_target_namespace }}"
+        labels: "{{ default_vm_labels }}"
+      spec:
+        type: "{{ vm_service_type }}"
+        selector: "{{ default_vm_labels }}"
+        ports: "{{ vm_service_ports }}"
+    state: present
+  when: vm_expose_service and vm_service_ports | length > 0
+
+- name: Get VM status
+  kubernetes.core.k8s_info:
+    api_version: kubevirt.io/v1
+    kind: VirtualMachine
+    name: "{{ vm_name }}"
+    namespace: "{{ vm_target_namespace }}"
+  register: vm_status
+
+- name: Display VM information
+  ansible.builtin.debug:
+    msg:
+      - "Virtual Machine '{{ vm_name }}' created successfully"
+      - "Namespace: {{ vm_target_namespace }}"
+      - "CPU Cores: {{ vm_cpu_cores }}"
+      - "Memory: {{ vm_memory }}"
+      - "Root Disk Size: {{ vm_disk_size }}"
+      - "Status: {{ vm_status.resources[0].status.printableStatus | default('Unknown') }}"
