@@ -13,8 +13,12 @@
   block:
   - name: Allocate floating ip  # noqa:no-changed-when
     ansible.builtin.command: >-
-      openstack floating ip create {{ floating_ip_network }} --description "{{ floating_ip_name }}"
-        -f json
+      openstack floating ip create {{ floating_ip_network }}
+      --description "{{ floating_ip_name }}"
+      {% for tag in floating_ip_tags %}
+      --tag "{{ tag }}"
+      {% endfor %}
+      -f json
     register: fip_cmd_raw
 
   - name: Unmarshal output from JSON

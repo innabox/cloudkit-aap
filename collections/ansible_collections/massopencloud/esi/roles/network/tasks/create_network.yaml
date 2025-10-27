@@ -5,6 +5,7 @@
     network_state: "present"
     network_name: "{{ 'network-' + network_suffix }}"
     l2_network_mtu: "{{ network_l2_network_mtu }}"
+    l2_network_tags: "{{ network_tags }}"
 
 - name: Create subnet
   ansible.builtin.include_role:
@@ -18,6 +19,7 @@
     l3_subnet_allocation_pool_start: "{{ network_l3_subnet_allocation_pool_start }}"
     l3_subnet_allocation_pool_end: "{{ network_l3_subnet_allocation_pool_end }}"
     l3_subnet_dns_nameservers: "{{ network_l3_subnet_dns_nameservers }}"
+    l3_network_tags: "{{ network_tags }}"
 
 - name: Create router
   ansible.builtin.include_role:
@@ -28,3 +30,4 @@
     router_subnets:
       - "{{ create_subnet_result }}"
     l3_router_external_network: "{{ network_l3_router_external_network }}"
+    l3_network_tags: "{{ network_tags }}"

@@ -47,6 +47,11 @@ argument_specs:
           External network used for the router.
         type: "list"
         required: false
+      network_tags:
+        description: |
+          List of tags to apply to all network resources (network, subnet, router).
+        type: "list"
+        required: false
   get_node_network_info:
     options:
       node:

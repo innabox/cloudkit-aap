@@ -6,3 +6,4 @@ network_l3_subnet_allocation_pool_start: 192.168.50.10
 network_l3_subnet_allocation_pool_end: 192.168.50.200
 network_l3_subnet_dns_nameservers:
   - 8.8.8.8
+network_tags: []

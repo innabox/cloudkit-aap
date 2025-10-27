@@ -30,6 +30,7 @@
   vars:
     floating_ip_state: present
     floating_ip_name: "{{ external_access_name }}-api"  # noqa:var-naming[no-role-prefix]
+    floating_ip_tags: ['o-sac', '{{ external_access_name }}']
 
 - name: Set api_floating_ip
   ansible.builtin.set_fact:
@@ -53,6 +54,7 @@
   vars:
     floating_ip_state: present
     floating_ip_name: "{{ external_access_name }}-ingress"  # noqa:var-naming[no-role-prefix]
+    floating_ip_tags: ['o-sac', '{{ external_access_name }}']
 
 - name: Set external_access_ingress_floating_ip
   ansible.builtin.set_fact:

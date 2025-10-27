@@ -8,6 +8,7 @@
   vars:
     network_suffix: "{{ cluster_infra_name }}"
     network_state: present
+    network_tags: ['o-sac', '{{ cluster_infra_name }}']
 
 - name: Set cluster_infra_network_name
   ansible.builtin.set_fact:

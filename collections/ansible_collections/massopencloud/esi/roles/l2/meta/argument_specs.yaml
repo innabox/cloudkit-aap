@@ -18,6 +18,11 @@ argument_specs:
           Name of network to be deleted when state is `absent`; the deletion will fail if the network name is not unique.
         type: "str"
         required: true
+      l2_network_tags:
+        description: |
+          List of tags to apply to the network
+        type: "list"
+        required: false
   set_networks_for_node:
     options:
       networks:

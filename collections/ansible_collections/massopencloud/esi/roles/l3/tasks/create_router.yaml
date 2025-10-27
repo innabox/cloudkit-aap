@@ -11,13 +11,24 @@
 - name: Create a new router
   when: not routers.routers
   block:
-  - name: Create router
-    openstack.cloud.router:
-      name: "{{ router_name }}"
-      network: "{{ l3_router_external_network }}"
-      interfaces: "{{ router_subnets }}"
+  - name: Create router  # noqa:no-changed-when
+    ansible.builtin.command: >-
+      openstack router create
+      --external-gateway "{{ l3_router_external_network }}"
+      {% for tag in l3_network_tags %}
+      --tag "{{ tag }}"
+      {% endfor %}
+      "{{ router_name }}"
+      -f json
     register: router_cmd_result
 
   - name: Set create_router_result to new router
     ansible.builtin.set_fact:
-      create_router_result: "{{ router_cmd_result.router.id }}"
+      create_router_result: "{{ (router_cmd_result.stdout | from_json).id }}"
+
+  - name: Add subnets to router  # noqa:no-changed-when
+    ansible.builtin.command: >-
+      openstack router add subnet "{{ router_name }}" "{{ item }}"
+    loop: "{{ router_subnets }}"
+    register: router_add_subnet_result
+    failed_when: router_add_subnet_result.rc != 0

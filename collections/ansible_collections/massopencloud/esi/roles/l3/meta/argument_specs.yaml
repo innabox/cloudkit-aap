@@ -11,6 +11,11 @@ argument_specs:
           Name of the subnet to be created
         type: "str"
         required: true
+      l3_network_tags:
+        description: |
+          List of tags to apply to the subnet and router
+        type: "list"
+        required: false
   destroy_subnet:
     options:
       subnet_name:
