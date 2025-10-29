@@ -1,0 +1,13 @@
+---
+vm_settings_template_default:
+  cloud_init_config:
+    users:
+      - name: osac
+        sudo: "ALL=(ALL) NOPASSWD:ALL"
+        groups:
+          - wheel
+          - sudo
+        shell: /bin/bash
+        lock_passwd: true
+        ssh_authorized_keys: "{{ vm_settings_template_parameters.ssh_public_key | default([]) }}"
+    ssh_pwauth: false

@@ -1,0 +1,9 @@
+---
+- name: Display template parameters
+  ansible.builtin.debug:
+    msg: "{{ vm_order.spec.templateParameters | to_nice_yaml }}"
+
+- name: Update template parameters in VM order
+  ansible.builtin.set_fact:
+    vm_order: "{{ vm_order | combine({'spec': {'templateParameters': vm_settings_template_default | to_json}}, recursive=true) }}"
+  when: (vm_order.spec.templateParameters.cloud_init_config | default({})) | length == 0

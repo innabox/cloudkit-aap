@@ -8,7 +8,7 @@
 
 - name: Set finalizer_target_resource variable
   ansible.builtin.set_fact:
-    finalizer_target_resource: "{{ finalizer_resources.resources|first }}"
+    finalizer_target_resource: "{{ finalizer_resources.resources | first }}"
 
 - name: "Add finalizer to {{ finalizer_target.kind }}/{{ finalizer_target.name }}" # noqa: name[template]
   when: finalizer_state == "present"

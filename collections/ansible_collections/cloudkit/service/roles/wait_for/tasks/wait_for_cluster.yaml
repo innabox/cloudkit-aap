@@ -10,7 +10,7 @@
   delay: "{{ wait_for_cluster_delay }}"
   vars:
     network_cluster_operator: >-
-      {{ network_cluster_operator_results.resources[0]|default({}) }}
+      {{ network_cluster_operator_results.resources[0] | default({}) }}
     condition: >-
       {{
         (
