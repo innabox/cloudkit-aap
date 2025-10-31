@@ -208,7 +208,7 @@ class Template(Base):
         return f"{self.collection}.{self.name}"
 
     @pydantic.computed_field
-    def node_sets(self) -> dict[str, NodeSet]:
+    def node_sets(self) -> dict[str, NodeSet] | None:
         ret = {
             nr.resource_class: NodeSet(
                 host_class=nr.resource_class, size=nr.number_of_nodes
