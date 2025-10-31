@@ -1,0 +1,13 @@
+argument_specs:
+  main:
+    options:
+      agent_state:
+        type: str
+        choices:
+          - present
+          - absent
+        required: true
+      node_names:
+        type: list
+        elements: str
+        required: true
