@@ -1,0 +1,12 @@
+- name: Set the number of available agents
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Assert that desired_number_of_agents exists and not empty
+      ansible.builtin.assert:
+        that:
+          - desired_number_of_agents is defined
+
+    - name: Set number of agents
+      ansible.builtin.include_role:
+        name: massopencloud.esi.agent

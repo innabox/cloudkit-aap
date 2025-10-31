@@ -11,5 +11,4 @@
     - name: Import agents
       ansible.builtin.include_role:
         name: massopencloud.esi.agent
-      vars:
-        agent_state: present
+        tasks_from: import_agents

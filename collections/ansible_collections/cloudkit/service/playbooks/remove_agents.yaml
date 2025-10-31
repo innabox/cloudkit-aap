@@ -11,5 +11,4 @@
     - name: Remove agents
       ansible.builtin.include_role:
         name: massopencloud.esi.agent
-      vars:
-        agent_state: absent
+        tasks_from: remove_agents
