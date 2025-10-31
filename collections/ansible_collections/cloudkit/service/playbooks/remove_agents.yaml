@@ -1,0 +1,14 @@
+- name: Remove agents back into nodes
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Assert that node_names exists and not empty
+      ansible.builtin.assert:
+        that:
+          - node_names is defined
+          - node_names | length > 0
+
+    - name: Remove agents
+      ansible.builtin.include_role:
+        name: massopencloud.esi.agent
+        tasks_from: remove_agents

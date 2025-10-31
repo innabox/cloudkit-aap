@@ -1,0 +1,78 @@
+- name: Display node names that will be removed from being agents
+  ansible.builtin.debug:
+    var: node_names
+
+- name: Get list of existing agents
+  kubernetes.core.k8s_info:
+    kind: Agent
+    api_version: agent-install.openshift.io/v1beta1
+    namespace: "{{ agent_namespace }}"
+  register: esi_initial_agents
+
+- name: Initialize esi_node_info_list
+  ansible.builtin.set_fact:
+    esi_node_info_list: []
+
+- name: Get node informations
+  ansible.builtin.command: >
+    openstack baremetal node show {{ node_name }} -f json
+  register: esi_node_info_raw
+  changed_when: true
+  loop: "{{ node_names }}"
+  loop_control:
+    loop_var: node_name
+
+- name: Unmarshal node informations
+  ansible.builtin.set_fact:
+    esi_node_info_list: "{{ esi_node_info_raw.results | map(attribute='stdout') | map('from_json') | list }}"
+
+- name: Initialize esi_agents
+  ansible.builtin.set_fact:
+    esi_agents: []
+
+- name: Find matching agents
+  ansible.builtin.set_fact:
+    esi_agents: >-
+      {{
+        esi_agents + [
+          esi_initial_agents.resources |
+          selectattr('spec.hostname', 'defined') |
+          selectattr('spec.hostname', 'equalto', node_name | lower) |
+          first
+        ]
+      }}
+  loop: "{{ node_names }}"
+  loop_control:
+    loop_var: node_name
+
+- name: Delete agents
+  kubernetes.core.k8s:
+    kind: Agent
+    api_version: agent-install.openshift.io/v1beta1
+    namespace: "{{ agent_namespace }}"
+    name: "{{ esi_agent.metadata.name }}"
+    state: absent
+  loop: "{{ esi_agents }}"
+  loop_control:
+    loop_var: esi_agent
+
+- name: Clean nodes
+  when: esi_node_info.provision_state == "active"
+  ansible.builtin.command: >
+    openstack baremetal node undeploy {{ esi_node_info.name }}
+  changed_when: true
+  loop: "{{ esi_node_info_list }}"
+  loop_control:
+    loop_var: esi_node_info
+
+- name: Wait for nodes to become available
+  ansible.builtin.command: >
+    openstack baremetal node show {{ node_name }} -f json
+  changed_when: true
+  register: esi_node_info_raw
+  until: (esi_node_info_raw.stdout | from_json).provision_state == "available"
+  retries: 300
+  delay: 10
+  loop: "{{ node_names }}"
+  loop_control:
+    loop_var: node_name

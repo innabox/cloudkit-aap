@@ -1,0 +1,18 @@
+argument_specs:
+  main:
+    options:
+      desired_number_of_agents:
+        type: int
+        required: true
+  import_agents:
+    options:
+      node_names:
+        type: list
+        elements: str
+        required: true
+  remove_agents:
+    options:
+      node_names:
+        type: list
+        elements: str
+        required: true
