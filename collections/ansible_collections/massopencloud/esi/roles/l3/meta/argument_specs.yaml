@@ -49,3 +49,17 @@ argument_specs:
           Name or ID of the router to be destroyed
         type: "str"
         required: true
+  list_routers:
+    options:
+      l3_network_properties:
+        description: |
+          Dictionary of properties to convert to tags for filtering routers
+        type: "dict"
+        required: false
+  list_subnets:
+    options:
+      l3_network_properties:
+        description: |
+          Dictionary of properties to convert to tags for filtering subnets
+        type: "dict"
+        required: false

@@ -35,3 +35,10 @@ argument_specs:
           Name or UUID of node
         type: "str"
         required: true
+  list_networks:
+    options:
+      l2_network_properties:
+        description: |
+          Dictionary of properties to convert to tags for filtering networks
+        type: "dict"
+        required: false
