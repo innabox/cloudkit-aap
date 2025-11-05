@@ -3,6 +3,21 @@
   ansible.builtin.set_fact:
     vm_name: "{{ template_parameters.vm_name }}"
 
+- name: Get VirtualMachine info for floating IP cleanup
+  kubernetes.core.k8s_info:
+    api_version: kubevirt.io/v1
+    kind: VirtualMachine
+    name: "{{ vm_name }}"
+    namespace: "{{ vm_target_namespace }}"
+  register: vm_info
+
+- name: Delete floating IP
+  ansible.builtin.include_role:
+    name: massopencloud.esi.floating_ip
+    tasks_from: destroy_floating_ip
+  vars:
+    floating_ip_name: "{{ vm_name }}-floating-ip"
+
 - name: Stop VirtualMachine
   kubernetes.core.k8s:
     api_version: kubevirt.io/v1
@@ -41,6 +56,14 @@
     api_version: v1
     kind: Service
     name: "{{ vm_name }}-service"
+    namespace: "{{ vm_target_namespace }}"
+    state: absent
+
+- name: Delete VM load balancer service
+  kubernetes.core.k8s:
+    api_version: v1
+    kind: Service
+    name: "{{ vm_name }}-load-balancer"
     namespace: "{{ vm_target_namespace }}"
     state: absent
 

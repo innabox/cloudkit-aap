@@ -6,17 +6,15 @@ default_vm_os_type: "linux"
 default_vm_image_source: "quay.io/containerdisks/fedora:latest"
 
 # Network Configuration Defaults
+default_vm_internal_network: "hypershift"
 default_vm_network_type: "pod"
-default_vm_expose_service: false
-default_vm_service_type: "ClusterIP"
 
 # Default service ports for common applications
 default_vm_service_ports:
-  ssh:
-    - name: "ssh"
-      port: 22
-      target_port: 22
-      protocol: "TCP"
+  - name: "ssh"
+    port: 22
+    targetPort: 22
+    protocol: "TCP"
 
 # Storage Defaults
 default_vm_storage_class: "nfs-client"  # NFS storage operator storage class
