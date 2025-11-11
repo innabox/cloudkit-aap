@@ -115,6 +115,7 @@ class TemplateParameter(Base):
             name=name,
             title=spec.get("short_description"),
             description=spec.get("description"),
+            required=spec.get("required", False),
             default=spec.get("default"),
             type=TypeMapping[spec.get("type", "str")],
         )
