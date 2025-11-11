@@ -1,0 +1,93 @@
+- name: Display node names that will be removed from being agents
+  ansible.builtin.debug:
+    var: manage_agents_node_names
+
+- name: Get list of existing agents
+  kubernetes.core.k8s_info:
+    kind: Agent
+    api_version: agent-install.openshift.io/v1beta1
+    namespace: "{{ manage_agents_namespace }}"
+  register: initial_agents
+
+- name: Get node informations
+  openstack.cloud.baremetal_node_info:
+    name: "{{ node_name }}"
+  register: node_infos
+  loop: "{{ manage_agents_node_names }}"
+  loop_control:
+    loop_var: node_name
+
+- name: Extract node informations
+  ansible.builtin.set_fact:
+    node_info_list: "{{ node_infos.results | map(attribute='baremetal_nodes') | map('first') | list }}"
+
+- name: Get MAC addresses of nodes
+  openstack.cloud.baremetal_port_info:
+    node: "{{ node_name }}"
+  register: ports_list
+  loop: "{{ manage_agents_node_names }}"
+  loop_control:
+    loop_var: node_name
+
+- name: Extract MAC addresses
+  ansible.builtin.set_fact:
+    node_addresses_list: >-
+      {{
+        ports_list.results |
+        map(attribute='ports') |
+        map('map', attribute='address') |
+        map('list') |
+        list
+      }}
+
+- name: Find matching agents
+  ansible.builtin.set_fact:
+    agent_names: >-
+      {{
+        agent_names | default([]) + [
+          node_addresses |
+          massopencloud.esi.match_agent_addresses(initial_agents.resources)
+        ]
+      }}
+  loop: "{{ node_addresses_list }}"
+  loop_control:
+    loop_var: node_addresses
+  when: node_addresses | massopencloud.esi.match_agent_addresses(initial_agents.resources)
+
+- name: Delete agents
+  when:
+    - agent_names is defined
+    - agent_names | length > 0
+  kubernetes.core.k8s:
+    kind: Agent
+    api_version: agent-install.openshift.io/v1beta1
+    namespace: "{{ manage_agents_namespace }}"
+    name: "{{ agent }}"
+    state: absent
+  loop: "{{ agent_names }}"
+  loop_control:
+    loop_var: agent
+
+
+- name: Clean nodes
+  when: node_info.provision_state == "active"
+  openstack.cloud.baremetal_node_action:
+    name: "{{ node_info.name }}"
+    state: absent
+    deploy: false
+  async: 300
+  poll: 0
+  loop: "{{ node_info_list }}"
+  loop_control:
+    loop_var: node_info
+
+- name: Wait for nodes to become available
+  openstack.cloud.baremetal_node_info:
+    name: "{{ node_name }}"
+  register: node_info
+  until: node_info.baremetal_nodes[0].provision_state == "available"
+  retries: 300
+  delay: 10
+  loop: "{{ manage_agents_node_names }}"
+  loop_control:
+    loop_var: node_name
