@@ -170,3 +170,15 @@
   loop: "{{ range(agent_names | length) | list }}"
   loop_control:
     loop_var: node_idx
+
+- name: Move agents to idle agents network
+  ansible.builtin.include_role:
+    name: massopencloud.esi.l2
+    tasks_from: set_networks_for_node
+  vars:
+    node: "{{ node_info.name }}"
+    networks:
+    - "{{ manage_agents_idle_agents_network }}"
+  loop: "{{ filtered_node_info }}"
+  loop_control:
+    loop_var: node_info

@@ -44,6 +44,9 @@ argument_specs:
         type: list
         elements: str
         required: true
+      manage_agents_idle_agents_network:
+        type: str
+        required: true
   remove_agents:
     options:
       manage_agents_node_names:
