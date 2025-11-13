@@ -11,14 +11,13 @@
       ansible.builtin.set_fact:
         vm_order_name: "{{ vm_order.metadata.name }}"
 
-    - name: Apply default VM settings
-      ansible.builtin.include_role:
-        name: cloudkit.service.vm_settings
-
     - name: Extract VM template info
       ansible.builtin.include_role:
         name: cloudkit.service.extract_vm_template_info
 
+    - name: Apply default VM settings
+      ansible.builtin.include_role:
+        name: cloudkit.service.vm_settings
   tasks:
     - name: Determine working namespace
       ansible.builtin.include_role:
@@ -30,6 +29,7 @@
           - "VM order: {{ vm_order_name }}"
           - "VM target namespace: {{ vm_target_namespace }}"
           - "Template ID: {{ template_id }}"
+          - "Template parameters: {{ template_parameters }}"
 
     - name: "Set the finalizer on the Cloudkit VM  {{ vm_order.metadata.name }}"
       ansible.builtin.include_role:

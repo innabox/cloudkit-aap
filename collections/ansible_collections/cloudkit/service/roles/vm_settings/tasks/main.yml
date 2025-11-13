@@ -1,9 +1,15 @@
 ---
+- name: Assert template_parameters is defined
+  ansible.builtin.assert:
+    that:
+      - template_parameters is defined
+    fail_msg: "template_parameters must be defined"
+
 - name: Display template parameters
   ansible.builtin.debug:
-    msg: "{{ vm_order.spec.templateParameters | to_nice_yaml }}"
+    var: template_parameters
 
 - name: Update template parameters in VM order
   ansible.builtin.set_fact:
-    vm_order: "{{ vm_order | combine({'spec': {'templateParameters': vm_settings_template_default | to_json}}, recursive=true) }}"
-  when: (vm_order.spec.templateParameters.cloud_init_config | default({})) | length == 0
+    template_parameters: "{{ template_parameters | combine(vm_settings_template_default, recursive=true) }}"
+  when: (template_parameters.cloud_init_config is not defined) or (template_parameters.cloud_init_config | length == 0)

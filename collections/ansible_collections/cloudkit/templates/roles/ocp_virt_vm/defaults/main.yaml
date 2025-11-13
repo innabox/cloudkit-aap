@@ -1,13 +1,6 @@
 ---
-# Default VM configuration values
-
-# Default OS and Image Configuration
-default_vm_os_type: "linux"
-default_vm_image_source: "quay.io/containerdisks/fedora:latest"
-
 # Network Configuration Defaults
 default_vm_internal_network: "hypershift"
-default_vm_network_type: "pod"
 
 # Default service ports for common applications
 default_vm_service_ports:
@@ -18,8 +11,6 @@ default_vm_service_ports:
 
 # Storage Defaults
 default_vm_storage_class: "nfs-client"  # NFS storage operator storage class
-default_additional_disks: []
-default_ssh_public_key: ""
 
 # Labels applied to all VM resources
 default_vm_labels: "{{ {vm_order_label: vm_order_name} }}"

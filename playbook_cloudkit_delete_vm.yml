@@ -15,13 +15,13 @@
       ansible.builtin.debug:
         var: vm_order
 
-    - name: Apply default VM settings
-      ansible.builtin.include_role:
-        name: cloudkit.service.vm_settings
-
     - name: Extract VM template info
       ansible.builtin.include_role:
         name: cloudkit.service.extract_vm_template_info
+
+    - name: Apply default VM settings
+      ansible.builtin.include_role:
+        name: cloudkit.service.vm_settings
 
     - name: Determine target namespace
       ansible.builtin.include_role:
@@ -39,10 +39,6 @@
       ansible.builtin.include_role:
         name: "{{ template_id }}"
         tasks_from: "delete"
-      vars:
-        template_parameters:
-          vm_name: "{{ vm_order_name }}"
-          vm_namespace: "{{ vm_target_namespace }}"
 
     - name: "Remove the finalizer on the Cloudkit VM  {{ vm_order.metadata.name }}"
       ansible.builtin.include_role:

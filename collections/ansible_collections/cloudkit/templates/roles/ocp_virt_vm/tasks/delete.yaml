@@ -1,7 +1,7 @@
 ---
 - name: Set VM facts
   ansible.builtin.set_fact:
-    vm_name: "{{ template_parameters.vm_name }}"
+    vm_name: "{{ vm_order.metadata.name }}"
 
 - name: Get VirtualMachine info for floating IP cleanup
   kubernetes.core.k8s_info:

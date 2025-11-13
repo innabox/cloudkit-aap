@@ -9,43 +9,34 @@ argument_specs:
         type: dict
         description: VM configuration parameters
         options:
-          vm_name:
-            description: >
-              Name of the virtual machine to create. If not specified,
-              will generate a random name using adjective-noun pairs.
+          cpu_cores:
+            description: Number of CPU cores for the VM.
+            type: int
+            required: false
+            default: 2
+          memory:
+            description: Amount of memory for the VM.
             type: str
             required: false
-          vm_image_source:
+            default: 2Gi
+          disk_size:
+            description: Size of the VM root disk.
+            type: str
+            required: false
+            default: 10Gi
+          image_source:
             description: >
               Container disk image or data source for the VM root disk.
               Can be a container image URL or PVC reference.
             type: str
             required: false
             default: "quay.io/containerdisks/fedora:latest"
-          vm_os_type:
-            description: >
-              Operating system type for VM optimization and features.
-            type: str
-            required: false
-            default: "linux"
-            choices:
-              - linux
-              - windows
           cloud_init_config:
             description: >
               Cloud-init configuration for VM initialization.
               Can include user data, network config, etc.
             type: dict
             required: false
-          vm_network_type:
-            description: >
-              Network attachment type for the VM.
-            type: str
-            required: false
-            default: "pod"
-            choices:
-              - pod
-              - multus
           ssh_public_key:
             description: >
               SSH public key to inject into the VM for remote access.

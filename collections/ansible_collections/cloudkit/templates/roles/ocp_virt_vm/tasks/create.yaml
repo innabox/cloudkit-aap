@@ -2,16 +2,14 @@
 - name: Set VM facts
   ansible.builtin.set_fact:
     vm_name: "{{ vm_order.metadata.name }}"
-    vm_cpu_cores: "2"
-    vm_memory: "2Gi"
-    vm_disk_size: "10Gi"
-    vm_image_source: "{{ template_parameters.vm_image_source | default(default_vm_image_source) }}"
-    vm_os_type: "{{ template_parameters.vm_os_type | default(default_vm_os_type) }}"
+    vm_cpu_cores: "{{ template_parameters.cpu_cores }}"
+    vm_memory: "{{ template_parameters.memory }}"
+    vm_disk_size: "{{ template_parameters.disk_size }}"
+    vm_image_source: "{{ template_parameters.image_source }}"
     storage_class: "{{ default_vm_storage_class }}"
     vm_internal_network: "{{ default_vm_internal_network }}"
     vm_service_ports: "{{ default_vm_service_ports }}"
-    vm_network_type: "{{ template_parameters.vm_network_type | default(default_vm_network_type) }}"
-    ssh_public_key: "{{ template_parameters.ssh_public_key | default(default_ssh_public_key) }}"
+    ssh_public_key: "{{ template_parameters.ssh_public_key }}"
 
 - name: Create cloud-init secret
   kubernetes.core.k8s:
@@ -21,15 +19,11 @@
       metadata:
         name: "{{ vm_name }}-cloud-init"
         namespace: "{{ vm_target_namespace }}"
+        labels: "{{ default_vm_labels }}"
       type: Opaque
       data:
         userData: "{{ (template_parameters.cloud_init_config | to_nice_yaml) | b64encode }}"
     state: present
-
-- name: Append 'docker://' if needed
-  ansible.builtin.set_fact:
-    vm_os_type: "docker://{{ vm_os_type }}"
-  when: not vm_os_type.startswith('docker://')
 
 - name: Create DataVolume for VM root disk
   kubernetes.core.k8s:
@@ -39,6 +33,7 @@
       metadata:
         name: "{{ vm_name }}-root-disk"
         namespace: "{{ vm_target_namespace }}"
+        labels: "{{ default_vm_labels }}"
       spec:
         source:
           registry:
