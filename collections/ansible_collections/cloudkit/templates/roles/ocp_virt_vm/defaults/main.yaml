@@ -2,13 +2,6 @@
 # Network Configuration Defaults
 default_vm_internal_network: "hypershift"
 
-# Default service ports for common applications
-default_vm_service_ports:
-  - name: "ssh"
-    port: 22
-    targetPort: 22
-    protocol: "TCP"
-
 # Storage Defaults
 default_vm_storage_class: "nfs-client"  # NFS storage operator storage class
 

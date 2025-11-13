@@ -8,8 +8,14 @@
     vm_image_source: "{{ template_parameters.image_source }}"
     storage_class: "{{ default_vm_storage_class }}"
     vm_internal_network: "{{ default_vm_internal_network }}"
-    vm_service_ports: "{{ default_vm_service_ports }}"
+    vm_exposed_ports: "{{ template_parameters.exposed_ports }}"
     ssh_public_key: "{{ template_parameters.ssh_public_key }}"
+
+- name: Validate exposed_ports format
+  ansible.builtin.assert:
+    that:
+      - template_parameters.exposed_ports is match('^([0-9]+/(tcp|udp))(,[0-9]+/(tcp|udp))*$')
+    fail_msg: "exposed_ports must be in format 'port/protocol' (e.g., '22/tcp,80/tcp') where protocol is 'tcp' or 'udp'"
 
 - name: Create cloud-init secret
   kubernetes.core.k8s:
@@ -131,6 +137,16 @@
       vm: "{{ vm_name }}"
       instance: "{{ vm_order.metadata.namespace }}"
       purpose: "o-sac"
+
+- name: Build Kubernetes service ports from exposed_ports
+  ansible.builtin.set_fact:
+    vm_service_ports: >
+      {{ vm_service_ports | default([]) + [{'name': port_name, 'port': port_number, 'targetPort': port_number, 'protocol': port_protocol}] }}
+  vars:
+    port_number: "{{ item.split('/')[0] | int }}"
+    port_protocol: "{{ item.split('/')[1] | upper }}"
+    port_name: "{{ port_protocol | lower }}-{{ port_number }}"
+  loop: "{{ vm_exposed_ports.split(',') }}"
 
 - name: Create external LoadBalancer for VM
   kubernetes.core.k8s:
