@@ -22,8 +22,22 @@
         labels: "{{ default_vm_labels }}"
       type: Opaque
       data:
-        userData: "{{ (template_parameters.cloud_init_config | to_nice_yaml) | b64encode }}"
+        userData: "{{ (template_parameters.cloud_init_config | default({}) | to_nice_yaml) | b64encode }}"
     state: present
+
+- name: Create Secret resource containing ssh public key
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: "{{ vm_name }}-ssh-public-key"
+        namespace: "{{ vm_target_namespace }}"
+        labels: "{{ default_vm_labels }}"
+      data:
+        ssh-public-key: "{{ ssh_public_key | b64encode }}"
+      type: Opaque
 
 - name: Create DataVolume for VM root disk
   kubernetes.core.k8s:
@@ -94,6 +108,13 @@
               - name: default
                 pod: {}
             volumes: "{{ base_volumes }}"
+            accessCredentials:
+              - sshPublicKey:
+                  source:
+                    secret:
+                      secretName: "{{ vm_name }}-ssh-public-key"
+                  propagationMethod:
+                    noCloud: {}
     state: present
   vars:
     base_volumes:

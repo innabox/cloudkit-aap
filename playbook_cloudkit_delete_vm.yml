@@ -19,10 +19,6 @@
       ansible.builtin.include_role:
         name: cloudkit.service.extract_vm_template_info
 
-    - name: Apply default VM settings
-      ansible.builtin.include_role:
-        name: cloudkit.service.vm_settings
-
     - name: Determine target namespace
       ansible.builtin.include_role:
         name: cloudkit.service.vm_working_namespace
