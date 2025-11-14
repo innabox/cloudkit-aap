@@ -9,13 +9,64 @@
     storage_class: "{{ default_vm_storage_class }}"
     vm_internal_network: "{{ default_vm_internal_network }}"
     vm_exposed_ports: "{{ template_parameters.exposed_ports }}"
-    ssh_public_key: "{{ template_parameters.ssh_public_key }}"
+    ssh_public_key: "{{ template_parameters.ssh_public_key | default(omit) }}"
+    cloud_init_config: "{{ template_parameters.cloud_init_config | default(cloud_init_config_default) }}"
 
 - name: Validate exposed_ports format
   ansible.builtin.assert:
     that:
       - template_parameters.exposed_ports is match('^([0-9]+/(tcp|udp))(,[0-9]+/(tcp|udp))*$')
     fail_msg: "exposed_ports must be in format 'port/protocol' (e.g., '22/tcp,80/tcp') where protocol is 'tcp' or 'udp'"
+
+- name: Validate cloud_init_config is base64 encoded
+  ansible.builtin.assert:
+    that:
+      - cloud_init_config | length > 0
+      - cloud_init_config | b64decode is defined
+    fail_msg: "cloud_init_config must be a valid base64 encoded string"
+
+- name: Build template spec base
+  ansible.builtin.set_fact:
+    vm_template_spec:
+      domain:
+        cpu:
+          cores: "{{ vm_cpu_cores }}"
+        memory:
+          guest: "{{ vm_memory }}"
+        devices:
+          disks:
+            - name: root-disk
+              disk:
+                bus: virtio
+            - name: cloud-init-disk
+              disk:
+                bus: virtio
+              serial: cloud-init
+          interfaces:
+            - name: default
+              masquerade: {}
+          rng: {}
+        features:
+          smm:
+            enabled: true
+          acpi: {}
+          apic: {}
+          hyperv:
+            relaxed: {}
+            vapic: {}
+            spinlocks:
+              spinlocks: 8191
+      networks:
+        - name: default
+          pod: {}
+      volumes:
+        - name: root-disk
+          dataVolume:
+            name: "{{ vm_name }}-root-disk"
+        - name: cloud-init-disk
+          cloudInitNoCloud:
+            secretRef:
+              name: "{{ vm_name }}-cloud-init"
 
 - name: Create cloud-init secret
   kubernetes.core.k8s:
@@ -28,22 +79,38 @@
         labels: "{{ default_vm_labels }}"
       type: Opaque
       data:
-        userData: "{{ (template_parameters.cloud_init_config | default({}) | to_nice_yaml) | b64encode }}"
+        userData: "{{ cloud_init_config }}"
     state: present
 
-- name: Create Secret resource containing ssh public key
-  kubernetes.core.k8s:
-    state: present
-    definition:
-      apiVersion: v1
-      kind: Secret
-      metadata:
-        name: "{{ vm_name }}-ssh-public-key"
-        namespace: "{{ vm_target_namespace }}"
-        labels: "{{ default_vm_labels }}"
-      data:
-        ssh-public-key: "{{ ssh_public_key | b64encode }}"
-      type: Opaque
+- name: Create ssh public key secret and add accessCredentials to template spec
+  when: ssh_public_key is defined and ssh_public_key | length > 0
+  block:
+    - name: Create Secret resource containing ssh public key
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: "{{ vm_name }}-ssh-public-key"
+            namespace: "{{ vm_target_namespace }}"
+            labels: "{{ default_vm_labels }}"
+          data:
+            ssh-public-key: "{{ ssh_public_key | b64encode }}"
+          type: Opaque
+
+    - name: Add accessCredentials to template spec
+      ansible.builtin.set_fact:
+        vm_template_spec: "{{ vm_template_spec | combine(ssh_public_key_patch, recursive=True, list_merge='append') }}"
+      vars:
+        ssh_public_key_patch:
+          accessCredentials:
+            - sshPublicKey:
+                source:
+                  secret:
+                    secretName: "{{ vm_name }}-ssh-public-key"
+                propagationMethod:
+                  noCloud: {}
 
 - name: Create DataVolume for VM root disk
   kubernetes.core.k8s:
@@ -81,56 +148,8 @@
         template:
           metadata:
             labels: "{{ default_vm_labels }}"
-          spec:
-            domain:
-              cpu:
-                cores: "{{ vm_cpu_cores }}"
-              memory:
-                guest: "{{ vm_memory }}"
-              devices:
-                disks:
-                  - name: root-disk
-                    disk:
-                      bus: virtio
-                  - name: cloud-init-disk
-                    disk:
-                      bus: virtio
-                    serial: cloud-init
-                interfaces:
-                  - name: default
-                    masquerade: {}
-                rng: {}
-              features:
-                smm:
-                  enabled: true
-                acpi: {}
-                apic: {}
-                hyperv:
-                  relaxed: {}
-                  vapic: {}
-                  spinlocks:
-                    spinlocks: 8191
-            networks:
-              - name: default
-                pod: {}
-            volumes: "{{ base_volumes }}"
-            accessCredentials:
-              - sshPublicKey:
-                  source:
-                    secret:
-                      secretName: "{{ vm_name }}-ssh-public-key"
-                  propagationMethod:
-                    noCloud: {}
+          spec: "{{ vm_template_spec }}"
     state: present
-  vars:
-    base_volumes:
-      - name: root-disk
-        dataVolume:
-          name: "{{ vm_name }}-root-disk"
-      - name: cloud-init-disk
-        cloudInitNoCloud:
-          secretRef:
-            name: "{{ vm_name }}-cloud-init"
 
 - name: Show VM Namespace and VM Name
   debug:

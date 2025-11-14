@@ -7,3 +7,5 @@ default_vm_storage_class: "nfs-client"  # NFS storage operator storage class
 
 # Labels applied to all VM resources
 default_vm_labels: "{{ {vm_order_label: vm_order_name} }}"
+
+cloud_init_config_default: "{{ '#cloud-config' | b64encode }}"

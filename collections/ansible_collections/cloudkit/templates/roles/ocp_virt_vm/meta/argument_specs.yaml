@@ -33,16 +33,15 @@ argument_specs:
             default: "quay.io/containerdisks/fedora:latest"
           cloud_init_config:
             description: >
-              Cloud-init configuration for VM initialization.
+              Cloud-init configuration for VM initialization as base64-encoded string.
               Can include user data, network config, etc.
-            type: dict
+            type: str
             required: false
           ssh_public_key:
             description: >
               SSH public key to inject into the VM for remote access.
             type: str
             required: false
-            default: ""
           exposed_ports:
             description: >
               Ports to expose on the VM for ingress traffic.
