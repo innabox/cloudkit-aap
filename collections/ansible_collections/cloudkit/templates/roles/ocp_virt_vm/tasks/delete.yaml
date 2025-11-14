@@ -3,14 +3,6 @@
   ansible.builtin.set_fact:
     vm_name: "{{ vm_order.metadata.name }}"
 
-- name: Get VirtualMachine info for floating IP cleanup
-  kubernetes.core.k8s_info:
-    api_version: kubevirt.io/v1
-    kind: VirtualMachine
-    name: "{{ vm_name }}"
-    namespace: "{{ vm_target_namespace }}"
-  register: vm_info
-
 - name: Delete floating IP
   ansible.builtin.include_role:
     name: massopencloud.esi.floating_ip

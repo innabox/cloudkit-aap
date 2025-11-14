@@ -191,10 +191,10 @@
 
 - name: Annotate VirtualMachine with floating IP address
   kubernetes.core.k8s:
-    api_version: kubevirt.io/v1
+    api_version: cloudkit.openshift.io/v1alpha1
     kind: VirtualMachine
     name: "{{ vm_name }}"
-    namespace: "{{ vm_target_namespace }}"
+    namespace: "{{ vm_order.metadata.namespace }}"
     state: present
     definition:
       metadata:
