@@ -10,6 +10,7 @@
     vm_internal_network: "{{ default_vm_internal_network }}"
     vm_exposed_ports: "{{ template_parameters.exposed_ports }}"
     ssh_public_key: "{{ template_parameters.ssh_public_key }}"
+    cloud_init_config: "{{ template_parameters.cloud_init_config }}"
 
 - name: Validate exposed_ports format
   ansible.builtin.assert:
@@ -28,7 +29,7 @@
         labels: "{{ default_vm_labels }}"
       type: Opaque
       data:
-        userData: "{{ (template_parameters.cloud_init_config | default({}) | to_nice_yaml) | b64encode }}"
+        userData: "{{ cloud_init_config }}"
     state: present
 
 - name: Create Secret resource containing ssh public key
