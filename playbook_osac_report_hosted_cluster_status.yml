@@ -1,0 +1,17 @@
+- hosts: localhost
+  gather_facts: true
+  vars:
+    cluster_order: "{{ ansible_eda.event.payload }}"
+    hosted_cluster_status: unknown
+  tasks:
+    - kubernetes.core.k8s:
+        state: patched
+        definition:
+          apiVersion: cloudkit.openshift.io/v1alpha1
+          kind: ClusterOrder
+          metadata:
+            name: "{{ cluster_order.metadata.name }}"
+            namespace: "{{ cluster_order.metadata.namespace }}"
+            annotations:
+              cloudkit.openshift.io/ansible-workflow-status: "{{ hosted_cluster_status }}"
+              cloudkit.openshift.io/ansible-workflow-time: "{{ ansible_date_time.iso8601 }}"
