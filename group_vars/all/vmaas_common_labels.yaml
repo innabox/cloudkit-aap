@@ -1,2 +1,0 @@
-vm_order_label: "cloudkit.openshift.io/virtualmachine"
-vm_settings_cloudkit_finalizer: "cloudkit-aap.openshift.io/finalizer"

@@ -5,21 +5,14 @@
 
   vars:
     vm_order: "{{ ansible_eda.event.payload }}"
+    vm_order_name: "{{ ansible_eda.event.payload.metadata.name }}"
 
   pre_tasks:
-    - name: Set VM order name
-      ansible.builtin.set_fact:
-        vm_order_name: "{{ vm_order.metadata.name }}"
-
-    - name: VM order for deletion
-      ansible.builtin.debug:
-        var: vm_order
-
     - name: Extract VM template info
       ansible.builtin.include_role:
         name: cloudkit.service.extract_vm_template_info
 
-    - name: Determine target namespace
+    - name: Determine working namespace
       ansible.builtin.include_role:
         name: cloudkit.service.vm_working_namespace
 
@@ -28,7 +21,7 @@
       ansible.builtin.debug:
         msg:
           - "Deleting VM order: {{ vm_order_name }}"
-          - "VM target namespace: {{ vm_target_namespace }}"
+          - "VM working namespace: {{ vm_working_namespace }}"
           - "Template ID: {{ template_id }}"
 
     - name: Call the selected VM template for deletion
@@ -41,9 +34,9 @@
         name: cloudkit.service.finalizer
       vars:
         finalizer_state: absent
-        finalizer_name: "{{ vm_settings_cloudkit_finalizer }}"
+        finalizer_name: "{{ vm_cloudkit_finalizer }}"
         finalizer_target:
           api_version: cloudkit.openshift.io/v1alpha1
           kind: VirtualMachine
           namespace: "{{ vm_order.metadata.namespace }}"
-          name: "{{ vm_order.metadata.name }}"
+          name: "{{ vm_order_name }}"

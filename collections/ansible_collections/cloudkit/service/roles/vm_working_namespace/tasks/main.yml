@@ -16,4 +16,6 @@
 
   - name: Set working vm namespace as result
     ansible.builtin.set_fact:
+      vm_working_namespace: "{{ vm_working_namespace_list.resources[0].metadata.name }}"
+      # Temporary: will be removed with template PR
       vm_target_namespace: "{{ vm_working_namespace_list.resources[0].metadata.name }}"

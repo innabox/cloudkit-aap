@@ -29,6 +29,14 @@
       ansible.builtin.include_role:
         name: cloudkit.service.enumerate_templates
 
+    - name: Print cluster templates found.
+      ansible.builtin.debug:
+        var: cloudkit_cluster_templates
+
+    - name: Print vm templates found.
+      ansible.builtin.debug:
+        var: cloudkit_vm_templates
+
     - name: Publish templates
       ansible.builtin.include_role:
         name: cloudkit.service.publish_templates

@@ -1,2 +1,5 @@
 cluster_order_label: "cloudkit.openshift.io/clusterorder"
 cluster_order_infrastructure_finalizer: "cloudkit.openshift.io/infrastructure"
+
+vm_order_label: "cloudkit.openshift.io/virtualmachine"
+vm_cloudkit_finalizer: "cloudkit-aap.openshift.io/finalizer"
