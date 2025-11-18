@@ -9,50 +9,28 @@
     namespace: "{{ manage_agents_namespace }}"
   register: initial_agents
 
-- name: Get node informations
-  openstack.cloud.baremetal_node_info:
-    name: "{{ node_name }}"
-  register: node_infos
-  loop: "{{ manage_agents_node_names }}"
-  loop_control:
-    loop_var: node_name
-
-- name: Extract node informations
-  ansible.builtin.set_fact:
-    node_info_list: "{{ node_infos.results | map(attribute='baremetal_nodes') | map('first') | list }}"
-
-- name: Get MAC addresses of nodes
-  openstack.cloud.baremetal_port_info:
-    node: "{{ node_name }}"
-  register: ports_list
-  loop: "{{ manage_agents_node_names }}"
-  loop_control:
-    loop_var: node_name
-
-- name: Extract MAC addresses
-  ansible.builtin.set_fact:
-    node_addresses_list: >-
-      {{
-        ports_list.results |
-        map(attribute='ports') |
-        map('map', attribute='address') |
-        map('list') |
-        list
-      }}
+- name: Get list of node info
+  ansible.builtin.include_role:
+    name: massopencloud.esi.node
+    tasks_from: list_nodes
+  vars:
+    node_names: "{{ manage_agents_node_names }}"
+# registers: node_info_list
 
 - name: Find matching agents
-  ansible.builtin.set_fact:
-    agent_names: >-
-      {{
-        agent_names | default([]) + [
-          node_addresses |
-          massopencloud.esi.match_agent_addresses(initial_agents.resources)
-        ]
-      }}
-  loop: "{{ node_addresses_list }}"
-  loop_control:
-    loop_var: node_addresses
-  when: node_addresses | massopencloud.esi.match_agent_addresses(initial_agents.resources)
+  ansible.builtin.include_role:
+    name: massopencloud.esi.node
+    tasks_from: get_agent_names
+# registers: agents
+# registers: agent_names
+# registers: agent_hostnames
+
+- name: Display matching agents
+  when: agent_names is defined
+  ansible.builtin.debug:
+    msg:
+      - "matching agent names: {{ agent_names }}"
+      - "matching agent hostnames: {{ agent_hostnames }}"
 
 - name: Delete agents
   when:
@@ -68,26 +46,12 @@
   loop_control:
     loop_var: agent
 
-
 - name: Clean nodes
-  when: node_info.provision_state == "active"
-  openstack.cloud.baremetal_node_action:
-    name: "{{ node_info.name }}"
-    state: absent
-    deploy: false
-  async: 300
-  poll: 0
-  loop: "{{ node_info_list }}"
-  loop_control:
-    loop_var: node_info
-
-- name: Wait for nodes to become available
-  openstack.cloud.baremetal_node_info:
-    name: "{{ node_name }}"
-  register: node_info
-  until: node_info.baremetal_nodes[0].provision_state == "available"
-  retries: 300
-  delay: 10
-  loop: "{{ manage_agents_node_names }}"
-  loop_control:
-    loop_var: node_name
+  when:
+    - agent_hostnames is defined
+    - agent_hostnames | length > 0
+  ansible.builtin.include_role:
+    name: massopencloud.esi.node
+    tasks_from: clean_nodes
+  vars:
+    node_names: "{{ agent_hostnames | upper }}"

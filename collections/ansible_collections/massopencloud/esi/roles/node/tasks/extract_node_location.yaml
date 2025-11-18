@@ -1,0 +1,8 @@
+- name: Extract topology from all node names
+  ansible.builtin.set_fact:
+    topology_labels_list: >-
+      {{ agent_topology_labels_list | default([]) + [node_info.name | massopencloud.esi.extract_esi_location] }}
+  loop: "{{ node_info_list }}"
+  loop_control:
+    loop_var: node_info
+    label: "{{ node_info.name }}"
