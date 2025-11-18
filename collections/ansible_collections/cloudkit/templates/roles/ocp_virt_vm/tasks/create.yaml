@@ -114,6 +114,7 @@
 
 - name: Create DataVolume for VM root disk
   kubernetes.core.k8s:
+    apply: true
     definition:
       apiVersion: cdi.kubevirt.io/v1beta1
       kind: DataVolume
@@ -136,6 +137,7 @@
 
 - name: Create VirtualMachine
   kubernetes.core.k8s:
+    apply: true
     definition:
       apiVersion: kubevirt.io/v1
       kind: VirtualMachine
@@ -191,6 +193,7 @@
 - name: Create external LoadBalancer for VM
   kubernetes.core.k8s:
     state: present
+    apply: true
     definition:
       apiVersion: v1
       kind: Service
@@ -245,7 +248,7 @@
     ports: "{{ port_mappings }}"
     description: "{{ vm_name }}-nodeport"
 
-- name: Annotate VirtualMachine with floating IP address
+- name: Annotate VirtualMachine with floating IP address and config hash
   kubernetes.core.k8s:
     api_version: cloudkit.openshift.io/v1alpha1
     kind: VirtualMachine
@@ -256,6 +259,7 @@
       metadata:
         annotations:
           cloudkit.openshift.io/floating-ip-address: "{{ allocate_floating_ip_result }}"
+          cloudkit-aap.openshift.io/reconciled-config-version: "{{ vm_order.status.desiredConfigVersion | default('unknown') }}"
 
 - name: Get VM status
   kubernetes.core.k8s_info:
