@@ -1,0 +1,15 @@
+- name: Get agents
+  kubernetes.core.k8s_info:
+    kind: Agent
+    api_version: agent-install.openshift.io/v1beta1
+    namespace: "{{ manage_agents_namespace }}"
+  register: agents
+
+- name: Filter nodes that are not agents
+  ansible.builtin.set_fact:
+    filtered_node_info: "{{ filtered_node_info | default([]) + [node_info] }}"
+  loop: "{{ node_info_list }}"
+  loop_control:
+    loop_var: node_info
+    label: "{{ node_info.name }}"
+  when: not node_info.ports | map(attribute='address') | massopencloud.esi.match_agent_addresses(agents.resources)

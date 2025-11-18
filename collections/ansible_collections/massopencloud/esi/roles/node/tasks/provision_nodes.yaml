@@ -1,0 +1,44 @@
+- name: Set nodes to provisioning network
+  ansible.builtin.include_role:
+    name: massopencloud.esi.l2
+    tasks_from: set_networks_for_node
+  vars:
+    networks:
+      - "{{ provisioning_network_name }}"
+    node: "{{ node_info.name }}"
+  loop: "{{ node_info_list }}"
+  loop_control:
+    loop_var: node_info
+    label: "{{ node_info.name }}"
+
+- name: Set deploy interface, set boot image url, and deploy nodes
+  openstack.cloud.baremetal_node_action:
+    name: "{{ node_info.name }}"
+    instance_info:
+      deploy_interface: ramdisk
+      boot_iso: "{{ discovery_url }}"
+    deploy: true
+    wait: false
+  loop: "{{ node_info_list }}"
+  loop_control:
+    loop_var: node_info
+    label: "{{ node_info.name }}"
+
+- name: Wait for nodes to be deployed
+  when: wait
+  kubernetes.core.k8s_info:
+    kind: Agent
+    api_version: agent-install.openshift.io/v1beta1
+    namespace: "{{ manage_agents_namespace }}"
+  register: agents
+  until: >
+    node_info_list |
+    map(attribute='ports') |
+    map('map', attribute='address') |
+    list |
+    map('massopencloud.esi.match_agent_addresses', agents.resources) |
+    reject('none') |
+    list |
+    length == (node_info_list | length)
+  retries: 90
+  delay: 10

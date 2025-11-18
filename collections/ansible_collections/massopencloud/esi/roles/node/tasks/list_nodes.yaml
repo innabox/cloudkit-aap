@@ -1,0 +1,32 @@
+- name: Get node informations
+  openstack.cloud.baremetal_node_info:
+  register: node_infos
+
+- name: Get baremetal ports
+  openstack.cloud.baremetal_port_info:
+  register: ports_list
+
+- name: Filter nodes by node_name
+  ansible.builtin.set_fact:
+    node_infos: >-
+      {{
+        (node_names is defined) | ternary(
+          node_infos.baremetal_nodes | selectattr('name', 'in', node_names) | list,
+          node_infos.baremetal_nodes
+        )
+      }}
+
+- name: Combine ports to each node info
+  ansible.builtin.set_fact:
+    node_info_list: >-
+      {{
+        node_info_list | default([]) + [
+          node_info | combine({
+            'ports': ports_list.ports | selectattr('node_id', 'equalto', node_info.id) | list
+          })
+        ]
+      }}
+  loop: "{{ node_infos }}"
+  loop_control:
+    loop_var: node_info
+    label: "{{ node_info.name }}"

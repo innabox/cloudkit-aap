@@ -1,0 +1,20 @@
+- name: Undeploy nodes
+  openstack.cloud.baremetal_node_action:
+    name: "{{ node_name }}"
+    state: absent
+    deploy: false
+    wait: false
+  loop: "{{ node_names }}"
+  loop_control:
+    loop_var: node_name
+
+- name: Wait for nodes to become available
+  openstack.cloud.baremetal_node_info:
+    name: "{{ node_name }}"
+  register: node_info
+  until: node_info.baremetal_nodes[0].provision_state == "available"
+  retries: 300
+  delay: 10
+  loop: "{{ node_names }}"
+  loop_control:
+    loop_var: node_name
