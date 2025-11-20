@@ -110,6 +110,28 @@
                 propagationMethod:
                   noCloud: {}
 
+- name: Get the all StorageClasses
+  kubernetes.core.k8s_info:
+    api_version: storage.k8s.io/v1
+    kind: StorageClass
+  register: storage_classes
+
+- name: Set default StorageClass
+  ansible.builtin.set_fact:
+    storage_class: "{{ item.metadata.name }}"
+  loop: "{{ storage_classes.resources }}"
+  when:
+    - "'storageclass.kubernetes.io/is-default-class' in item.metadata.annotations"
+    - item.metadata.annotations['storageclass.kubernetes.io/is-default-class'] | bool
+
+- name: Override the storage_class name if defined in cluster-fulfillment-ig
+  set_fact:
+    storage_class: "{{ lookup('env', 'CLOUDKIT_VM_OPERATIONS_STORAGE_CLASS') | default(storage_class) }}"
+
+- name: Using vmaas_storage_class
+  ansible.builtin.debug:
+    var: storage_class
+
 - name: Create DataVolume for VM root disk
   kubernetes.core.k8s:
     definition:
@@ -239,7 +261,7 @@
   vars:
     internal_ip: "{{ node_info.resources[0].status.addresses | selectattr('type', 'equalto', 'InternalIP') | map(attribute='address') | first }}"
     floating_ip: "{{ allocate_floating_ip_result }}"
-    internal_network: "{{ vm_internal_network }}"
+    internal_network: "{{ default_vm_internal_network }}"
     ports: "{{ port_mappings }}"
     description: "{{ vm_name }}-nodeport"
 
