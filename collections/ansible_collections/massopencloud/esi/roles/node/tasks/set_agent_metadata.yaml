@@ -1,0 +1,105 @@
+- name: Set metadata from node and agent names
+  when:
+    - node_names | length > 0
+    - node_all_agents | length > 0
+  block:
+    - name: Get combined node and port info
+      ansible.builtin.include_role:
+        name: massopencloud.esi.node
+        tasks_from: get_nodes
+      vars:
+        node_filter_names: "{{ node_names }}"
+    # set_fact: node_info_list
+
+    - name: Filter nodes that are agents
+      ansible.builtin.set_fact:
+        filtered_node_info: "{{ filtered_node_info | default([]) + [node_info] }}"
+      loop: "{{ node_info_list }}"
+      loop_control:
+        loop_var: node_info
+        label: "{{ node_info.name }}"
+      when: >-
+        node_info.ports |
+        selectattr('address', 'defined') |
+        map(attribute='address') |
+        massopencloud.esi.match_agent_addresses(node_all_agents)
+
+    - name: Get filtered agent names
+      ansible.builtin.set_fact:
+        agent_names: >-
+          {{
+            agent_names | default([]) + [
+              node_info.ports |
+              map(attribute='address') |
+              massopencloud.esi.match_agent_addresses(node_all_agents)
+            ]
+          }}
+      loop: "{{ filtered_node_info }}"
+      loop_control:
+        loop_var: node_info
+        label: "{{ node_info.name }}"
+
+    - name: Extract topology from all node names
+      ansible.builtin.set_fact:
+        agent_topology_labels_list: >-
+          {{ agent_topology_labels_list | default([]) + [node_info.name | massopencloud.esi.extract_esi_location] }}
+      loop: "{{ filtered_node_info }}"
+      loop_control:
+        loop_var: node_info
+        label: "{{ node_info.name }}"
+
+    - name: Create topology labels for all nodes
+      ansible.builtin.set_fact:
+        agent_topology_labels_list: >-
+          {{ agent_topology_labels_list | default([]) + [topology_labels] }}
+      vars:
+        topology_labels: |-
+          {% filter from_yaml %}
+          {% for label, val in agent_topology.items() %}
+            {{ manage_agents_topology_label_namespace }}/{{ label }}: "{{ val }}"
+          {% endfor %}
+          {% endfilter %}
+      loop: "{{ agent_topology_labels_list }}"
+      loop_control:
+        loop_var: agent_topology
+
+    - name: Create resource class labels for all nodes
+      ansible.builtin.set_fact:
+        agent_resource_class_labels_list: >-
+          {{ agent_resource_class_labels_list | default([]) + [{'esi.nerc.mghpcc.org/resource_class': node_info.resource_class}] }}
+      loop: "{{ filtered_node_info }}"
+      loop_control:
+        loop_var: node_info
+        label: "{{ node_info.name }}"
+
+    - name: Extract topology from all node names
+      ansible.builtin.set_fact:
+        topology_labels_list: >-
+          {{ agent_topology_labels_list | default([]) + [node_info.name | massopencloud.esi.extract_esi_location] }}
+      loop: "{{ filtered_node_info }}"
+      loop_control:
+        loop_var: node_info
+        label: "{{ node_info.name }}"
+
+    - name: Configure agent metadata for all nodes
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: agent-install.openshift.io/v1beta1
+          kind: Agent
+          metadata:
+            name: "{{ agent_names[node_idx] }}"
+            namespace: "{{ node_agent_namespace }}"
+            annotations: "{{ {manage_agents_node_uuid_annotation: filtered_node_info[node_idx].id} }}"
+            labels: >-
+              {{
+                (topology_labels_list[node_idx] |
+                from_yaml) |
+                combine(agent_resource_class_labels_list[node_idx])
+              }}
+          spec:
+            approved: true
+            hostname: "{{ filtered_node_info[node_idx].name | lower }}"
+      loop: "{{ range(agent_names | length) | list }}"
+      loop_control:
+        loop_var: node_idx

@@ -2,20 +2,25 @@
   ansible.builtin.debug:
     var: manage_agents_node_names
 
-- name: Get list of node info
-  ansible.builtin.include_role:
-    name: massopencloud.esi.node
-    tasks_from: list_nodes
-  vars:
-    node_names: "{{ manage_agents_node_names }}"
-# registers: node_info_list
+- name: Get all agents
+  kubernetes.core.k8s_info:
+    kind: Agent
+    api_version: agent-install.openshift.io/v1beta1
+    namespace: "{{ manage_agents_namespace }}"
+  register: initial_agents
 
-- name: Set filtered lists of only nodes that need importing
-  ansible.builtin.include_role:
-    name: massopencloud.esi.node
-    tasks_from: get_non_agent_nodes
-# registers: filtered_node_info
-# registers: agents
+- name: Filter non-agent node names
+  when: initial_agents | length > 0
+  ansible.builtin.set_fact:
+    manage_agents_node_names: >-
+      {{
+        manage_agents_node_names |
+        difference(initial_agents.resources |
+          selectattr('spec.hostname', 'defined') |
+          map(attribute='spec.hostname') |
+          list
+        )
+      }}
 
 - name: Get InfraEnv information
   kubernetes.core.k8s_info:
@@ -35,101 +40,38 @@
     name: massopencloud.esi.node
     tasks_from: provision_nodes
   vars:
-    provisioning_network_name: "{{ manage_agents_provisioning_network_name }}"
-    node_info_list: "{{ filtered_node_info }}"
+    node_provisioning_network_name: "{{ manage_agents_provisioning_network_name }}"
+    node_discovery_url: "{{ discovery_url }}"
+    node_names: "{{ manage_agents_node_names }}"
+    node_all_agents: "{{ initial_agents.resources }}"
+    node_agent_namespace: "{{ manage_agents_namespace }}"
     wait: true
 
-- name: Get filtered agent names
+- name: Get all agents
+  kubernetes.core.k8s_info:
+    kind: Agent
+    api_version: agent-install.openshift.io/v1beta1
+    namespace: "{{ manage_agents_namespace }}"
+  register: final_agents
+
+- name: Set agent metadata
   ansible.builtin.include_role:
     name: massopencloud.esi.node
-    tasks_from: get_agent_names
+    tasks_from: set_agent_metadata
   vars:
-    node_info_list: "{{ filtered_node_info }}"
-# registers: agent_names
-# registers: agent_hostnames
-
-- name: Display the node names that were imported as agents
-  ansible.builtin.debug:
-    msg: "Imported {{ node_info.name }} as agent {{ agent_names[node_idx] }}"
-  loop: "{{ filtered_node_info }}"
-  loop_control:
-    loop_var: node_info
-    index_var: node_idx
-    label: "{{ node_idx }}"
-
-- name: Extract topology from all node names
-  ansible.builtin.set_fact:
-    agent_topology_labels_list: >-
-      {{ agent_topology_labels_list | default([]) + [node_info.name | massopencloud.esi.extract_esi_location] }}
-  loop: "{{ filtered_node_info }}"
-  loop_control:
-    loop_var: node_info
-    label: "{{ node_info.name }}"
-
-- name: Create topology labels for all nodes
-  ansible.builtin.set_fact:
-    agent_topology_labels_list: >-
-      {{ agent_topology_labels_list | default([]) + [topology_labels] }}
-  vars:
-    topology_labels: |-
-      {% filter from_yaml %}
-      {% for label, val in agent_topology.items() %}
-        {{ manage_agents_topology_label_namespace }}/{{ label }}: "{{ val }}"
-      {% endfor %}
-      {% endfilter %}
-  loop: "{{ agent_topology_labels_list }}"
-  loop_control:
-    loop_var: agent_topology
-
-- name: Create resource class labels for all nodes
-  ansible.builtin.set_fact:
-    agent_resource_class_labels_list: >-
-      {{ agent_resource_class_labels_list | default([]) + [{'esi.nerc.mghpcc.org/resource_class': node_info.resource_class}] }}
-  loop: "{{ filtered_node_info }}"
-  loop_control:
-    loop_var: node_info
-    label: "{{ node_info.name }}"
-
-- name: Get node topology labels
-  ansible.builtin.include_role:
-    name: massopencloud.esi.node
-    tasks_from: extract_node_location
-  vars:
-    node_info_list: "{{ filtered_node_info }}"
-# registers: topology_labels_list
-
-- name: Configure agent metadata for all nodes
-  kubernetes.core.k8s:
-    state: present
-    definition:
-      apiVersion: agent-install.openshift.io/v1beta1
-      kind: Agent
-      metadata:
-        name: "{{ agent_names[node_idx] }}"
-        namespace: "{{ manage_agents_namespace }}"
-        annotations: "{{ {manage_agents_node_uuid_annotation: filtered_node_info[node_idx].id} }}"
-        labels: >-
-          {{
-            (topology_labels_list[node_idx] |
-            from_yaml) |
-            combine(agent_resource_class_labels_list[node_idx])
-          }}
-      spec:
-        approved: true
-        hostname: "{{ filtered_node_info[node_idx].name | lower }}"
-  loop: "{{ range(agent_names | length) | list }}"
-  loop_control:
-    loop_var: node_idx
+    node_names: "{{ manage_agents_node_names }}"
+    node_all_agents: "{{ final_agents.resources }}"
+    node_agent_namespace: "{{ manage_agents_namespace }}"
 
 - name: Move agents to idle agents network
   ansible.builtin.include_role:
     name: massopencloud.esi.l2
     tasks_from: set_networks_for_node
   vars:
-    node: "{{ node_info.name }}"
+    node: "{{ node_name }}"
     networks:
     - "{{ manage_agents_idle_agents_network }}"
-  loop: "{{ filtered_node_info }}"
+  loop: "{{ manage_agents_node_names }}"
   loop_control:
-    loop_var: node_info
-    label: "{{ node_info.name }} -> {{ manage_agents_idle_agents_network }}"
+    loop_var: node_name
+    label: "{{ node_name }} -> {{ manage_agents_idle_agents_network }}"
