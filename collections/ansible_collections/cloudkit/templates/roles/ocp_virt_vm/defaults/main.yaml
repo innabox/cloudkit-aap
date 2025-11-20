@@ -1,11 +1,14 @@
 ---
-# Network Configuration Defaults
 default_vm_internal_network: "hypershift"
-
-# Storage Defaults
-default_vm_storage_class: "nfs-client"  # NFS storage operator storage class
-
-# Labels applied to all VM resources
+default_vm_storage_class: "nfs-client"
 default_vm_labels: "{{ {vm_order_label: vm_order_name} }}"
 
-cloud_init_config_default: "{{ '#cloud-config' | b64encode }}"
+# Setup the defaults described in the arg_specs.
+default_arg_specs:
+  cpu_cores: 2
+  memory: 2Gi
+  disk_size: 10Gi
+  image_source: "quay.io/containerdisks/fedora:latest"
+  exposed_ports: "22/tcp"
+  cloud_init_config: "{{ '#cloud-config' | b64encode }}"
+  storage_class: "nfs-client"

@@ -1,28 +1,26 @@
+# The VM Create Playbook in osac-aap pass in the following variables:
+# vm_order: Payload from EDA
+# vm_order_name: Name for the order.
+# vm_working_namespace: Private namespace created for the VM
+# template_id: Template Id string.
+# template_parameters: All template variables passed.  Defined in arguement_specs.yaml
+# default_arg_specs: default values for arguement_specs
 ---
-- name: Set VM facts
+- name: Merge template defaults into template_parameters
   ansible.builtin.set_fact:
-    vm_name: "{{ vm_order.metadata.name }}"
-    vm_cpu_cores: "{{ template_parameters.cpu_cores }}"
-    vm_memory: "{{ template_parameters.memory }}"
-    vm_disk_size: "{{ template_parameters.disk_size }}"
-    vm_image_source: "{{ template_parameters.image_source }}"
-    storage_class: "{{ default_vm_storage_class }}"
-    vm_internal_network: "{{ default_vm_internal_network }}"
-    vm_exposed_ports: "{{ template_parameters.exposed_ports }}"
-    ssh_public_key: "{{ template_parameters.ssh_public_key | default(omit) }}"
-    cloud_init_config: "{{ template_parameters.cloud_init_config | default(cloud_init_config_default) }}"
+    params: "{{ default_arg_specs | combine(template_parameters) }}"
 
 - name: Validate exposed_ports format
   ansible.builtin.assert:
     that:
-      - template_parameters.exposed_ports is match('^([0-9]+/(tcp|udp))(,[0-9]+/(tcp|udp))*$')
+      - params.exposed_ports is match('^([0-9]+/(tcp|udp))(,[0-9]+/(tcp|udp))*$')
     fail_msg: "exposed_ports must be in format 'port/protocol' (e.g., '22/tcp,80/tcp') where protocol is 'tcp' or 'udp'"
 
 - name: Validate cloud_init_config is base64 encoded
   ansible.builtin.assert:
     that:
-      - cloud_init_config | length > 0
-      - cloud_init_config | b64decode is defined
+      - params.cloud_init_config | length > 0
+      - params.cloud_init_config | b64decode is defined
     fail_msg: "cloud_init_config must be a valid base64 encoded string"
 
 - name: Build template spec base
@@ -30,9 +28,9 @@
     vm_template_spec:
       domain:
         cpu:
-          cores: "{{ vm_cpu_cores }}"
+          cores: "{{ params.cpu_cores }}"
         memory:
-          guest: "{{ vm_memory }}"
+          guest: "{{ params.memory }}"
         devices:
           disks:
             - name: root-disk
@@ -62,11 +60,11 @@
       volumes:
         - name: root-disk
           dataVolume:
-            name: "{{ vm_name }}-root-disk"
+            name: "{{ vm_order_name }}-root-disk"
         - name: cloud-init-disk
           cloudInitNoCloud:
             secretRef:
-              name: "{{ vm_name }}-cloud-init"
+              name: "{{ vm_order_name }}-cloud-init"
 
 - name: Create cloud-init secret
   kubernetes.core.k8s:
@@ -74,16 +72,16 @@
       apiVersion: v1
       kind: Secret
       metadata:
-        name: "{{ vm_name }}-cloud-init"
-        namespace: "{{ vm_target_namespace }}"
+        name: "{{ vm_order_name }}-cloud-init"
+        namespace: "{{ vm_working_namespace }}"
         labels: "{{ default_vm_labels }}"
       type: Opaque
       data:
-        userData: "{{ cloud_init_config }}"
+        userData: "{{ params.cloud_init_config }}"
     state: present
 
 - name: Create ssh public key secret and add accessCredentials to template spec
-  when: ssh_public_key is defined and ssh_public_key | length > 0
+  when: params.ssh_public_key is defined and params.ssh_public_key | length > 0
   block:
     - name: Create Secret resource containing ssh public key
       kubernetes.core.k8s:
@@ -92,11 +90,11 @@
           apiVersion: v1
           kind: Secret
           metadata:
-            name: "{{ vm_name }}-ssh-public-key"
-            namespace: "{{ vm_target_namespace }}"
+            name: "{{ vm_order_name }}-ssh-public-key"
+            namespace: "{{ vm_working_namespace }}"
             labels: "{{ default_vm_labels }}"
           data:
-            ssh-public-key: "{{ ssh_public_key | b64encode }}"
+            ssh-public-key: "{{ params.ssh_public_key | b64encode }}"
           type: Opaque
 
     - name: Add accessCredentials to template spec
@@ -108,7 +106,7 @@
             - sshPublicKey:
                 source:
                   secret:
-                    secretName: "{{ vm_name }}-ssh-public-key"
+                    secretName: "{{ vm_order_name }}-ssh-public-key"
                 propagationMethod:
                   noCloud: {}
 
@@ -118,20 +116,20 @@
       apiVersion: cdi.kubevirt.io/v1beta1
       kind: DataVolume
       metadata:
-        name: "{{ vm_name }}-root-disk"
-        namespace: "{{ vm_target_namespace }}"
+        name: "{{ vm_order_name }}-root-disk"
         labels: "{{ default_vm_labels }}"
+        namespace: "{{ vm_working_namespace }}"
       spec:
         source:
           registry:
-            url: "docker://{{ vm_image_source }}"
+            url: "docker://{{ params.image_source }}"
         pvc:
           accessModes:
             - ReadWriteOnce
           resources:
             requests:
-              storage: "{{ vm_disk_size }}"
-          storageClassName: "{{ storage_class }}"
+              storage: "{{ params.disk_size }}"
+          storageClassName: "{{ params.storage_class }}"
     state: present
 
 - name: Create VirtualMachine
@@ -140,8 +138,8 @@
       apiVersion: kubevirt.io/v1
       kind: VirtualMachine
       metadata:
-        name: "{{ vm_name }}"
-        namespace: "{{ vm_target_namespace }}"
+        name: "{{ vm_order_name }}"
+        namespace: "{{ vm_working_namespace }}"
         labels: "{{ default_vm_labels }}"
       spec:
         running: true
@@ -153,28 +151,28 @@
 
 - name: Show VM Namespace and VM Name
   debug:
-    msg: "Namespace {{ vm_target_namespace }} - Name: {{ vm_name }}"
+    msg: "Namespace {{ vm_working_namespace }} - Name: {{ vm_order_name }}"
 
 - name: Wait for VM to be ready
   kubernetes.core.k8s_info:
     api_version: kubevirt.io/v1
     kind: VirtualMachine
-    name: "{{ vm_name }}"
-    namespace: "{{ vm_target_namespace }}"
+    name: "{{ vm_order_name }}"
+    namespace: "{{ vm_working_namespace }}"
     wait: true
     wait_condition:
       type: Ready
       status: "True"
     wait_timeout: 600
 
-- name: Create a floating IP to attach to VM
+- name: Assign floating IP
   ansible.builtin.include_role:
     name: massopencloud.esi.floating_ip
   vars:
     floating_ip_state: present
-    floating_ip_name: "{{ vm_name }}-floating-ip"
+    floating_ip_name: "{{ vm_order_name }}-floating-ip"
     floating_ip_properties:
-      vm: "{{ vm_name }}"
+      vm: "{{ vm_order_name }}"
       instance: "{{ vm_order.metadata.namespace }}"
       purpose: "o-sac"
 
@@ -186,7 +184,7 @@
     port_number: "{{ item.split('/')[0] | int }}"
     port_protocol: "{{ item.split('/')[1] | upper }}"
     port_name: "{{ port_protocol | lower }}-{{ port_number }}"
-  loop: "{{ vm_exposed_ports.split(',') }}"
+  loop: "{{ params.exposed_ports.split(',') }}"
 
 - name: Create external LoadBalancer for VM
   kubernetes.core.k8s:
@@ -195,8 +193,8 @@
       apiVersion: v1
       kind: Service
       metadata:
-        name: "{{ vm_name }}-load-balancer"
-        namespace: "{{ vm_target_namespace }}"
+        name: "{{ vm_order_name }}-load-balancer"
+        namespace: "{{ vm_working_namespace }}"
         labels: "{{ default_vm_labels }}"
       spec:
         type: LoadBalancer
@@ -207,8 +205,8 @@
   kubernetes.core.k8s_info:
     api_version: v1
     kind: Service
-    name: "{{ vm_name }}-load-balancer"
-    namespace: "{{ vm_target_namespace }}"
+    name: "{{ vm_order_name }}-load-balancer"
+    namespace: "{{ vm_working_namespace }}"
   register: load_balancer
   until: load_balancer.resources[0].status.loadBalancer.ingress is defined
   retries: 30
@@ -218,8 +216,8 @@
   kubernetes.core.k8s_info:
     api_version: kubevirt.io/v1
     kind: VirtualMachineInstance
-    name: "{{ vm_name }}"
-    namespace: "{{ vm_target_namespace }}"
+    name: "{{ vm_order_name }}"
+    namespace: "{{ vm_working_namespace }}"
   register: vmi_info
 
 - name: Get Node information for the VM
@@ -261,16 +259,16 @@
   kubernetes.core.k8s_info:
     api_version: kubevirt.io/v1
     kind: VirtualMachine
-    name: "{{ vm_name }}"
-    namespace: "{{ vm_target_namespace }}"
+    name: "{{ vm_order_name }}"
+    namespace: "{{ vm_working_namespace }}"
   register: vm_status
 
 - name: Display VM information
   ansible.builtin.debug:
     msg:
-      - "Virtual Machine '{{ vm_name }}' created successfully"
-      - "Namespace: {{ vm_target_namespace }}"
-      - "CPU Cores: {{ vm_cpu_cores }}"
-      - "Memory: {{ vm_memory }}"
-      - "Root Disk Size: {{ vm_disk_size }}"
+      - "Virtual Machine '{{ vm_order_name }}' created successfully"
+      - "Namespace: {{ vm_working_namespace }}"
+      - "Image: {{ params.image_source }}"
+      - "CPU Cores: {{ params.cpu_cores }}/Memory: {{ params.memory }}"
+      - "Root Disk Size: {{ params.disk_size }}"
       - "Status: {{ vm_status.resources[0].status.printableStatus | default('Unknown') }}"
