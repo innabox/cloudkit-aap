@@ -151,7 +151,7 @@
           resources:
             requests:
               storage: "{{ params.disk_size }}"
-          storageClassName: "{{ params.storage_class }}"
+          storageClassName: "{{ storage_class }}"
     state: present
 
 - name: Create VirtualMachine
