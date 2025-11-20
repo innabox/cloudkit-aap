@@ -1,14 +1,54 @@
 argument_specs:
+  get_nodes:
+    options:
+      node_filter_names:
+        type: list
+        elements: str
   provision_nodes:
     options:
-      provisioning_network_name:
+      node_provisioning_network_name:
         required: true
         type: str
-      node_info_list:
+      node_discovery_url:
+        required: true
+        type: str
+      node_names:
+        required: true
+        type: list
+        elements: str
+      node_all_agents:
         required: true
         type: list
         elements: dict
-      discovery_url:
+      node_agent_namespace:
+        required: true
+        type: str
+      wait:
+        type: bool
+  set_agent_metadata:
+    options:
+      node_names:
+        required: true
+        type: list
+        elements: str
+      node_all_agents:
+        required: true
+        type: list
+        elements: dict
+      node_agent_namespace:
+        required: true
+        type: str
+  remove_agents:
+    options:
+      node_names:
+        required: true
+        type: list
+        elements: str
+      node_all_agents:
+        required: true
+        type: list
+        elements: dict
+      node_agent_namespace:
         required: true
         type: str
   clean_nodes:
@@ -17,30 +57,5 @@ argument_specs:
         required: true
         type: list
         elements: str
-  list_nodes:
-    options:
-      node_names:
-        type: list
-        elements: str
-  filter_non_agent_nodes:
-    options:
-      node_info_list:
-        required: true
-        type: list
-        elements: dict
-  get_agent_names:
-    options:
-      node_info_list:
-        required: true
-        type: list
-        elements: dict
-  extract_node_location:
-    options:
-      node_info_list:
-        required: true
-        type: list
-        elements: dict
-      agent_topology_labels_list:
-        required: true
-        type: list
-        elements: dict
+      wait:
+        type: bool
