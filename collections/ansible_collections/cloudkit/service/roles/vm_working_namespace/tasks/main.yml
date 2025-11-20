@@ -11,7 +11,7 @@
 
   - name: Check if the working vm namespace is found
     ansible.builtin.fail:
-      msg: "Working virtualmachine namespace was not found."
+      msg: "Working virtualmachine namespace was not found. ({{ vm_working_namespace_list.resources | length }} were found.)"
     when: vm_working_namespace_list.resources | length != 1
 
   - name: Set working vm namespace as result

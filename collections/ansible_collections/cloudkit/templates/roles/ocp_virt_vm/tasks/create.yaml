@@ -263,13 +263,13 @@
     floating_ip: "{{ allocate_floating_ip_result }}"
     internal_network: "{{ default_vm_internal_network }}"
     ports: "{{ port_mappings }}"
-    description: "{{ vm_name }}-nodeport"
+    description: "{{ vm_order_name }}-nodeport"
 
 - name: Annotate VirtualMachine with floating IP address
   kubernetes.core.k8s:
     api_version: cloudkit.openshift.io/v1alpha1
     kind: VirtualMachine
-    name: "{{ vm_name }}"
+    name: "{{ vm_order_name }}"
     namespace: "{{ vm_order.metadata.namespace }}"
     state: present
     definition:
