@@ -279,7 +279,7 @@
       metadata:
         annotations:
           cloudkit.openshift.io/floating-ip-address: "{{ allocate_floating_ip_result }}"
-          cloudkit-aap.openshift.io/reconciled-config-version: "{{ vm_order.status.desiredConfigVersion | default('unknown') }}"
+          cloudkit.openshift.io/reconciled-config-version: "{{ vm_order.status.desiredConfigVersion | default('unknown') }}"
 
 - name: Get VM status
   kubernetes.core.k8s_info:
