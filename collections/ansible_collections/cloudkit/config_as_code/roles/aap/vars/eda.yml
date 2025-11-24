@@ -15,6 +15,7 @@ eda_projects:  # noqa: var-naming[no-role-prefix]
     organization: "{{ aap_organization_name }}"
     url: "{{ aap_project_git_uri }}"
     scm_branch: "{{ aap_project_git_branch }}"
+    sync: true
 
 # Create decision environment
 eda_decision_environments:  # noqa: var-naming[no-role-prefix]
