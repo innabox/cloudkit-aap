@@ -1,0 +1,77 @@
+- name: Display node names that will be added as agents
+  ansible.builtin.debug:
+    var: manage_agents_node_names
+
+- name: Get all agents
+  kubernetes.core.k8s_info:
+    kind: Agent
+    api_version: agent-install.openshift.io/v1beta1
+    namespace: "{{ manage_agents_namespace }}"
+  register: initial_agents
+
+- name: Filter non-agent node names
+  when: initial_agents | length > 0
+  ansible.builtin.set_fact:
+    manage_agents_node_names: >-
+      {{
+        manage_agents_node_names |
+        difference(initial_agents.resources |
+          selectattr('spec.hostname', 'defined') |
+          map(attribute='spec.hostname') |
+          list
+        )
+      }}
+
+- name: Get InfraEnv information
+  kubernetes.core.k8s_info:
+    kind: InfraEnv
+    api_version: agent-install.openshift.io/v1beta1
+    namespace: "{{ manage_agents_namespace }}"
+    name: "{{ manage_agents_infraenv_name }}"
+  register: infraenv
+
+- name: Set discovery_url
+  ansible.builtin.set_fact:
+    discovery_url: "{{ infraenv.resources[0].status.isoDownloadURL }}"
+  when: not discovery_url|default(false)
+
+- name: Provision nodes
+  ansible.builtin.include_role:
+    name: massopencloud.esi.node
+    tasks_from: provision_nodes
+  vars:
+    node_provisioning_network_name: "{{ manage_agents_provisioning_network_name }}"
+    node_discovery_url: "{{ discovery_url }}"
+    node_names: "{{ manage_agents_node_names }}"
+    node_all_agents: "{{ initial_agents.resources }}"
+    node_agent_namespace: "{{ manage_agents_namespace }}"
+    wait: true
+
+- name: Get all agents
+  kubernetes.core.k8s_info:
+    kind: Agent
+    api_version: agent-install.openshift.io/v1beta1
+    namespace: "{{ manage_agents_namespace }}"
+  register: final_agents
+
+- name: Set agent metadata
+  ansible.builtin.include_role:
+    name: massopencloud.esi.node
+    tasks_from: set_agent_metadata
+  vars:
+    node_names: "{{ manage_agents_node_names }}"
+    node_all_agents: "{{ final_agents.resources }}"
+    node_agent_namespace: "{{ manage_agents_namespace }}"
+
+- name: Move agents to idle agents network
+  ansible.builtin.include_role:
+    name: massopencloud.esi.l2
+    tasks_from: set_networks_for_node
+  vars:
+    node: "{{ node_name }}"
+    networks:
+    - "{{ manage_agents_idle_agents_network }}"
+  loop: "{{ manage_agents_node_names }}"
+  loop_control:
+    loop_var: node_name
+    label: "{{ node_name }} -> {{ manage_agents_idle_agents_network }}"

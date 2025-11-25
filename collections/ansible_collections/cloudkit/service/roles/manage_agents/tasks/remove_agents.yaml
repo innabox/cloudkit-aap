@@ -1,0 +1,31 @@
+- name: Display node names that will be removed from being agents
+  ansible.builtin.debug:
+    var: manage_agents_node_names
+
+- name: Get agents
+  kubernetes.core.k8s_info:
+    kind: Agent
+    api_version: agent-install.openshift.io/v1beta1
+    namespace: "{{ manage_agents_namespace }}"
+  register: agents_result
+
+- name: Extract agents
+  ansible.builtin.set_fact:
+    initial_agents: "{{ agents_result.resources }}"
+
+- name: Delete agents
+  ansible.builtin.include_role:
+    name: massopencloud.esi.node
+    tasks_from: remove_agents
+  vars:
+    node_names: "{{ manage_agents_node_names }}"
+    node_all_agents: "{{ initial_agents }}"
+    node_agent_namespace: "{{ manage_agents_namespace }}"
+
+- name: Clean nodes
+  ansible.builtin.include_role:
+    name: massopencloud.esi.node
+    tasks_from: clean_nodes
+  vars:
+    node_names: "{{ manage_agents_node_names }}"
+    wait: true
