@@ -18,15 +18,4 @@ repos:
       files: \.(yaml|yml)$
       types: [file, yaml]
       entry: yamllint --strict
-
-- repo: https://github.com/ansible/ansible-lint
-  rev: v24.9.2 # Pin to a specific stable tag (not "main")
-  hooks:
-    - id: ansible-lint
-      name: Ansible Lint
-      files: \.(yaml|yml)$ # Only lint YAML files
-      additional_dependencies:
-        - ansible-core==2.18.1
-        - jmespath
-        - pydantic
 exclude: 'vendor/.*'

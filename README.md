@@ -48,3 +48,35 @@ Then re-vendor the collections:
 rm -rf vendor
 ansible-galaxy collection install -r collections/requirements.yml
 ```
+
+## Development Tools
+
+### Pre-commit Hooks
+
+This repository uses pre-commit hooks to ensure code quality. Install them with:
+
+```bash
+pre-commit install
+```
+
+### Optional: Ansible Lint Pre-push Hook
+
+While `ansible-lint` runs automatically in CI on pull requests, you can optionally run it locally before pushing. Since ansible-lint can be slow and generate verbose output, it's recommended to run it as a pre-push hook rather than on every commit.
+
+To set up a local pre-push hook for ansible-lint:
+
+1. Create `.git/hooks/pre-push`:
+
+```bash
+#!/bin/bash
+echo "Running ansible-lint..."
+uv run ansible-lint
+```
+
+2. Make it executable:
+
+```bash
+chmod +x .git/hooks/pre-push
+```
+
+This will run ansible-lint before each `git push`, catching issues before they reach CI.
