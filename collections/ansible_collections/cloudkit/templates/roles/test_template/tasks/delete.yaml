@@ -1,7 +1,0 @@
-- name: Destroy hosted cluster
-  ansible.builtin.debug:
-    msg: "Delete tasks"
-
-- name: Fail if requested
-  when: template_parameters.fail_delete|default(false)
-  fail:

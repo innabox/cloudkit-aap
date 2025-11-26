@@ -1,3 +1,0 @@
-- name: Delete cluster
-  ansible.builtin.import_role:
-    name: cloudkit.templates.ocp_4_17_small
