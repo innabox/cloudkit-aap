@@ -9,7 +9,7 @@
     - name: Report workflow status
       when: >-
         workflow_status != "succeeded" or
-        cluster_order.metadata.annotations["osac.openshift.io/ansible-workflow-status"]|default("") != workflow_status
+        cluster_order.metadata.annotations["osac.openshift.io/ansible-workflow-status"] | default("") != workflow_status
       kubernetes.core.k8s:
         state: patched
         definition:

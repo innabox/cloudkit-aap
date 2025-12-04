@@ -36,7 +36,7 @@
         finalizer_target:
           api_version: "{{ item.api_version }}"
           kind: "{{ item.kind }}"
-          namespace: "{{ item.namespace|default(omit) }}"
+          namespace: "{{ item.namespace | default(omit) }}"
           name: "{{ item.name }}"
       loop:
         - api_version: cloudkit.openshift.io/v1alpha1
