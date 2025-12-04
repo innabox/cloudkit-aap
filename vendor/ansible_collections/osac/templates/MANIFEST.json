@@ -1,0 +1,35 @@
+{
+ "collection_info": {
+  "namespace": "osac",
+  "name": "templates",
+  "version": "0.0.1",
+  "authors": [
+   "Jason Kary <jkary@redhat.com>"
+  ],
+  "readme": "README.md",
+  "tags": [
+   "cloud",
+   "infrastructure",
+   "innabox",
+   "osac"
+  ],
+  "description": "Base templates for OSAC Fulfillment Services solution",
+  "license": [
+   "Apache-2.0"
+  ],
+  "license_file": "LICENSE",
+  "dependencies": {},
+  "repository": "http://github.com/innabox/osac-templates",
+  "documentation": "http://github.com/innabox/osac-templates/README.md",
+  "homepage": "http://github.com/innabox/osac-templates",
+  "issues": "http://github.com/innabox/issues/issues"
+ },
+ "file_manifest_file": {
+  "name": "FILES.json",
+  "ftype": "file",
+  "chksum_type": "sha256",
+  "chksum_sha256": "47eac26fa0f3977832f3ac38af02cc79d7cc75de7df08563e9e3225f1fa059b4",
+  "format": 1
+ },
+ "format": 1
+}

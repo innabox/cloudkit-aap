@@ -22,8 +22,6 @@ collections:
   - name: osac.templates
     type: git
     source: https://github.com/innabox/osac-templates
-    version: main
   - name: osac.massopencloud
     type: git
     source: https://github.com/innabox/osac-massopencloud-templates
-    version: main

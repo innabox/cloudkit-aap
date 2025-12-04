@@ -1,0 +1,6 @@
+skip_list:
+  - role-name[path]
+  - var-naming[no-role-prefix]
+exclude_paths:
+  - vendor/
+  - .github/

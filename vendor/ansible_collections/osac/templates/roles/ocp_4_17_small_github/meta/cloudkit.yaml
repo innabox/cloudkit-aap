@@ -1,0 +1,17 @@
+# Define the display name and description of the template
+title: OpenShift 4.17 Cluster + GitHub
+description: >
+  This template will build a minimally configured OpenShift 4.17 cluster. It
+  will be configured to support authentication via GitHub.
+
+# This sets the nodeRequest field in the ClusterOrder manifest. There must be at
+# least one entry in this list.
+default_node_request:
+- resourceClass: fc430
+  numberOfNodes: 2
+
+# This declares that for a cluster built from this template, only the resource
+# classes listed here may be used when requesting additional nodes. If this
+# list is empty or unspecified, a ClusterOrder may request nodes from any
+# available resource class.
+allowed_resource_classes: []

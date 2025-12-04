@@ -1,0 +1,34 @@
+{
+ "collection_info": {
+  "namespace": "osac",
+  "name": "massopencloud",
+  "version": "0.0.1",
+  "authors": [
+   "Jason Kary <jkary@redhat.com>"
+  ],
+  "readme": "README.md",
+  "tags": [
+   "cloud",
+   "infrastructure",
+   "tools"
+  ],
+  "description": "Collection of OSAC templates for massopencloud organization",
+  "license": [
+   "Apache-2.0"
+  ],
+  "license_file": "LICENSE",
+  "dependencies": {},
+  "repository": "http://github.com/innabox/osac-massopencloud-templates",
+  "documentation": "http://github.com/innabox/osac-massopencloud-templates/README.md",
+  "homepage": "http://github.com/innabox/osac-massopencloud-templates",
+  "issues": "http://github.com/innabox/issues/issues"
+ },
+ "file_manifest_file": {
+  "name": "FILES.json",
+  "ftype": "file",
+  "chksum_type": "sha256",
+  "chksum_sha256": "5d5a458d697e604a3ae0427400b97cb7ebdf22a70287afe6f04fd79c94dc1b0f",
+  "format": 1
+ },
+ "format": 1
+}
