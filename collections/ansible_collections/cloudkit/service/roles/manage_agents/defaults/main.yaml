@@ -1,5 +1,3 @@
 manage_agents_provisioning_network_name: provisioning
-manage_agents_node_uuid_annotation: esi.nerc.mghpcc.org/uuid
-manage_agents_topology_label_namespace: topology.nerc.mghpcc.org
 manage_agents_namespace: hardware-inventory
 manage_agents_infraenv_name: hardware-inventory

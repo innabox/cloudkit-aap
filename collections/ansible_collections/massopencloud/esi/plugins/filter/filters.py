@@ -1,7 +1,7 @@
-import json
 import re
 
-re_node_location = re.compile("moc-r([0-9]+)p([a-z])c([0-9]+)u([0-9]+)(-s(.*))?")
+re_node_location = re.compile(
+        "moc-r([0-9]+)p([a-z])c([0-9]+)u([0-9]+)(-s(.*))?")
 
 
 def extract_esi_location(v: str) -> dict[str, str]:
@@ -18,21 +18,64 @@ def extract_esi_location(v: str) -> dict[str, str]:
     }
 
 
-def match_agent_addresses(v: list[str], agents) -> str|None:
-    for agent in agents:
-        agent_addresses = [
-            iface["macAddress"] for iface in agent.get("status", {}).get("inventory", {}).get("interfaces", []) ]
-        if any(addr in agent_addresses for addr in v):
-            return agent['metadata']['name']
+def mac_to_agent_name(v: list[str], agents) -> str | None:
+    try:
+        from ansible_collections.cloudkit.service.plugins.filter.agents \
+                import mac_to_agent_name as cloudkit_mac_to_agent_name
 
-    return None
+        return cloudkit_mac_to_agent_name(v, agents)
+    except ImportError:
+        target_addresses = set(v)
+        for agent in agents:
+            # Use set intersection
+            interfaces = agent.get("status", {}) \
+                              .get("inventory", {}) \
+                              .get("interfaces", [])
+            agent_addresses = {iface["macAddress"] for iface in interfaces}
+
+            if target_addresses.intersection(agent_addresses):
+                return agent['metadata']['name']
+
+        return None
+
+
+def get_agent_metadata(node_info_list, agents):
+    agent_metadata = []
+
+    for node_info in node_info_list:
+        node_addresses = [port.get('address')
+                          for port in node_info.get('ports', [])
+                          if port.get('address')]
+        agent_name = mac_to_agent_name(node_addresses, agents)
+
+        annotations = {"esi.nerc.mghpcc.org/uuid": node_info['id']}
+
+        topology = extract_esi_location(node_info['name'])
+        topology_labels = {"topology.nerc.mghpcc.org/%s" % label: str(val)
+                           for label, val in topology.items()
+                           if val is not None}
+        resource_class_label = {
+            'esi.nerc.mghpcc.org/resource_class':
+                node_info.get('resource_class', '')
+        }
+        labels = {**topology_labels, **resource_class_label}
+
+        agent_metadata.append({
+            "name": agent_name,
+            "hostname": node_info['name'],
+            "annotations": annotations,
+            "labels": labels,
+        })
+
+    return agent_metadata
 
 
 class FilterModule:
     def filters(self):
         return {
             "extract_esi_location": extract_esi_location,
-            "match_agent_addresses": match_agent_addresses,
+            "mac_to_agent_name": mac_to_agent_name,
+            "get_agent_metadata": get_agent_metadata,
         }
 
 
