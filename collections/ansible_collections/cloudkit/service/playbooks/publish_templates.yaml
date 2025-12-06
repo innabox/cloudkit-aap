@@ -6,7 +6,7 @@
     publish_templates_namespace: "{{ lookup('env', 'CLOUDKIT_PUBLISH_TEMPLATES_NAMESPACE') | default(publish_templates_namespace_default, true) }}"
     publish_templates_service_account: "{{ lookup('env', 'CLOUDKIT_PUBLISH_TEMPLATES_SERVICE_ACCOUNT', default='template-publisher') }}"
     cloudkit_fulfillment_service_uri: "{{ lookup('env', 'CLOUDKIT_FULFILLMENT_SERVICE_URI', default='https://fulfillment-api:8000') }}"
-    cloudkit_template_collections: "{{ lookup('env', 'CLOUDKIT_TEMPLATE_COLLECTIONS') | default('cloudkit.templates', true) | split(',') }}"
+    cloudkit_template_collections: "{{ lookup('env', 'CLOUDKIT_TEMPLATE_COLLECTIONS') | default('osac.templates', true) | split(',') }}"
   tasks:
     - name: Display configuration values
       ansible.builtin.debug:
