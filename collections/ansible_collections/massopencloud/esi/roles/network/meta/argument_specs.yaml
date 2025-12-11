@@ -57,15 +57,3 @@ argument_specs:
           Dictionary of properties to convert to tags for network resources
         type: "dict"
         required: false
-  get_node_network_info:
-    options:
-      node:
-        description: |
-          Name or UUID of node
-        type: "str"
-        required: true
-      network:
-        description: |
-          Name or UUID of network
-        type: "str"
-        required: true
