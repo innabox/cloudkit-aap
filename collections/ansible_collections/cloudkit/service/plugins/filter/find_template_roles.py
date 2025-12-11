@@ -1,6 +1,7 @@
 # pyright: reportExplicitAny=false
 
 import json
+import re
 import subprocess
 import yaml
 
@@ -16,6 +17,11 @@ from pathlib import Path
 from enum import StrEnum
 
 import pydantic
+
+from ansible.utils.display import Display
+from ansible.errors import AnsibleFilterError
+
+display = Display()
 
 AnsibleArgumentType = Literal[
     "str",
@@ -87,7 +93,16 @@ TypeMapping: dict[AnsibleArgumentType | type, ProtobufType] = {
 
 
 class Base(pydantic.BaseModel):
-    pass
+    """Base model with common Pydantic configuration for all models."""
+
+    model_config = pydantic.ConfigDict(
+        # Keep flexible for Ansible data (YAML can have various formats)
+        strict=False,
+        # Validate on assignment for better error detection
+        validate_assignment=True,
+        # Allow arbitrary types (needed for Path objects)
+        arbitrary_types_allowed=True,
+    )
 
 
 class ProtobufAnyValue(Base):
@@ -98,7 +113,7 @@ class ProtobufAnyValue(Base):
 
 
 class TemplateParameter(Base):
-    """TemplateParameter represents a single template paramter"""
+    """TemplateParameter represents a single template parameter"""
 
     name: str
     title: str | None
@@ -178,12 +193,12 @@ class Metadata(Base):
     template_type: TemplateTypeEnum = pydantic.Field(
         default=TemplateTypeEnum.cluster, exclude=True
     )
-    default_node_request: list[NodeRequest] = []
+    default_node_request: list[NodeRequest] = pydantic.Field(default_factory=list)
     allowed_resource_classes: list[str] | None = None
 
 
 class Template(Base):
-    """Role represents a single template role"""
+    """Template represents a single template role"""
 
     collection: str = pydantic.Field(..., exclude=True)
     path: Path = pydantic.Field(..., exclude=True)
@@ -219,6 +234,22 @@ class Template(Base):
 
         return ret if ret else None
 
+def _validate_collection_name(name: str) -> None:
+    """Validate that collection name follows namespace.collection format.
+
+    Args:
+        name: Collection name to validate
+
+    Raises:
+        AnsibleFilterError: If collection name format is invalid
+    """
+    if not re.match(r'^[a-zA-Z0-9_]+\.[a-zA-Z0-9_]+$', name):
+        raise AnsibleFilterError(
+            f"Invalid collection name format: '{name}'. "
+            f"Expected format: namespace.collection (e.g., 'cloudkit.service')"
+        )
+
+
 class Collection(Base):
     """Collection represents an Ansible collection"""
 
@@ -226,33 +257,74 @@ class Collection(Base):
     name: str
 
     def read_metadata_for_role(self, path: Path) -> Metadata | None:
+        """Read metadata for a role from cloudkit.yaml/yml file.
+
+        Args:
+            path: Path to the role directory
+
+        Returns:
+            Metadata object if found and valid, None otherwise
+        """
         for filename in ["cloudkit.yaml", "cloudkit.yml"]:
             metadata_file: Path = path / "meta" / filename
             if metadata_file.exists():
                 break
         else:
-            return
+            display.vvv(f"No metadata file found for role at {path}")
+            return None
 
-        with metadata_file.open("r") as fd:
-            metadata = yaml.safe_load(fd)
+        try:
+            with metadata_file.open("r", encoding="utf-8") as fd:
+                metadata = yaml.safe_load(fd)
+        except yaml.YAMLError as e:
+            display.warning(f"Failed to parse metadata file {metadata_file}: {e}")
+            return None
+        except (PermissionError, OSError) as e:
+            display.warning(f"Error reading metadata file {metadata_file}: {e}")
+            return None
 
         if metadata:
-            return Metadata.model_validate(metadata)
+            try:
+                return Metadata.model_validate(metadata)
+            except Exception as e:
+                display.warning(f"Invalid metadata in {metadata_file}: {e}")
+                return None
+
+        return None
 
     def read_params_for_role(self, path: Path) -> list[TemplateParameter]:
+        """Read template parameters for a role from argument_specs.yaml/yml file.
+
+        Args:
+            path: Path to the role directory
+
+        Returns:
+            List of TemplateParameter objects, empty list if none found or on error.
+            An empty list is valid - it means the role has no exposed parameters.
+        """
         for filename in ["argument_specs.yaml", "argument_specs.yml"]:
             argspec_file = path / "meta" / filename
             if argspec_file.exists():
                 break
         else:
+            # No argument_specs file is valid - role may have no parameters
             return []
 
-        with argspec_file.open("r") as fd:
-            argspec: AnsibleArgumentSpec = cast(
-                AnsibleArgumentSpec, yaml.safe_load(fd))
+        try:
+            with argspec_file.open("r", encoding="utf-8") as fd:
+                argspec: AnsibleArgumentSpec = cast(
+                    AnsibleArgumentSpec, yaml.safe_load(fd))
+        except yaml.YAMLError as e:
+            display.warning(f"Failed to parse argument_specs file {argspec_file}: {e}")
+            return []
+        except (PermissionError, OSError) as e:
+            display.warning(f"Error reading argument_specs file {argspec_file}: {e}")
+            return []
 
         template_params: list[TemplateParameter] = []
 
+        # Navigate the nested structure to find template_parameters
+        # Missing keys at any level are valid - just means no parameters defined
         for name, spec in (
             argspec.get("argument_specs", {})
             .get("main", {})
@@ -261,58 +333,141 @@ class Collection(Base):
             .get("options", {})
             .items()
         ):
-            template_params.append(TemplateParameter.from_argspec(name, spec))
+            try:
+                template_params.append(TemplateParameter.from_argspec(name, spec))
+            except Exception as e:
+                display.warning(
+                    f"Failed to parse template parameter '{name}' in {argspec_file}: {e}"
+                )
+                # Continue processing other parameters
+                continue
 
         return template_params
 
-    def templates(self):
-        for path in (self.parent_path / self.name.replace(".", "/") / "roles").glob(
-            "*"
-        ):
+    def templates(self) -> Generator[Template, None, None]:
+        """Generate Template objects for all roles in this collection.
+
+        Yields:
+            Template objects for each valid role found
+        """
+        roles_dir = self.parent_path / self.name.replace(".", "/") / "roles"
+
+        # Validate roles directory exists
+        if not roles_dir.exists():
+            display.vvv(f"No roles directory found for collection '{self.name}' at {roles_dir}")
+            return
+
+        if not roles_dir.is_dir():
+            display.warning(f"Expected directory but found file at {roles_dir}")
+            return
+
+        for path in roles_dir.glob("*"):
+            # Only process directories (roles must be directories)
+            if not path.is_dir():
+                display.vvv(f"Skipping non-directory item in roles: {path.name}")
+                continue
+
             metadata = self.read_metadata_for_role(path)
             params = self.read_params_for_role(path)
             if metadata is not None:
-                template = Template(
-                    collection=self.name,
-                    path=path,
-                    name=path.name,
-                    title=metadata.title,
-                    description=metadata.description,
-                    template_type=metadata.template_type,
-                    default_node_request=metadata.default_node_request,
-                    allowed_resource_classes=metadata.allowed_resource_classes,
-                    parameters=params,
-                )
-                yield template
+                try:
+                    template = Template(
+                        collection=self.name,
+                        path=path,
+                        name=path.name,
+                        title=metadata.title,
+                        description=metadata.description,
+                        template_type=metadata.template_type,
+                        default_node_request=metadata.default_node_request,
+                        allowed_resource_classes=metadata.allowed_resource_classes,
+                        parameters=params,
+                    )
+                    yield template
+                except Exception as e:
+                    display.warning(
+                        f"Failed to create template for role '{path.name}' in collection '{self.name}': {e}"
+                    )
+                    continue
 
 
 def find_template_roles(requested: list[str]) -> Generator[Template, None, None]:
+    """Find template roles in requested Ansible collections.
+
+    Args:
+        requested: List of collection names to search
+
+    Yields:
+        Template objects found in the collections
+    """
+    display.vv(f"Searching for templates in collections: {', '.join(requested)}")
+
     collections: list[Collection] = []
     for collection in requested:
-        info: AnsibleCollectionList = cast(
-            AnsibleCollectionList,
-            json.loads(
-                subprocess.check_output(
-                    [
-                        "ansible-galaxy",
-                        "collection",
-                        "list",
-                        collection,
-                        "--format",
-                        "json",
-                    ],
-                    stderr=subprocess.DEVNULL,
-                )
-            ),
-        )
+        # Validate collection name format
+        try:
+            _validate_collection_name(collection)
+        except AnsibleFilterError as e:
+            display.warning(str(e))
+            continue
+
+        display.vvv(f"Querying ansible-galaxy for collection: {collection}")
+
+        try:
+            output = subprocess.check_output(
+                [
+                    "ansible-galaxy",
+                    "collection",
+                    "list",
+                    collection,
+                    "--format",
+                    "json",
+                ],
+                stderr=subprocess.PIPE,
+                timeout=30,
+            )
+            info: AnsibleCollectionList = cast(
+                AnsibleCollectionList,
+                json.loads(output)
+            )
+        except subprocess.TimeoutExpired:
+            display.warning(
+                f"Timeout querying ansible-galaxy for collection '{collection}' (30s limit exceeded)"
+            )
+            continue
+        except subprocess.CalledProcessError as e:
+            stderr_msg = e.stderr.decode('utf-8', errors='replace') if e.stderr else "No error output"
+            display.warning(
+                f"Failed to query collection '{collection}': {stderr_msg}"
+            )
+            continue
+        except FileNotFoundError:
+            raise AnsibleFilterError(
+                "ansible-galaxy command not found. Ensure Ansible is properly installed."
+            )
+        except json.JSONDecodeError as e:
+            display.warning(
+                f"Invalid JSON response from ansible-galaxy for collection '{collection}': {e}"
+            )
+            continue
 
         if info:
-            # If `ansible-galaxy collection list` find multiple collections with the given name,
-            # we will select the first one.
+            # If `ansible-galaxy collection list` finds the collection in multiple paths,
+            # we will select the first one and warn the user.
+            collection_paths = list(info.keys())
+
+            if len(collection_paths) > 1:
+                display.warning(
+                    f"Collection '{collection}' found in multiple locations: {collection_paths}. "
+                    f"Using first location: {collection_paths[0]}"
+                )
+
+            collection_path = Path(collection_paths[0])
+            display.vvv(f"Found collection '{collection}' at {collection_path}")
             collections.append(
-                Collection(parent_path=Path(
-                    list(info.keys())[0]), name=collection)
+                Collection(parent_path=collection_path, name=collection)
             )
+        else:
+            display.vv(f"Collection '{collection}' not found")
 
     for collection in collections:
         yield from collection.templates()
@@ -320,7 +475,7 @@ def find_template_roles(requested: list[str]) -> Generator[Template, None, None]
 
 def find_cluster_template_roles_filter(
     requested: list[str], template_type: str | TemplateTypeEnum | None = None
-):
+) -> list[dict[str, Any]]:
     """Transform the return values from find_template_roles into something that makes Ansible happy.
 
     Args:
@@ -330,24 +485,44 @@ def find_cluster_template_roles_filter(
 
     Returns:
         List of template role dictionaries matching the specified type (or all if no type specified)
+
+    Raises:
+        AnsibleFilterError: If template_type is invalid or an unexpected error occurs
     """
-    roles = find_template_roles(requested)
+    try:
+        roles = find_template_roles(requested)
 
-    # Filter by template type if specified
-    if template_type is not None:
-        # Convert string to enum if needed
-        if isinstance(template_type, str):
-            try:
-                template_type = TemplateTypeEnum(template_type)
-            except ValueError:
-                # Invalid template type, return empty list
-                return []
-        roles = (role for role in roles if role.template_type == template_type)
+        # Filter by template type if specified
+        if template_type is not None:
+            # Convert string to enum if needed
+            if isinstance(template_type, str):
+                try:
+                    template_type = TemplateTypeEnum(template_type)
+                except ValueError:
+                    valid_types = ', '.join(f"'{t.value}'" for t in TemplateTypeEnum)
+                    raise AnsibleFilterError(
+                        f"Invalid template_type '{template_type}'. "
+                        f"Valid options are: {valid_types}"
+                    )
 
-    return [
-        role.model_dump(by_alias=True, exclude_none=True)
-        for role in roles
-    ]
+            display.vv(f"Filtering templates by type: {template_type.value}")
+            roles = (role for role in roles if role.template_type == template_type)
+
+        result = [
+            role.model_dump(by_alias=True, exclude_none=True)
+            for role in roles
+        ]
+
+        display.vv(f"Returning {len(result)} filtered template(s)")
+        return result
+
+    except AnsibleFilterError:
+        # Re-raise AnsibleFilterError as-is
+        raise
+    except Exception as e:
+        # Catch unexpected exceptions and convert to AnsibleFilterError
+        display.error(f"Unexpected error in find_template_roles filter: {e}")
+        raise AnsibleFilterError(f"Template discovery failed: {str(e)}")
 
 
 def find_compute_instance_template_roles_filter(requested: list[str]):
@@ -361,7 +536,14 @@ def find_compute_instance_template_roles_filter(requested: list[str]):
 
 
 class FilterModule:
-    def filters(self):
+    """Ansible filter plugin for finding template roles."""
+
+    def filters(self) -> dict[str, Any]:
+        """Return the available filter functions.
+
+        Returns:
+            Dictionary mapping filter names to filter functions
+        """
         return {
             "find_cluster_template_roles": find_cluster_template_roles_filter,
             "find_compute_instance_template_roles": find_compute_instance_template_roles_filter,
