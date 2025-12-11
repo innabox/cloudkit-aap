@@ -318,14 +318,35 @@ def find_template_roles(requested: list[str]) -> Generator[Template, None, None]
         yield from collection.templates()
 
 
-def find_cluster_template_roles_filter(requested: list[str]):
-    """Transform the return values from find_template_roles into something
-    that makes Ansible happy, but only for cluster templates."""
+def find_cluster_template_roles_filter(
+    requested: list[str], template_type: str | TemplateTypeEnum | None = None
+):
+    """Transform the return values from find_template_roles into something that makes Ansible happy.
+
+    Args:
+        requested: List of collection names to search for templates
+        template_type: Optional template type to filter by. If None, returns all templates.
+                      Can be a string ('cluster', 'vm') or TemplateTypeEnum value.
+
+    Returns:
+        List of template role dictionaries matching the specified type (or all if no type specified)
+    """
+    roles = find_template_roles(requested)
+
+    # Filter by template type if specified
+    if template_type is not None:
+        # Convert string to enum if needed
+        if isinstance(template_type, str):
+            try:
+                template_type = TemplateTypeEnum(template_type)
+            except ValueError:
+                # Invalid template type, return empty list
+                return []
+        roles = (role for role in roles if role.template_type == template_type)
+
     return [
         role.model_dump(by_alias=True, exclude_none=True)
-        for role in find_template_roles(requested)
-        # Default to cluster for backward compatibility
-        if role.template_type == TemplateTypeEnum.cluster
+        for role in roles
     ]
 
 
@@ -338,6 +359,7 @@ def find_compute_instance_template_roles_filter(requested: list[str]):
         if role.template_type == TemplateTypeEnum.compute_instance
     ]
 
+
 class FilterModule:
     def filters(self):
         return {
@@ -346,9 +368,27 @@ class FilterModule:
         }
 
 
-
 if __name__ == "__main__":
     import sys
 
-    found = find_cluster_template_roles_filter(sys.argv[1:])
-    print(json.dumps(list(found)))
+    # Usage: python find_template_roles.py --type cluster|vm collection1 collection2 ...
+    if "--type" not in sys.argv:
+        print("Error: --type parameter is required", file=sys.stderr)
+        print("Usage: python find_template_roles.py --type cluster|vm collection1 collection2 ...", file=sys.stderr)
+        sys.exit(1)
+
+    type_idx = sys.argv.index("--type")
+    if type_idx + 1 >= len(sys.argv):
+        print("Error: --type requires a value (cluster or vm)", file=sys.stderr)
+        sys.exit(1)
+
+    template_type = sys.argv[type_idx + 1]
+    collections = sys.argv[1:type_idx] + sys.argv[type_idx + 2:]
+
+    if not collections:
+        print("Error: At least one collection name is required", file=sys.stderr)
+        print("Usage: python find_template_roles.py --type cluster|vm collection1 collection2 ...", file=sys.stderr)
+        sys.exit(1)
+
+    found = find_cluster_template_roles_filter(collections, template_type)
+    print(json.dumps(found))
