@@ -1,12 +1,18 @@
-- name: Grab current network configuration for node  # noqa:no-changed-when
-  ansible.builtin.command: >-
-    openstack esi node network list --node {{ node }} --long
-      -f json
-  register: nnl_cmd_raw
+- name: Grab current network configuration for node
+  massopencloud.esi.node_network_info:
+    nodes:
+      - "{{ node }}"
+  register: nnl_raw
 
-- name: Unmarshal output from JSON and filter for attached networks
+- name: Filter for attached ports
   ansible.builtin.set_fact:
-    nnl_result: "{{ nnl_cmd_raw.stdout | from_json | rejectattr('Network UUID', 'equalto', None) }}"
+    ports_info: >-
+      {{
+        nnl_raw.node_networks[0].ports_info |
+        rejectattr('network_port', 'undefined') |
+        rejectattr('network_port', 'equalto', None) |
+        list
+      }}
 
 - name: Get all networks
   openstack.cloud.networks_info:
@@ -22,28 +28,44 @@
         ) | map(attribute='id') | unique
       }}
 
+- name: Extract network IDs from node ports
+  ansible.builtin.set_fact:
+    current_node_network_ids: >-
+      {{
+        ports_info |
+        map(attribute='network.id') |
+        list
+      }}
+
 - name: Check if configured networks are different from desired networks
   ansible.builtin.set_fact:
-    network_differences: "{{ network_uuids | difference(nnl_result | map(attribute='Network UUID')) + nnl_result | map(attribute='Network UUID') | difference(network_uuids) }}"
+    network_differences: >-
+      {{
+        (network_uuids | difference(current_node_network_ids)) +
+        (current_node_network_ids | difference(network_uuids))
+      }}
 
-- name: Detach networks from node  # noqa:no-changed-when
-  when: network_differences | length > 0 and nnl_result | length > 0
-  ansible.builtin.command: >-
-    openstack esi node network detach --all {{ node }}
+- name: Detach networks from node
+  when: network_differences | length > 0 and ports_info | length > 0
+  massopencloud.esi.node_network:
+    state: absent
+    node: "{{ node }}"
 
 - name: Delete Neutron ports
   when: network_differences | length > 0
-  loop: "{{ nnl_result }}"
+  loop: "{{ ports_info }}"
   loop_control:
-    loop_var: network_info
+    loop_var: port_info
   openstack.cloud.port:
     state: "absent"
-    name: "{{ network_info['Network Port UUID'] }}"
+    name: "{{ port_info.network_port.id }}"
 
-- name: Attach networks to node  # noqa:no-changed-when
+- name: Attach networks to node
   when: network_differences | length > 0
   loop: "{{ network_uuids }}"
   loop_control:
     loop_var: network_uuid
-  ansible.builtin.command: >-
-    openstack esi node network attach --network {{ network_uuid }} {{ node }}
+  massopencloud.esi.node_network:
+    state: present
+    node: "{{ node }}"
+    network: "{{ network_uuid }}"
