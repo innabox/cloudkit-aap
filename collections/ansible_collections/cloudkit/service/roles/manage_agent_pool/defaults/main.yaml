@@ -1,0 +1,3 @@
+manage_agent_pool_provisioning_network_name: provisioning
+manage_agent_pool_namespace: hardware-inventory
+manage_agent_pool_infraenv_name: hardware-inventory
