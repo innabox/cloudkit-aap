@@ -77,6 +77,10 @@
         infrastructureAvailabilityPolicy: HighlyAvailable
         olmCatalogPlacement: management
 
+- name: Set nodepool prefix
+  ansible.builtin.set_fact:
+    nodepool_prefix: "nodepool-{{ hosted_cluster_name }}"
+
 - name: Create NodePool resources
   kubernetes.core.k8s:
     state: present
@@ -84,9 +88,9 @@
       apiVersion: hypershift.openshift.io/v1beta1
       kind: NodePool
       metadata:
-        name: "nodepool-{{ hosted_cluster_name }}-{{ item.resourceClass }}"
+        name: "{{ nodepool_prefix }}-{{ item.resourceClass }}"
         namespace: "{{ hosted_cluster_namespace }}"
-        labels: "{{ hosted_cluster_default_cluster_order_label }}"
+        labels: "{{ {esi_agent_resource_class_label: item.resourceClass} | combine(hosted_cluster_default_cluster_order_label) }}"
       spec:
         clusterName: "{{ hosted_cluster_name }}"
         replicas: "{{ item.numberOfNodes | int }}"
@@ -103,3 +107,41 @@
   loop: "{{ hosted_cluster_node_requests }}"
   loop_control:
     label: "Create NodePool nodepool-{{ hosted_cluster_name }}-{{ item.resourceClass }}"
+
+- name: Remove node pools matching resource classes that are no longer requested
+  block:
+    - name: Set requested resource classes
+      ansible.builtin.set_fact:
+        hosted_cluster_requested_resource_classes: "{{ hosted_cluster_node_requests | map(attribute='resourceClass') }}"
+
+    - name: Retrieve all currently allocated nodepools
+      kubernetes.core.k8s_info:
+        api_version: hypershift.openshift.io/v1beta1
+        kind: NodePool
+        namespace: "{{ hosted_cluster_namespace }}"
+      register: hosted_cluster_nodepools
+
+    - name: Determine which resource classes are no longer needed
+      ansible.builtin.set_fact:
+        hosted_cluster_removed_resource_classes: "{{ hosted_cluster_removed_resource_classes | default([]) + [item.metadata.labels[esi_agent_resource_class_label]] }}"
+      with_items: "{{ hosted_cluster_nodepools.resources }}"
+      when: item.metadata.labels[esi_agent_resource_class_label] not in hosted_cluster_requested_resource_classes
+
+    - name: Set nodepools to be removed
+      ansible.builtin.set_fact:
+        hosted_cluster_removed_nodepools: "{{ hosted_cluster_removed_resource_classes | default([]) | map('regex_replace', '^', nodepool_prefix + '-') }}"
+
+    - name: Display resource classes to be removed
+      ansible.builtin.debug:
+        msg: "The following NodePools are no longer needed and will be removed: {{ hosted_cluster_removed_nodepools }}"
+
+    - name: Delete NodePool resources
+      kubernetes.core.k8s:
+        state: absent
+        api_version: hypershift.openshift.io/v1beta1
+        kind: NodePool
+        namespace: "{{ hosted_cluster_namespace }}"
+        name: "{{ item }}"
+      loop: "{{ hosted_cluster_removed_nodepools }}"
+      loop_control:
+        label: "Delete NodePool {{ item }}"

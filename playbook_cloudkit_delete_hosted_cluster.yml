@@ -27,14 +27,22 @@
         name: "{{ template_id }}"
         tasks_from: "delete"
 
-    - name: Remove infrastructure finalizer from clusterorder
+    - name: Remove infrastructure finalizer
       ansible.builtin.include_role:
         name: cloudkit.service.finalizer
       vars:
         finalizer_state: absent
         finalizer_name: "{{ cluster_order_infrastructure_finalizer }}"
         finalizer_target:
-          api_version: cloudkit.openshift.io/v1alpha1
+          api_version: "{{ item.api_version }}"
+          kind: "{{ item.kind }}"
+          namespace: "{{ item.namespace | default(omit) }}"
+          name: "{{ item.name }}"
+      loop:
+        - api_version: cloudkit.openshift.io/v1alpha1
           kind: ClusterOrder
           namespace: "{{ lookup('env', 'POD_NAMESPACE') }}"
           name: "{{ cluster_order.metadata.name }}"
+        - api_version: v1
+          kind: Namespace
+          name: "{{ cluster_working_namespace }}"

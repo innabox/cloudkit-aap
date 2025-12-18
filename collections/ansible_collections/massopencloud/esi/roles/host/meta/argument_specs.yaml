@@ -1,0 +1,33 @@
+argument_specs:
+  add_host_to_hostpool:
+    options:
+      host_pool_name:
+        description: Hostpool to add host to
+        type: "str"
+        required: true
+      host_name:
+        description: Host to add to hostpool
+        type: "str"
+        required: true
+  list_hosts:
+    options:
+      host_class:
+        description: Host class to filter hosts by
+        type: "str"
+        required: false
+      host_pool_name:
+        description: Hostpool to filter hosts by
+        type: "str"
+        required: false
+  list_host_classes_for_hostpool:
+    options:
+      host_pool_name:
+        description: Hostpool to check
+        type: "str"
+        required: true
+  remove_host_from_hostpool:
+    options:
+      host_name:
+        description: Host to remove from hostpool
+        type: "str"
+        required: true

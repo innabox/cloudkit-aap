@@ -1,0 +1,8 @@
+- name: List hosts currently labeled with the hostpool label
+  ansible.builtin.include_role:
+    name: massopencloud.esi.host
+    tasks_from: list_hosts
+
+- name: Set current host classes in use by hostpool
+  ansible.builtin.set_fact:
+    host_class_list: "{{ host_list | map(attribute='host_class') | list | unique }}"

@@ -115,6 +115,7 @@ class TemplateParameter(Base):
             name=name,
             title=spec.get("short_description"),
             description=spec.get("description"),
+            required=spec.get("required", False),
             default=spec.get("default"),
             type=TypeMapping[spec.get("type", "str")],
         )
@@ -145,14 +146,16 @@ class TemplateParameter(Base):
             try:
                 return ProtobufAnyValue(type=TypeMapping[type(value)], value=value)
             except KeyError as err:
-                raise ValueError(f"Default values must be scalar type, not {err}")
+                raise ValueError(
+                    f"Default values must be scalar type, not {err}")
 
 
 class NodeRequest(Base):
     """NodeRequest represents the bare metal resources requested for a cluster"""
 
     resource_class: str = pydantic.Field(..., validation_alias="resourceClass")
-    number_of_nodes: int = pydantic.Field(..., validation_alias="numberOfNodes")
+    number_of_nodes: int = pydantic.Field(...,
+                                          validation_alias="numberOfNodes")
 
 
 class NodeSet(Base):
@@ -162,12 +165,20 @@ class NodeSet(Base):
     size: int
 
 
+class TemplateTypeEnum(StrEnum):
+    cluster = "cluster"
+    vm = "vm"
+
+
 class Metadata(Base):
     """Metadata about the template"""
 
     title: str
     description: str | None = None
-    default_node_request: list[NodeRequest]
+    template_type: TemplateTypeEnum = pydantic.Field(
+        default=TemplateTypeEnum.cluster, exclude=True
+    )
+    default_node_request: list[NodeRequest] = []
     allowed_resource_classes: list[str] | None = None
 
 
@@ -181,9 +192,11 @@ class Template(Base):
     title: str | None = None
     description: str | None = None
     default_node_request: list[NodeRequest] = pydantic.Field(exclude=True)
+    template_type: TemplateTypeEnum = pydantic.Field(exclude=True)
 
     # Not currently supported by the API
-    allowed_resource_classes: list[str] | None = pydantic.Field(None, exclude=True)
+    allowed_resource_classes: list[str] | None = pydantic.Field(
+        None, exclude=True)
 
     parameters: list[TemplateParameter]
 
@@ -196,15 +209,15 @@ class Template(Base):
         return f"{self.collection}.{self.name}"
 
     @pydantic.computed_field
-    def node_sets(self) -> dict[str, NodeSet]:
-        return {
+    def node_sets(self) -> dict[str, NodeSet] | None:
+        ret = {
             nr.resource_class: NodeSet(
-                host_class=nr.resource_class,
-                size=nr.number_of_nodes
+                host_class=nr.resource_class, size=nr.number_of_nodes
             )
             for nr in self.default_node_request
         }
 
+        return ret if ret else None
 
 class Collection(Base):
     """Collection represents an Ansible collection"""
@@ -235,7 +248,8 @@ class Collection(Base):
             return []
 
         with argspec_file.open("r") as fd:
-            argspec: AnsibleArgumentSpec = cast(AnsibleArgumentSpec, yaml.safe_load(fd))
+            argspec: AnsibleArgumentSpec = cast(
+                AnsibleArgumentSpec, yaml.safe_load(fd))
 
         template_params: list[TemplateParameter] = []
 
@@ -264,6 +278,7 @@ class Collection(Base):
                     name=path.name,
                     title=metadata.title,
                     description=metadata.description,
+                    template_type=metadata.template_type,
                     default_node_request=metadata.default_node_request,
                     allowed_resource_classes=metadata.allowed_resource_classes,
                     parameters=params,
@@ -295,31 +310,45 @@ def find_template_roles(requested: list[str]) -> Generator[Template, None, None]
             # If `ansible-galaxy collection list` find multiple collections with the given name,
             # we will select the first one.
             collections.append(
-                Collection(parent_path=Path(list(info.keys())[0]), name=collection)
+                Collection(parent_path=Path(
+                    list(info.keys())[0]), name=collection)
             )
 
     for collection in collections:
         yield from collection.templates()
 
 
-def find_template_roles_filter(requested: list[str]):
+def find_cluster_template_roles_filter(requested: list[str]):
     """Transform the return values from find_template_roles into something
-    that makes Ansible happy."""
+    that makes Ansible happy, but only for cluster templates."""
     return [
         role.model_dump(by_alias=True, exclude_none=True)
         for role in find_template_roles(requested)
+        # Default to cluster for backward compatibility
+        if role.template_type == TemplateTypeEnum.cluster
     ]
 
+
+def find_vm_template_roles_filter(requested: list[str]):
+    """Transform the return values from find_template_roles into something
+    that makes Ansible happy, but only for VM templates."""
+    return [
+        role.model_dump(by_alias=True, exclude_none=True)
+        for role in find_template_roles(requested)
+        if role.template_type == TemplateTypeEnum.vm
+    ]
 
 class FilterModule:
     def filters(self):
         return {
-            "find_template_roles": find_template_roles_filter,
+            "find_cluster_template_roles": find_cluster_template_roles_filter,
+            "find_vm_template_roles": find_vm_template_roles_filter,
         }
+
 
 
 if __name__ == "__main__":
     import sys
 
-    found = find_template_roles_filter(sys.argv[1:])
+    found = find_cluster_template_roles_filter(sys.argv[1:])
     print(json.dumps(list(found)))

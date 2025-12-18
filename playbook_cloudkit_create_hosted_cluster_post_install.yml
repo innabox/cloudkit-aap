@@ -5,7 +5,8 @@
   gather_facts: false
 
   environment:
-    KUBECONFIG: "{{ admin_kubeconfig | to_yaml | cloudkit.service.to_temp_file }}"
+    KUBECONFIG: >-
+      {{ admin_kubeconfig | default("{}") | to_yaml | cloudkit.service.to_temp_file }}
 
   vars:
     cluster_order: "{{ ansible_eda.event.payload }}"

@@ -1,0 +1,3 @@
+- name: Set hostpool for host # noqa:no-changed-when
+  ansible.builtin.command: >-
+    openstack baremetal node set --extra hostpool="{{ host_pool_name }}" {{ host_name }}

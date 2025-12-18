@@ -1,0 +1,39 @@
+---
+- name: Call base template
+  ansible.builtin.import_role:
+    name: osac.templates.ocp_virt_vm
+    tasks_from: create
+
+- name: Assign floating IP
+  ansible.builtin.include_role:
+    name: massopencloud.esi.floating_ip
+  vars:
+    floating_ip_state: present
+    floating_ip_name: "{{ vm_order_name }}-floating-ip"
+    floating_ip_properties:
+      vm: "{{ vm_order_name }}"
+      instance: "{{ vm_order.metadata.namespace }}"
+      purpose: "o-sac"
+
+- name: Create floating IP port forwarding to VM node NodePorts
+  ansible.builtin.include_role:
+    name: massopencloud.esi.floating_ip
+    tasks_from: create_port_forwarding
+  vars:
+    internal_ip: "{{ node_info.resources[0].status.addresses | selectattr('type', 'equalto', 'InternalIP') | map(attribute='address') | first }}"
+    floating_ip: "{{ allocate_floating_ip_result }}"
+    internal_network: "{{ vm_internal_network }}"
+    ports: "{{ port_mappings }}"
+    description: "{{ vm_name }}-nodeport"
+
+- name: Annotate VirtualMachine with floating IP address
+  kubernetes.core.k8s:
+    api_version: cloudkit.openshift.io/v1alpha1
+    kind: VirtualMachine
+    name: "{{ vm_name }}"
+    namespace: "{{ vm_order.metadata.namespace }}"
+    state: present
+    definition:
+      metadata:
+        annotations:
+          cloudkit.openshift.io/floating-ip-address: "{{ allocate_floating_ip_result }}"

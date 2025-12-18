@@ -10,6 +10,16 @@ argument_specs:
       floating_ip_name:
         type: "str"
         required: true
+      floating_ip_tags:
+        description: |
+          List of tags to apply to the floating IP
+        type: "list"
+        required: false
+      floating_ip_properties:
+        description: |
+          Dictionary of properties to convert to tags for the floating IP
+        type: "dict"
+        required: false
   create_port_forwarding:
     options:
       internal_ip:

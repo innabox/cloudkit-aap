@@ -1,3 +1,9 @@
+- name: Purge port forwardings
+  ansible.builtin.command: >-
+    openstack esi port forwarding purge {{ floating_ip }} -f json
+  register: purge_port_fwd_result
+  changed_when: purge_port_fwd_result.stdout | from_json | length > 0
+
 - name: Create port forwarding  # noqa:no-changed-when
   when: ports
   ansible.builtin.command: >-

@@ -1,0 +1,32 @@
+- name: Get node information
+  openstack.cloud.baremetal_node_info:
+  register: baremetal_node_info_result
+
+- name: Filter for hosts
+  ansible.builtin.set_fact:
+    node_list: "{{ baremetal_node_info_result.baremetal_nodes | selectattr('extra.purpose', 'defined') | selectattr('extra.purpose', 'equalto', 'host') | list }}"
+
+- name: Filter by resource class
+  when: host_class is defined
+  ansible.builtin.set_fact:
+    node_list: "{{ node_list | selectattr('resource_class', 'equalto', host_class) | list }}"
+
+- name: Filter by hostpool if hostpool name is defined
+  when: host_pool_name is defined
+  ansible.builtin.set_fact:
+    node_list: "{{ node_list | selectattr('extra.hostpool', 'defined') | selectattr('extra.hostpool', 'equalto', host_pool_name) | list }}"
+
+- name: Filter by available hosts if hostpool name is not defined
+  when: host_pool_name is not defined
+  block:
+    - name: Filter out hosts that have hostpool label
+      ansible.builtin.set_fact:
+        node_list: "{{ node_list | selectattr('extra.hostpool', 'undefined') | list }}"
+
+    - name: Filter out hosts that are not in the available state
+      ansible.builtin.set_fact:
+        node_list: "{{ node_list | selectattr('provision_state', 'equalto', 'available') | list }}"
+
+- name: Transform Ironic node into OSAC host
+  ansible.builtin.set_fact:
+    host_list: "{{ node_list | map('massopencloud.esi.ironic_node_to_osac_host') | list }}"

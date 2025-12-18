@@ -1,0 +1,320 @@
+{
+ "files": [
+  {
+   "name": ".",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": ".ansible-lint.yml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "e25e5e765908d6f8be2f0bc914c4caf80b7655dc25ea90c3d88b29bea43580a0",
+   "format": 1
+  },
+  {
+   "name": ".github",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": ".github/dependabot.yml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "791205b295a75b5470abd03c96e743113cf275c7b904eb4c95ebaa89355c3009",
+   "format": 1
+  },
+  {
+   "name": ".github/workflows",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": ".github/workflows/pre-commit.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "0670ebe1d44753f160f7768c7050f40e56053a139c49041abfb039fa2a4d5d22",
+   "format": 1
+  },
+  {
+   "name": ".pre-commit-config.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "474c5b35af9eab443c56b30046a7b45b5db7b31cf05a9c08c665d6115392b570",
+   "format": 1
+  },
+  {
+   "name": ".yamllint.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "1838a297c5d4799fe84747649d944c19fa5324981d6d45cdbf6db8757eff0e1e",
+   "format": 1
+  },
+  {
+   "name": "CHANGELOG.rst",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "f22be23d51316a0063fe30d4814cc5823c4daa34634fbbd5c5cbddc89bc1100b",
+   "format": 1
+  },
+  {
+   "name": "LICENSE",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "1f6965e2598002fb0a2a96bd586d884b64d4c2bcb890d901a777418dbe143d4b",
+   "format": 1
+  },
+  {
+   "name": "README.md",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "98f3eeeeaef7cf10531a3c337f931e913cc7cd21596435ee0110414a724e0141",
+   "format": 1
+  },
+  {
+   "name": "meta",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "meta/runtime.yml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "92cb0e6a11e096d47a285d13f8334410cc279b914ceef36f8a02849cd2d07c65",
+   "format": 1
+  },
+  {
+   "name": "plugins",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "plugins/README.md",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "1f0c1570611f0113fdc47b71348700c2aee33ac9e744d7b9229a75fdf96c9df0",
+   "format": 1
+  },
+  {
+   "name": "roles",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "roles/ocp_4_17_small",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "roles/ocp_4_17_small/defaults",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "roles/ocp_4_17_small/defaults/main.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "f6ac06f364d635ecabab51cb3ae410839b9c094260a4856bc9e2127599a96e96",
+   "format": 1
+  },
+  {
+   "name": "roles/ocp_4_17_small/meta",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "roles/ocp_4_17_small/meta/argument_specs.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "bbb80dc412c5c02a36e5ed6574a5f49fa4aee29a82d5a4eb7c5e0fcdb7ec55ab",
+   "format": 1
+  },
+  {
+   "name": "roles/ocp_4_17_small/meta/cloudkit.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "c00c16ad727243a56e0dfcba1ffbdde79022a22a3145371489ef1d40584489ad",
+   "format": 1
+  },
+  {
+   "name": "roles/ocp_4_17_small/tasks",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "roles/ocp_4_17_small/tasks/delete.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "f0ec82a3210a11a2071aa5fb6206da6f5c5922d8b2d8fbf7a5b27fdc8b461bd1",
+   "format": 1
+  },
+  {
+   "name": "roles/ocp_4_17_small/tasks/install.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "4b6d464dea4200f0142c02e8f8e2a9b7925c36bae3bc0a4a280f03eb03421e67",
+   "format": 1
+  },
+  {
+   "name": "roles/ocp_4_17_small/tasks/post_install.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "e54360a3d9e22e601e223bf7cc13be21a40a6227f3ae2bd9e0c65f21f4fae345",
+   "format": 1
+  },
+  {
+   "name": "roles/ocp_4_17_small_github",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "roles/ocp_4_17_small_github/defaults",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "roles/ocp_4_17_small_github/defaults/main.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "f1365dad5c61af984ffe45b6eb344377f94faf8a2529b36f60f11b72e773d4e9",
+   "format": 1
+  },
+  {
+   "name": "roles/ocp_4_17_small_github/meta",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "roles/ocp_4_17_small_github/meta/argument_specs.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "aa11b4a37e014db06414e8a7434bd88c35431480d6b8377050eac08db8e783dc",
+   "format": 1
+  },
+  {
+   "name": "roles/ocp_4_17_small_github/meta/cloudkit.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "409e2811eb86063e352207c58d5f149d7d483f1b4a8d932a4df2f3234cff693d",
+   "format": 1
+  },
+  {
+   "name": "roles/ocp_4_17_small_github/tasks",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "roles/ocp_4_17_small_github/tasks/delete.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "047343ff07c6b21dda00820d1df598c5240405424a5b55d84055d6855f167c7f",
+   "format": 1
+  },
+  {
+   "name": "roles/ocp_4_17_small_github/tasks/install.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "e27a1e3513245d7fbf6067dc92fa7e80cdc6af21dccfea5f8412e7bae7adf3af",
+   "format": 1
+  },
+  {
+   "name": "roles/ocp_4_17_small_github/tasks/post_install.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "cb6f7b708d5bc7b243142766b950261106a79e703cdbf4f63dc2d9fdd797acf9",
+   "format": 1
+  },
+  {
+   "name": "roles/ocp_virt_vm",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "roles/ocp_virt_vm/defaults",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "roles/ocp_virt_vm/defaults/main.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "678ca4042a1682558261a53fab1e29ff2881105905074ec2acba3029a9584447",
+   "format": 1
+  },
+  {
+   "name": "roles/ocp_virt_vm/meta",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "roles/ocp_virt_vm/meta/argument_specs.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "cb48f91b845715b6960fb9039c1c72830e81e4e7362c85dc559514dd1664abdd",
+   "format": 1
+  },
+  {
+   "name": "roles/ocp_virt_vm/meta/cloudkit.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "4acf04f387f75c7df72f4b2beaa02fee600bf8de4db1a0310e800d55c0ad295e",
+   "format": 1
+  },
+  {
+   "name": "roles/ocp_virt_vm/tasks",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "roles/ocp_virt_vm/tasks/create.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "b7a51e957762372c7febec94775c7a4c36fc1cbf0544e3236425b9dc4786e816",
+   "format": 1
+  },
+  {
+   "name": "roles/ocp_virt_vm/tasks/delete.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "bbd4e8d9e10dcd18f79a52a139c777183f87cd3152c55547b9543737b7573438",
+   "format": 1
+  }
+ ],
+ "format": 1
+}

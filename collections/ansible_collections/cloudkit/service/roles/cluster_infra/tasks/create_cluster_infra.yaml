@@ -8,6 +8,10 @@
   vars:
     network_suffix: "{{ cluster_infra_name }}"
     network_state: present
+    network_properties:
+      instance: "{{ cluster_order.metadata.namespace }}"
+      clusterorder: "{{ cluster_infra_name }}"
+      purpose: "o-sac"
 
 - name: Set cluster_infra_network_name
   ansible.builtin.set_fact:
@@ -18,6 +22,37 @@
 # we run detach_and_unlabel_all_removed_agents, causing them to be
 # erroneously detached.
 
+- name: Retrieve all currently allocated node pools
+  kubernetes.core.k8s_info:
+    api_version: hypershift.openshift.io/v1beta1
+    kind: NodePool
+    namespace: "{{ cluster_working_namespace }}"
+  register: current_node_pools
+
+- name: Set resource classes included in the request
+  ansible.builtin.set_fact:
+    requested_resource_classes: >
+      {{ cluster_infra_node_requests | map(attribute='resourceClass') }}
+
+- name: Determine which resource classes are no longer needed
+  ansible.builtin.set_fact:
+    removed_resource_classes: "{{ removed_resource_classes | default([]) + [item.metadata.labels[esi_agent_resource_class_label]] }}"
+  with_items: "{{ current_node_pools.resources }}"
+  when: item.metadata.labels[esi_agent_resource_class_label] not in requested_resource_classes
+
+- name: Display additional resource classes to be removed
+  ansible.builtin.debug:
+    msg: "The following resource classes are no longer requested: {{ removed_resource_classes | default([]) }}"
+
+- name: Initialize updated cluster infra node requests that will include removed resource classes
+  ansible.builtin.set_fact:
+    updated_cluster_infra_node_requests: "{{ cluster_infra_node_requests }}"
+
+- name: Add removed resource classes to updated cluster infra node requests
+  ansible.builtin.set_fact:
+    updated_cluster_infra_node_requests: "{{ updated_cluster_infra_node_requests + [{'numberOfNodes': '0', 'resourceClass': item}] }}"
+  with_items: "{{ removed_resource_classes | default([]) }}"
+
 - name: Wait for the Agents to be removed from the cluster
   ansible.builtin.include_role:
     name: manage_agents
@@ -26,7 +61,7 @@
     manage_agents_cluster_order_name: "{{ cluster_infra_name }}"
     manage_agents_desired_count: "{{ item.numberOfNodes | int }}"
     manage_agents_resource_class: "{{ item.resourceClass }}"
-  loop: "{{ cluster_infra_node_requests }}"
+  loop: "{{ updated_cluster_infra_node_requests }}"
 
 - name: Detach agents from cluster
   ansible.builtin.include_role:

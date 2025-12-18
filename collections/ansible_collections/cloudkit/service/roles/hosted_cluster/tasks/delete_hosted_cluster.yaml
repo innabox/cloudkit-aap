@@ -14,6 +14,15 @@
     namespace: "{{ hosted_cluster_namespace }}"
     name: "sshkey-cluster-{{ hosted_cluster_name }}"
 
+# Delete ManagedCluster resource; ideally this should be automatically deleted when
+# we remove the HostedCluster, as we do not create the ManagedCluster.
+- name: Delete ManagedCluster resource
+  kubernetes.core.k8s:
+    state: absent
+    api_version: cluster.open-cluster-management.io/v1
+    kind: ManagedCluster
+    name: "{{ hosted_cluster_name }}"
+
 - name: Delete HostedCluster resource
   kubernetes.core.k8s:
     state: absent
@@ -26,7 +35,7 @@
   kubernetes.core.k8s:
     state: absent
     api_version: hypershift.openshift.io/v1beta1
-    kind: HostedCluster
+    kind: NodePool
     namespace: "{{ hosted_cluster_namespace }}"
     name: "nodepool-{{ hosted_cluster_name }}-{{ item.resourceClass }}"
   loop: "{{ hosted_cluster_node_requests }}"

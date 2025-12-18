@@ -25,8 +25,8 @@
         holderIdentity: "{{ lease_holder }}"
   register: lease_object
   until: lease_object is successful
-  retries: "{{ lease_retries|default(0) }}"
-  delay: "{{ lease_delay|default(1) }}"
+  retries: "{{ lease_retries | default(0) }}"
+  delay: "{{ lease_delay | default(1) }}"
 
 - name: "Delete lock {{ lease_name }}"
   when: lease_state == "absent"

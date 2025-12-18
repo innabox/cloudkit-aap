@@ -1,0 +1,3 @@
+- name: Delete cluster
+  ansible.builtin.import_role:
+    name: osac.templates.ocp_4_17_small

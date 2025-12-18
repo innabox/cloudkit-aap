@@ -98,6 +98,34 @@ controller_templates: # noqa: var-naming[no-role-prefix]
     allow_simultaneous: true
     ask_variables_on_launch: true
     verbosity: 0
+  - name: "{{ aap_prefix }}-report-hosted-cluster-status-success"
+    project: "{{ aap_prefix }}"
+    organization: "{{ aap_organization_name }}"
+    job_type: run
+    playbook: "playbook_osac_report_hosted_cluster_status.yml"
+    inventory: "{{ aap_prefix }}-cluster-fulfillment"
+    execution_environment: "{{ aap_prefix }}-ee"
+    instance_groups:
+      - "{{ aap_prefix }}-cluster-fulfillment-ig"
+    allow_simultaneous: true
+    ask_variables_on_launch: true
+    verbosity: 0
+    extra_vars:
+      workflow_status: succeeded
+  - name: "{{ aap_prefix }}-report-hosted-cluster-status-failure"
+    project: "{{ aap_prefix }}"
+    organization: "{{ aap_organization_name }}"
+    job_type: run
+    playbook: "playbook_osac_report_hosted_cluster_status.yml"
+    inventory: "{{ aap_prefix }}-cluster-fulfillment"
+    execution_environment: "{{ aap_prefix }}-ee"
+    instance_groups:
+      - "{{ aap_prefix }}-cluster-fulfillment-ig"
+    allow_simultaneous: true
+    ask_variables_on_launch: true
+    verbosity: 0
+    extra_vars:
+      workflow_status: failed
 
 controller_job_template_surveys: # noqa: var-naming[no-role-prefix]
   - name: "{{ aap_prefix }}-create-hosted-cluster-post-install"
@@ -120,11 +148,13 @@ controller_job_template_surveys: # noqa: var-naming[no-role-prefix]
 # Create workflows for cluster management
 controller_workflows: # noqa: var-naming[no-role-prefix]
   - name: "{{ aap_prefix }}-create-hosted-cluster-workflow"
-    description: "Workflow for hosted cluster creation"
+    description: "Workflow for creating hosted cluster"
     organization: "{{ aap_organization_name }}"
     ask_variables_on_launch: true
     inventory: "{{ aap_prefix }}-cluster-fulfillment"
     allow_simultaneous: true
+    extra_vars:
+      workflow_name: create-hosted-cluster
     workflow_nodes:
       - identifier: "create-cluster"
         unified_job_template:
@@ -133,9 +163,50 @@ controller_workflows: # noqa: var-naming[no-role-prefix]
         related:
           success_nodes:
             - identifier: "post-install"
+          failure_nodes:
+            - identifier: "report-hosted-cluster-status-failure"
       - identifier: "post-install"
         unified_job_template:
           name: "{{ aap_prefix }}-create-hosted-cluster-post-install"
+          type: job_template
+        related:
+          success_nodes:
+            - identifier: "report-hosted-cluster-status-success"
+          failure_nodes:
+            - identifier: "report-hosted-cluster-status-failure"
+      - identifier: "report-hosted-cluster-status-success"
+        unified_job_template:
+          name: "{{ aap_prefix }}-report-hosted-cluster-status-success"
+          type: job_template
+      - identifier: "report-hosted-cluster-status-failure"
+        unified_job_template:
+          name: "{{ aap_prefix }}-report-hosted-cluster-status-failure"
+          type: job_template
+  - name: "{{ aap_prefix }}-delete-hosted-cluster-workflow"
+    description: "Workflow for deleting hosted cluster"
+    organization: "{{ aap_organization_name }}"
+    ask_variables_on_launch: true
+    inventory: "{{ aap_prefix }}-cluster-fulfillment"
+    allow_simultaneous: true
+    extra_vars:
+      workflow_name: delete-hosted-cluster
+    workflow_nodes:
+      - identifier: "delete-cluster"
+        unified_job_template:
+          name: "{{ aap_prefix }}-delete-hosted-cluster"
+          type: job_template
+        related:
+          failure_nodes:
+            - identifier: "report-hosted-cluster-status-failure"
+          success_nodes:
+            - identifier: "report-hosted-cluster-status-success"
+      - identifier: "report-hosted-cluster-status-success"
+        unified_job_template:
+          name: "{{ aap_prefix }}-report-hosted-cluster-status-success"
+          type: job_template
+      - identifier: "report-hosted-cluster-status-failure"
+        unified_job_template:
+          name: "{{ aap_prefix }}-report-hosted-cluster-status-failure"
           type: job_template
 
 # Create cluster fulfillment and confg-as-code inventories. They are the same

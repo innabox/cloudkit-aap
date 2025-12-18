@@ -1,0 +1,52 @@
+argument_specs:
+  main:
+    options:
+      vm_order:
+        type: dict
+        required: true
+        description: VM configuration
+      template_parameters:
+        type: dict
+        description: VM configuration parameters
+        options:
+          cpu_cores:
+            description: Number of CPU cores for the VM.
+            type: int
+            required: false
+            default: 2
+          memory:
+            description: Amount of memory for the VM.
+            type: str
+            required: false
+            default: 2Gi
+          disk_size:
+            description: Size of the VM root disk.
+            type: str
+            required: false
+            default: 10Gi
+          image_source:
+            description: >
+              Container disk image or data source for the VM root disk.
+              Can be a container image URL or PVC reference.
+            type: str
+            required: false
+            default: "quay.io/containerdisks/fedora:latest"
+          cloud_init_config:
+            description: >
+              Cloud-init configuration for VM initialization as base64-encoded string.
+              Can include user data, network config, etc.
+            type: str
+            required: false
+          ssh_public_key:
+            description: >
+              Comma-separated list of SSH public keys to inject into the VM for remote access.
+            type: str
+            required: false
+          exposed_ports:
+            description: >
+              Ports to expose on the VM for ingress traffic.
+              The syntax is a comma-separated list of `<port>/<protocol>` pairs, where `<protocol>` is either `tcp` or `udp`.
+              For example, `22/tcp,80/tcp` will expose tcp ports 22 and 80 on the VM.
+            type: str
+            required: false
+            default: "22/tcp"

@@ -1,0 +1,12 @@
+---
+- name: Call base template delete
+  ansible.builtin.import_role:
+    name: osac.templates.ocp_virt_vm
+    tasks_from: delete
+
+- name: Delete floating IP
+  ansible.builtin.include_role:
+    name: massopencloud.esi.floating_ip
+    tasks_from: destroy_floating_ip
+  vars:
+    floating_ip_name: "{{ vm_order_name }}-floating-ip"
