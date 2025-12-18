@@ -2,18 +2,19 @@
 - name: Retrieve working vm namespace unless it is already set
   when: vm_working_namespace is not defined
   block:
-  - name: Retrieve namespace created for the VirtualMachine
+  - name: Retrieve tenant
     kubernetes.core.k8s_info:
-      kind: Namespace
-      label_selectors:
-        - "{{ vm_order_label }}={{ vm_order_name }}"
-    register: vm_working_namespace_list
+      api_version: cloudkit.openshift.io/v1alpha1
+      kind: Tenant
+      name: "{{ vm_order.status.tenantReference.name }}"
+      namespace: "{{ vm_order.status.tenantReference.namespace }}"
+    register: vm_working_namespace_tenant
 
-  - name: Check if the working vm namespace is found
+  - name: Check if the tenant is found
     ansible.builtin.fail:
-      msg: "Working virtualmachine namespace was not found. ({{ vm_working_namespace_list.resources | length }} were found.)"
-    when: vm_working_namespace_list.resources | length != 1
+      msg: "Tenant namespace was not found. ({{ vm_working_namespace_tenant.resources | length }} were found.)"
+    when: vm_working_namespace_tenant.resources | length != 1
 
   - name: Set working vm namespace as result
     ansible.builtin.set_fact:
-      vm_working_namespace: "{{ vm_working_namespace_list.resources[0].metadata.name }}"
+      vm_working_namespace: "{{ vm_working_namespace_tenant.resources[0].status.namespace }}"
