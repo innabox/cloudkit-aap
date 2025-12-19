@@ -9,6 +9,22 @@ argument_specs:
         description: Host to add to hostpool
         type: "str"
         required: true
+  attach_host_to_network:
+    options:
+      host_name:
+        description: Host name
+        type: "str"
+        required: true
+      host_network:
+        description: Network name
+        type: "str"
+        required: true
+  clean_host:
+    options:
+      host_name:
+        description: Host name
+        type: "str"
+        required: true
   list_hosts:
     options:
       host_class:

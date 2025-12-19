@@ -1,0 +1,24 @@
+- name: Report hostpool workflow status
+  hosts: localhost
+  gather_facts: true
+  vars:
+    hostpool: "{{ ansible_eda.event.payload }}"
+    workflow_name: unknown
+    workflow_status: unknown
+  tasks:
+    - name: Report workflow status
+      when: >-
+        workflow_status != "succeeded" or
+        hostpool.metadata.annotations["osac.openshift.io/ansible-workflow-status"] | default("") != workflow_status
+      kubernetes.core.k8s:
+        state: patched
+        definition:
+          apiVersion: cloudkit.openshift.io/v1alpha1
+          kind: HostPool
+          metadata:
+            name: "{{ hostpool.metadata.name }}"
+            namespace: "{{ hostpool.metadata.namespace }}"
+            annotations:
+              osac.openshift.io/ansible-workflow-name: "{{ workflow_name }}"
+              osac.openshift.io/ansible-workflow-status: "{{ workflow_status }}"
+              osac.openshift.io/ansible-workflow-time: "{{ ansible_date_time.iso8601 }}"

@@ -1,0 +1,106 @@
+- name: Show host requests
+  ansible.builtin.debug:
+    var: hostpool_infra_host_requests
+
+- name: Create hostpool network
+  ansible.builtin.include_role:
+    name: massopencloud.esi.network
+  vars:
+    network_suffix: "{{ hostpool_infra_name }}"
+    network_state: present
+    network_properties:
+      instance: "{{ hostpool_infra_namespace }}"
+      hostpool: "{{ hostpool_infra_name }}"
+      purpose: "o-sac"
+
+- name: Set hostpool_infra_network_name
+  ansible.builtin.set_fact:
+    hostpool_infra_network_name: "network-{{ hostpool_infra_name }}"
+
+# Handle scale down **before** scale up
+
+- name: List host classes currently in use by hostpool
+  ansible.builtin.include_role:
+    name: massopencloud.esi.host
+    tasks_from: list_host_classes_for_hostpool
+  vars:
+    host_pool_name: "{{ hostpool_infra_name }}"
+
+- name: Set host classes included in the request
+  ansible.builtin.set_fact:
+    requested_host_classes: >
+      {{ hostpool_infra_host_requests | map(attribute='hostClass') }}
+
+- name: Determine which host classes are no longer needed
+  ansible.builtin.set_fact:
+    removed_host_classes: >-
+      {{ host_class_list | difference(requested_host_classes) }}
+
+- name: Display host classes to be removed
+  ansible.builtin.debug:
+    msg: "The following host classes are no longer requested: {{ removed_host_classes | default([]) }}"
+
+- name: Initialize updated hostpool host requests
+  ansible.builtin.set_fact:
+    updated_hostpool_infra_host_requests: "{{ hostpool_infra_host_requests }}"
+
+- name: Add removed host classes to updated hostpool host requests
+  ansible.builtin.set_fact:
+    updated_hostpool_infra_host_requests: "{{ updated_hostpool_infra_host_requests + [{'size': '0', 'hostClass': item}] }}"
+  with_items: "{{ removed_host_classes | default([]) }}"
+
+- name: Remove hosts from hostpool
+  ansible.builtin.include_role:
+    name: manage_hosts
+    tasks_from: remove_hosts
+  vars:
+    manage_hosts_hostpool_name: "{{ hostpool_infra_name }}"
+    manage_hosts_desired_count: "{{ item.size | int }}"
+    manage_hosts_host_class: "{{ item.hostClass }}"
+  loop: "{{ updated_hostpool_infra_host_requests }}"
+
+- name: Add new hosts to hostpool
+  ansible.builtin.include_role:
+    name: manage_hosts
+    tasks_from: label_new_hosts
+  vars:
+    manage_hosts_hostpool_name: "{{ hostpool_infra_name }}"
+    manage_hosts_desired_count: "{{ item.size | int }}"
+    manage_hosts_host_class: "{{ item.hostClass }}"
+  loop: "{{ hostpool_infra_host_requests }}"
+
+- name: List hosts currently labeled with the hostpool label
+  ansible.builtin.include_role:
+    name: massopencloud.esi.host
+    tasks_from: list_hosts
+  vars:
+    host_pool_name: "{{ hostpool_infra_name }}"
+
+- name: Attach hosts to network
+  ansible.builtin.include_role:
+    name: massopencloud.esi.host
+    tasks_from: attach_host_to_network
+  vars:
+    host_name: "{{ item.name }}"
+    host_network: "{{ hostpool_infra_network_name }}"
+  loop: "{{ host_list }}"
+
+- name: Get client token
+  ansible.builtin.command:
+    cmd: >
+      oc create token -n {{ lookup('env', 'POD_NAMESPACE') }}
+      fulfillment-admin
+      --duration=10m
+  register: fulfillment_service_client_token
+  changed_when: false
+
+- name: Create hosts in fulfillment service
+  ansible.builtin.include_role:
+    name: manage_hosts
+    tasks_from: add_host_to_fulfillment_service
+  vars:
+    manage_hosts_fulfillment_service_token: "{{ fulfillment_service_client_token }}"
+    manage_hosts_validate_certs: "{{ hostpool_infra_validate_certs | default(true) | bool }}"
+    manage_hosts_host_name: "{{ item.name }}"
+    manage_hosts_hostpool_uid: "{{ hostpool_infra_uid }}"
+  loop: "{{ host_list }}"

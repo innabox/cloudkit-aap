@@ -1,0 +1,18 @@
+---
+- name: List hosts currently labeled with the hostpool label
+  ansible.builtin.include_role:
+    name: massopencloud.esi.host
+    tasks_from: list_hosts
+  vars:
+    host_pool_name: "{{ manage_hosts_hostpool_name }}"
+
+- name: Unlabel hosts from hostpool
+  ansible.builtin.include_role:
+    name: massopencloud.esi.host
+    tasks_from: remove_host_from_hostpool
+  vars:
+    host_name: "{{ host.name }}"
+  loop: "{{ host_list | default([]) }}"
+  loop_control:
+    loop_var: host
+    label: "Removing host {{ host.name }}"

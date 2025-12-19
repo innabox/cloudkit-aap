@@ -1,0 +1,50 @@
+---
+- name: List hosts currently labeled with the hostpool label
+  ansible.builtin.include_role:
+    name: massopencloud.esi.host
+    tasks_from: list_hosts
+  vars:
+    host_class: "{{ manage_hosts_host_class }}"
+    host_pool_name: "{{ manage_hosts_hostpool_name }}"
+
+- name: Set allocated hosts
+  ansible.builtin.set_fact:
+    manage_hosts_allocated: "{{ host_list }}"
+
+- name: Display host counts (remove_hosts)
+  ansible.builtin.debug:
+    msg: "We have {{ manage_hosts_allocated | length }} hosts; we want {{ manage_hosts_desired_count }}"
+
+- name: Remove hosts from hostpool
+  when: (manage_hosts_desired_count | int) < (manage_hosts_allocated | length)
+  block:
+    - name: Number of hosts being removed
+      ansible.builtin.set_fact:
+        manage_hosts_removed_count: >
+          {{ manage_hosts_allocated | length - manage_hosts_desired_count | int }}
+
+    - name: Select hosts to remove the hostpool
+      ansible.builtin.set_fact:
+        manage_hosts_remove_from_hostpool: "{{ manage_hosts_allocated[: (manage_hosts_removed_count | int)] }}"
+
+    - name: Unlabel hosts from hostpool
+      ansible.builtin.include_role:
+        name: massopencloud.esi.host
+        tasks_from: remove_host_from_hostpool
+      vars:
+        host_name: "{{ host.name }}"
+      loop: "{{ manage_hosts_remove_from_hostpool | default([]) }}"
+      loop_control:
+        loop_var: host
+        label: "Removing host {{ host.name }}"
+
+    - name: Clean hosts
+      ansible.builtin.include_role:
+        name: massopencloud.esi.host
+        tasks_from: clean_host
+      vars:
+        host_name: "{{ host.name }}"
+      loop: "{{ manage_hosts_remove_from_hostpool | default([]) }}"
+      loop_control:
+        loop_var: host
+        label: "Cleaning host {{ host.name }}"

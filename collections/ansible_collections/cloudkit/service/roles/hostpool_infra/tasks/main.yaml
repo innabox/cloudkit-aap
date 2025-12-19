@@ -1,0 +1,7 @@
+- name: Create (or update) hostpool infrastructure
+  when: hostpool_infra_state == 'present'
+  ansible.builtin.include_tasks: create_hostpool_infra.yaml
+
+- name: Destroy hostpool infrastructure
+  when: hostpool_infra_state == 'absent'
+  ansible.builtin.include_tasks: delete_hostpool_infra.yaml

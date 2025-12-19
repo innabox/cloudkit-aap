@@ -1,0 +1,48 @@
+---
+argument_specs:
+  add_host_to_fulfillment_service:
+    options:
+      manage_hosts_fulfillment_service_token:
+        type: str
+        required: true
+      manage_hosts_host_name:
+        type: str
+        required: true
+      manage_hosts_hostpool_uid:
+        type: str
+        required: true
+  label_new_hosts:
+    options:
+      manage_hosts_desired_count:
+        type: int
+        required: true
+      manage_hosts_host_class:
+        type: str
+        required: true
+      manage_hosts_hostpool_name:
+        type: str
+        required: true
+  remove_host_from_fulfillment_service:
+    options:
+      manage_hosts_fulfillment_service_token:
+        type: str
+        required: true
+      manage_hosts_host_name:
+        type: str
+        required: true
+  remove_hosts:
+    options:
+      manage_hosts_desired_count:
+        type: int
+        required: true
+      manage_hosts_host_class:
+        type: str
+        required: true
+      manage_hosts_hostpool_name:
+        type: str
+        required: true
+  unlabel_all_hosts:
+    options:
+      manage_hosts_hostpool_name:
+        type: str
+        required: true

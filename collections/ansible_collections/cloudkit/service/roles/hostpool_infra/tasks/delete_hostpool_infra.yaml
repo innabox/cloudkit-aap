@@ -1,0 +1,47 @@
+- name: List hosts currently labeled with the hostpool label
+  ansible.builtin.include_role:
+    name: massopencloud.esi.host
+    tasks_from: list_hosts
+  vars:
+    host_pool_name: "{{ hostpool_infra_name }}"
+
+- name: Get client token
+  ansible.builtin.command:
+    cmd: >
+      oc create token -n {{ lookup('env', 'POD_NAMESPACE') }}
+      fulfillment-admin
+      --duration=10m
+  register: fulfillment_service_client_token
+  changed_when: false
+
+- name: Delete hosts from fulfillment service
+  ansible.builtin.include_role:
+    name: manage_hosts
+    tasks_from: remove_host_from_fulfillment_service
+  vars:
+    manage_hosts_fulfillment_service_token: "{{ fulfillment_service_client_token }}"
+    manage_hosts_validate_certs: "{{ hostpool_infra_validate_certs | default(true) | bool }}"
+    manage_hosts_host_name: "{{ item.name }}"
+  loop: "{{ host_list }}"
+
+- name: Remove all hosts from hostpool
+  ansible.builtin.include_role:
+    name: manage_hosts
+    tasks_from: unlabel_all_hosts
+  vars:
+    manage_hosts_hostpool_name: "{{ hostpool_infra_name }}"
+
+- name: Clean hosts
+  ansible.builtin.include_role:
+    name: massopencloud.esi.host
+    tasks_from: clean_host
+  vars:
+    host_name: "{{ item.name }}"
+  loop: "{{ host_list }}"
+
+- name: Delete hostpool network
+  ansible.builtin.include_role:
+    name: massopencloud.esi.network
+  vars:
+    network_suffix: "{{ hostpool_infra_name }}"
+    network_state: absent

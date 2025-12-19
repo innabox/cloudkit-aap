@@ -1,0 +1,7 @@
+- name: Remove host from fulfillment service
+  ansible.builtin.uri:
+    url: "{{ cloudkit_fulfillment_service_uri }}/api/private/v1/hosts/{{ manage_hosts_host_name }}"
+    validate_certs: "{{ manage_hosts_validate_certs | default(true) | bool }}"
+    method: DELETE
+    headers:
+      authorization: Bearer {{ manage_hosts_fulfillment_service_token }}

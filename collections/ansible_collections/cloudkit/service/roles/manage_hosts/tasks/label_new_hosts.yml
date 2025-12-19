@@ -1,0 +1,77 @@
+---
+- name: List hosts currently labeled with the hostpool label
+  ansible.builtin.include_role:
+    name: massopencloud.esi.host
+    tasks_from: list_hosts
+  vars:
+    host_class: "{{ manage_hosts_host_class }}"
+    host_pool_name: "{{ manage_hosts_hostpool_name }}"
+
+- name: Set allocated hosts
+  ansible.builtin.set_fact:
+    manage_hosts_allocated: "{{ host_list }}"
+
+- name: Add hosts to the hostpool
+  when: (manage_hosts_desired_count | int) > (manage_hosts_allocated | length)
+  block:
+    # Since there is only one global pool of hosts, we need to make sure that
+    # the selection of new hosts is serialized by resource class
+    - name: Acquire host lock
+      ansible.builtin.include_role:
+        name: cloudkit.service.lease
+      vars:
+        lease_state: present
+        lease_name: "host-{{ manage_hosts_host_class }}-lock"
+        lease_holder: "{{ hostpool_holder_id }}"
+        lease_retries: 20
+        lease_delay: 5
+
+    - name: List available hosts with a matching host class
+      ansible.builtin.include_role:
+        name: massopencloud.esi.host
+        tasks_from: list_hosts
+      vars:
+        host_class: "{{ manage_hosts_host_class }}"
+
+    - name: Set available hosts
+      ansible.builtin.set_fact:
+        manage_hosts_available: "{{ host_list }}"
+
+    - name: Count the number of hosts to add to the hostpool
+      ansible.builtin.set_fact:
+        manage_hosts_selected_count: >
+          {{ manage_hosts_desired_count | int - manage_hosts_allocated | length }}
+
+    - name: Display host counts (label_new_hosts)
+      ansible.builtin.debug:
+        msg: "We have {{ manage_hosts_allocated | length }} hosts; we want {{ manage_hosts_desired_count }}"
+
+    - name: Select hosts to add to the hostpool
+      ansible.builtin.set_fact:
+        manage_hosts_add_to_hostpool: "{{ manage_hosts_available[: (manage_hosts_selected_count | int)] }}"
+
+    - name: Add selected hosts to the hostpool
+      ansible.builtin.include_role:
+        name: massopencloud.esi.host
+        tasks_from: add_host_to_hostpool
+      vars:
+        host_name: "{{ host.name }}"
+        host_pool_name: "{{ manage_hosts_hostpool_name }}"
+      loop: "{{ manage_hosts_add_to_hostpool | default([]) }}"
+      loop_control:
+        loop_var: host
+        label: "Adding host {{ host.name }}"
+
+    - name: Fail if not all hosts were added
+      ansible.builtin.fail:
+        msg: "{{ manage_hosts_add_to_hostpool | length }} hosts were added instead of {{ manage_hosts_selected_count }}. Please check host availability."
+      when: manage_hosts_add_to_hostpool | length != manage_hosts_selected_count | int
+
+  always:
+    - name: Delete host lock
+      ansible.builtin.include_role:
+        name: cloudkit.service.lease
+      vars:
+        lease_state: absent
+        lease_name: "host-{{ manage_hosts_host_class }}-lock"
+        lease_holder: "{{ hostpool_holder_id }}"

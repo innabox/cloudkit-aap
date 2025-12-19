@@ -1,0 +1,75 @@
+---
+- name: Create host pool infrastructure from a HostPool
+  hosts: localhost
+  gather_facts: false
+
+  vars:
+    hostpool: "{{ ansible_eda.event.payload }}"
+    cloudkit_fulfillment_service_uri: "{{ lookup('env', 'CLOUDKIT_FULFILLMENT_SERVICE_URI', default='https://fulfillment-api:8000') }}"
+
+  pre_tasks:
+    - name: Show hostpool values
+      ansible.builtin.debug:
+        var: hostpool
+
+    - name: Set hostpool name
+      ansible.builtin.set_fact:
+        hostpool_name: "{{ hostpool.metadata.name }}"
+
+    - name: Set lock holder identity
+      ansible.builtin.set_fact:
+        hostpool_holder_id: >-
+          {{ hostpool_name }}-{{ awx_job_id | default("unknown") }}-{{
+            lookup('community.general.random_string', special=false, numbers=false, upper=false)
+          }}
+
+    - name: Determine working namespace
+      ansible.builtin.include_role:
+        name: cloudkit.service.hostpool_working_namespace
+      vars:
+        hostpool_working_namespace_hostpool_name: "{{ hostpool_name }}"
+
+  tasks:
+    - name: Acquire hostpool lock
+      ansible.builtin.include_role:
+        name: cloudkit.service.lease
+      vars:
+        lease_state: present
+        lease_holder: "{{ hostpool_holder_id }}"
+        lease_name: "hostpool-{{ hostpool_name }}-lock"
+
+    - name: Add infrastructure finalizer
+      ansible.builtin.include_role:
+        name: cloudkit.service.finalizer
+      vars:
+        finalizer_state: present
+        finalizer_name: "{{ hostpool_infrastructure_finalizer }}"
+        finalizer_target:
+          api_version: "{{ item.api_version }}"
+          kind: "{{ item.kind }}"
+          namespace: "{{ item.namespace | default(omit) }}"
+          name: "{{ item.name }}"
+      loop:
+        - api_version: cloudkit.openshift.io/v1alpha1
+          kind: HostPool
+          namespace: "{{ lookup('env', 'POD_NAMESPACE') }}"
+          name: "{{ hostpool.metadata.name }}"
+        - api_version: v1
+          kind: Namespace
+          name: "{{ hostpool_working_namespace }}"
+
+    - name: Display hostpool information
+      ansible.builtin.debug:
+        msg:
+          - "hostpool: {{ hostpool.metadata.name }}"
+          - "Hostpool working namespace: {{ hostpool_working_namespace }}"
+
+    - name: Create hostpool infrastructure
+      ansible.builtin.import_role:
+        name: cloudkit.service.hostpool_infra
+      vars:
+        hostpool_infra_state: present
+        hostpool_infra_name: "{{ hostpool_name }}"
+        hostpool_infra_namespace: "{{ hostpool_working_namespace }}"
+        hostpool_infra_host_requests: "{{ hostpool.spec.hostSets | unique(attribute='hostClass') }}"
+        hostpool_infra_uid: "{{ hostpool.metadata.labels['cloudkit.openshift.io/hostpool-uuid'] }}"

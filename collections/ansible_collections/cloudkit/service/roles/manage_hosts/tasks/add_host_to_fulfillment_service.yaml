@@ -1,0 +1,25 @@
+- name: Check for matching host CRDs
+  kubernetes.core.k8s_info:
+    api_version: cloudkit.openshift.io/v1alpha1
+    kind: Host
+    namespace: "{{ lookup('env', 'POD_NAMESPACE') }}"
+    label_selectors:
+      - "{{ host_uuid_label }}={{ manage_hosts_host_name }}"
+  register: existing_hosts
+
+- name: Add new host to fulfillment service
+  when: existing_hosts.resources | length == 0
+  ansible.builtin.uri:
+    url: "{{ cloudkit_fulfillment_service_uri }}/api/private/v1/hosts"
+    validate_certs: "{{ manage_hosts_validate_certs | default(true) | bool }}"
+    method: POST
+    headers:
+      authorization: Bearer {{ manage_hosts_fulfillment_service_token }}
+    body_format: json
+    body: |
+      {
+        "id": "{{ manage_hosts_host_name }}",
+        "status": {
+           "host_pool": "{{ manage_hosts_hostpool_uid }}"
+        }
+      }

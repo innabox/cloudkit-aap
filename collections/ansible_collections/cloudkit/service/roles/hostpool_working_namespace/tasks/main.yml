@@ -1,0 +1,19 @@
+---
+- name: Retrieve working hostpool namespace unless it is already set
+  when: hostpool_working_namespace is not defined
+  block:
+  - name: Retrieve working hostpool namespace from HostPool name and namespace
+    kubernetes.core.k8s_info:
+      kind: Namespace
+      label_selectors:
+        - "{{ hostpool_label }}={{ hostpool_working_namespace_hostpool_name }}"
+    register: hostpool_working_namespace_list
+
+  - name: Check if the working hostpool namespace is found
+    ansible.builtin.fail:
+      msg: "Working hostpool namespace was not found."
+    when: hostpool_working_namespace_list.resources | length != 1
+
+  - name: Set working hostpool namespace as result
+    ansible.builtin.set_fact:
+      hostpool_working_namespace: "{{ hostpool_working_namespace_list.resources[0].metadata.name }}"

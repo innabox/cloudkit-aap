@@ -17,10 +17,16 @@ controller_roles: # noqa: var-naming[no-role-prefix]
     job_templates:
       - "{{ aap_prefix }}-create-hosted-cluster"
       - "{{ aap_prefix }}-delete-hosted-cluster"
+      - "{{ aap_prefix }}-create-hostpool"
+      - "{{ aap_prefix }}-delete-hostpool"
       - "{{ aap_prefix }}-create-vm"
       - "{{ aap_prefix }}-delete-vm"
       - "{{ aap_prefix }}-report-hosted-cluster-status-success"
       - "{{ aap_prefix }}-report-hosted-cluster-status-failure"
+      - "{{ aap_prefix }}-report-hostpool-status-success"
+      - "{{ aap_prefix }}-report-hostpool-status-failure"
     workflows:
       - "{{ aap_prefix }}-create-hosted-cluster-workflow"
       - "{{ aap_prefix }}-delete-hosted-cluster-workflow"
+      - "{{ aap_prefix }}-create-hostpool-workflow"
+      - "{{ aap_prefix }}-delete-hostpool-workflow"

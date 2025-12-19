@@ -34,3 +34,17 @@
         run_job_template:
           name: "{{ job_template_prefix }}-delete-vm"
           organization: "{{ job_template_organization }}"
+
+    - name: Create host pool
+      condition: event.meta.endpoint == "create-hostpool"
+      action:
+        run_workflow_template:
+          name: "{{ job_template_prefix }}-create-hostpool-workflow"
+          organization: "{{ job_template_organization }}"
+
+    - name: Delete host pool
+      condition: event.meta.endpoint == "delete-hostpool"
+      action:
+        run_workflow_template:
+          name: "{{ job_template_prefix }}-delete-hostpool-workflow"
+          organization: "{{ job_template_organization }}"
