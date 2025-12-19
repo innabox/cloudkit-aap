@@ -197,22 +197,15 @@ class Metadata(Base):
     allowed_resource_classes: list[str] | None = None
 
 
-class Template(Base):
-    """Template represents a single template role"""
+class BaseTemplate(Base):
+    """Base class for all template types"""
 
     collection: str = pydantic.Field(..., exclude=True)
     path: Path = pydantic.Field(..., exclude=True)
-
     name: str = pydantic.Field(..., exclude=True)
     title: str | None = None
     description: str | None = None
-    default_node_request: list[NodeRequest] = pydantic.Field(exclude=True)
     template_type: TemplateTypeEnum = pydantic.Field(exclude=True)
-
-    # Not currently supported by the API
-    allowed_resource_classes: list[str] | None = pydantic.Field(
-        None, exclude=True)
-
     parameters: list[TemplateParameter]
 
     @pydantic.field_serializer("path")
@@ -223,6 +216,14 @@ class Template(Base):
     def id(self) -> str:
         return f"{self.collection}.{self.name}"
 
+
+class ClusterTemplate(BaseTemplate):
+    """Template for cluster deployments"""
+
+    template_type: Literal[TemplateTypeEnum.cluster] = TemplateTypeEnum.cluster
+    default_node_request: list[NodeRequest] = pydantic.Field(default=[], exclude=True)
+    allowed_resource_classes: list[str] | None = pydantic.Field(None, exclude=True)
+
     @pydantic.computed_field
     def node_sets(self) -> dict[str, NodeSet] | None:
         ret = {
@@ -231,8 +232,13 @@ class Template(Base):
             )
             for nr in self.default_node_request
         }
-
         return ret if ret else None
+
+
+class ComputeInstanceTemplate(BaseTemplate):
+    """Template for ComputeInstance deployments"""
+
+    template_type: Literal[TemplateTypeEnum.compute_instance] = TemplateTypeEnum.compute_instance
 
 def _validate_collection_name(name: str) -> None:
     """Validate that collection name follows namespace.collection format.
@@ -344,11 +350,11 @@ class Collection(Base):
 
         return template_params
 
-    def templates(self) -> Generator[Template, None, None]:
+    def templates(self) -> Generator[BaseTemplate, None, None]:
         """Generate Template objects for all roles in this collection.
 
         Yields:
-            Template objects for each valid role found
+            BaseTemplate objects (ClusterTemplate or ComputeInstanceTemplate) for each valid role found
         """
         roles_dir = self.parent_path / self.name.replace(".", "/") / "roles"
 
@@ -371,18 +377,23 @@ class Collection(Base):
             params = self.read_params_for_role(path)
             if metadata is not None:
                 try:
-                    template = Template(
-                        collection=self.name,
-                        path=path,
-                        name=path.name,
-                        title=metadata.title,
-                        description=metadata.description,
-                        template_type=metadata.template_type,
-                        default_node_request=metadata.default_node_request,
-                        allowed_resource_classes=metadata.allowed_resource_classes,
-                        parameters=params,
-                    )
-                    yield template
+                    common = {
+                        "collection": self.name,
+                        "path": path,
+                        "name": path.name,
+                        "title": metadata.title,
+                        "description": metadata.description,
+                        "parameters": params,
+                    }
+
+                    if metadata.template_type == TemplateTypeEnum.cluster:
+                        yield ClusterTemplate(
+                            **common,
+                            default_node_request=metadata.default_node_request,
+                            allowed_resource_classes=metadata.allowed_resource_classes,
+                        )
+                    else:
+                        yield ComputeInstanceTemplate(**common)
                 except Exception as e:
                     display.warning(
                         f"Failed to create template for role '{path.name}' in collection '{self.name}': {e}"
@@ -390,14 +401,14 @@ class Collection(Base):
                     continue
 
 
-def find_template_roles(requested: list[str]) -> Generator[Template, None, None]:
+def find_template_roles(requested: list[str]) -> Generator[BaseTemplate, None, None]:
     """Find template roles in requested Ansible collections.
 
     Args:
         requested: List of collection names to search
 
     Yields:
-        Template objects found in the collections
+        BaseTemplate objects (ClusterTemplate or ComputeInstanceTemplate) found in the collections
     """
     display.vv(f"Searching for templates in collections: {', '.join(requested)}")
 
@@ -473,66 +484,36 @@ def find_template_roles(requested: list[str]) -> Generator[Template, None, None]
         yield from collection.templates()
 
 
-def find_cluster_template_roles_filter(
-    requested: list[str], template_type: str | TemplateTypeEnum | None = None
-) -> list[dict[str, Any]]:
-    """Transform the return values from find_template_roles into something that makes Ansible happy.
+def find_template_roles_filter(template_type: TemplateTypeEnum):
+    """Factory function that returns a filter for the specified template type.
 
     Args:
-        requested: List of collection names to search for templates
-        template_type: Optional template type to filter by. If None, returns all templates.
-                      Can be a string ('cluster', 'vm') or TemplateTypeEnum value.
+        template_type: The type of template to filter for
 
     Returns:
-        List of template role dictionaries matching the specified type (or all if no type specified)
-
-    Raises:
-        AnsibleFilterError: If template_type is invalid or an unexpected error occurs
+        A filter function that accepts a list of collection names and returns
+        matching template role dictionaries
     """
-    try:
-        roles = find_template_roles(requested)
+    def filter_func(requested: list[str]) -> list[dict[str, Any]]:
+        try:
+            roles = (
+                role for role in find_template_roles(requested)
+                if role.template_type == template_type
+            )
+            result = [
+                role.model_dump(by_alias=True, exclude_none=True)
+                for role in roles
+            ]
+            display.vv(f"Returning {len(result)} {template_type} template(s)")
+            return result
 
-        # Filter by template type if specified
-        if template_type is not None:
-            # Convert string to enum if needed
-            if isinstance(template_type, str):
-                try:
-                    template_type = TemplateTypeEnum(template_type)
-                except ValueError:
-                    valid_types = ', '.join(f"'{t.value}'" for t in TemplateTypeEnum)
-                    raise AnsibleFilterError(
-                        f"Invalid template_type '{template_type}'. "
-                        f"Valid options are: {valid_types}"
-                    )
+        except AnsibleFilterError:
+            raise
+        except Exception as e:
+            display.error(f"Unexpected error in find_template_roles filter: {e}")
+            raise AnsibleFilterError(f"Template discovery failed: {str(e)}")
 
-            display.vv(f"Filtering templates by type: {template_type.value}")
-            roles = (role for role in roles if role.template_type == template_type)
-
-        result = [
-            role.model_dump(by_alias=True, exclude_none=True)
-            for role in roles
-        ]
-
-        display.vv(f"Returning {len(result)} filtered template(s)")
-        return result
-
-    except AnsibleFilterError:
-        # Re-raise AnsibleFilterError as-is
-        raise
-    except Exception as e:
-        # Catch unexpected exceptions and convert to AnsibleFilterError
-        display.error(f"Unexpected error in find_template_roles filter: {e}")
-        raise AnsibleFilterError(f"Template discovery failed: {str(e)}")
-
-
-def find_compute_instance_template_roles_filter(requested: list[str]):
-    """Transform the return values from find_template_roles into something
-    that makes Ansible happy, but only for ComputeInstance templates."""
-    return [
-        role.model_dump(by_alias=True, exclude_none=True)
-        for role in find_template_roles(requested)
-        if role.template_type == TemplateTypeEnum.compute_instance
-    ]
+    return filter_func
 
 
 class FilterModule:
@@ -545,23 +526,23 @@ class FilterModule:
             Dictionary mapping filter names to filter functions
         """
         return {
-            "find_cluster_template_roles": find_cluster_template_roles_filter,
-            "find_compute_instance_template_roles": find_compute_instance_template_roles_filter,
+            "find_cluster_template_roles": find_template_roles_filter(TemplateTypeEnum.cluster),
+            "find_compute_instance_template_roles": find_template_roles_filter(TemplateTypeEnum.compute_instance),
         }
 
 
 if __name__ == "__main__":
     import sys
 
-    # Usage: python find_template_roles.py --type cluster|vm collection1 collection2 ...
+    # Usage: python find_template_roles.py --type cluster|compute_instance collection1 collection2 ...
     if "--type" not in sys.argv:
         print("Error: --type parameter is required", file=sys.stderr)
-        print("Usage: python find_template_roles.py --type cluster|vm collection1 collection2 ...", file=sys.stderr)
+        print("Usage: python find_template_roles.py --type cluster|compute_instance collection1 collection2 ...", file=sys.stderr)
         sys.exit(1)
 
     type_idx = sys.argv.index("--type")
     if type_idx + 1 >= len(sys.argv):
-        print("Error: --type requires a value (cluster or vm)", file=sys.stderr)
+        print("Error: --type requires a value (cluster or compute_instance)", file=sys.stderr)
         sys.exit(1)
 
     template_type = sys.argv[type_idx + 1]
@@ -569,8 +550,16 @@ if __name__ == "__main__":
 
     if not collections:
         print("Error: At least one collection name is required", file=sys.stderr)
-        print("Usage: python find_template_roles.py --type cluster|vm collection1 collection2 ...", file=sys.stderr)
+        print("Usage: python find_template_roles.py --type cluster|compute_instance collection1 collection2 ...", file=sys.stderr)
         sys.exit(1)
 
-    found = find_cluster_template_roles_filter(collections, template_type)
+    if template_type == TemplateTypeEnum.cluster:
+        filter_func = find_template_roles_filter(TemplateTypeEnum.cluster)
+    elif template_type == TemplateTypeEnum.compute_instance:
+        filter_func = find_template_roles_filter(TemplateTypeEnum.compute_instance)
+    else:
+        print(f"Error: Invalid template type '{template_type}'. Must be 'cluster' or 'compute_instance'", file=sys.stderr)
+        sys.exit(1)
+
+    found = filter_func(collections)
     print(json.dumps(found))
