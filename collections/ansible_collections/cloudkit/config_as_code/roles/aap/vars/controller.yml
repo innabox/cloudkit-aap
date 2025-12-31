@@ -74,27 +74,27 @@ controller_templates: # noqa: var-naming[no-role-prefix]
     allow_simultaneous: true
     ask_variables_on_launch: true
     verbosity: 0
-  - name: "{{ aap_prefix }}-create-vm"
+  - name: "{{ aap_prefix }}-create-compute-instance"
     project: "{{ aap_prefix }}"
     organization: "{{ aap_organization_name }}"
     job_type: run
-    playbook: "playbook_cloudkit_create_vm.yml"
-    inventory: "{{ aap_prefix }}-vm-operations"
+    playbook: "playbook_cloudkit_create_compute_instance.yml"
+    inventory: "{{ aap_prefix }}-compute-instance-operations"
     execution_environment: "{{ aap_prefix }}-ee"
     instance_groups:
-      - "{{ aap_prefix }}-vm-operations-ig"
+      - "{{ aap_prefix }}-compute-instance-operations-ig"
     allow_simultaneous: true
     ask_variables_on_launch: true
     verbosity: 0
-  - name: "{{ aap_prefix }}-delete-vm"
+  - name: "{{ aap_prefix }}-delete-compute-instance"
     project: "{{ aap_prefix }}"
     organization: "{{ aap_organization_name }}"
     job_type: run
-    playbook: "playbook_cloudkit_delete_vm.yml"
-    inventory: "{{ aap_prefix }}-vm-operations"
+    playbook: "playbook_cloudkit_delete_compute_instance.yml"
+    inventory: "{{ aap_prefix }}-compute-instance-operations"
     execution_environment: "{{ aap_prefix }}-ee"
     instance_groups:
-      - "{{ aap_prefix }}-vm-operations-ig"
+      - "{{ aap_prefix }}-compute-instance-operations-ig"
     allow_simultaneous: true
     ask_variables_on_launch: true
     verbosity: 0
@@ -222,8 +222,8 @@ controller_inventories: # noqa: var-naming[no-role-prefix]
   - name: "{{ aap_prefix }}-publish-templates"
     description: "Publish templates inventory"
     organization: "{{ aap_organization_name }}"
-  - name: "{{ aap_prefix }}-vm-operations"
-    description: "VM Operational Inventory"
+  - name: "{{ aap_prefix }}-compute-instance-operations"
+    description: "Compute Instance Operational Inventory"
     organization: "{{ aap_organization_name }}"
 
 controller_inventory_sources: # noqa: var-naming[no-role-prefix]
@@ -254,12 +254,12 @@ controller_inventory_sources: # noqa: var-naming[no-role-prefix]
     overwrite: true
     overwrite_vars: true
     update_cache_timeout: 0
-  - name: "{{ aap_prefix }}-vm-operations-is"
+  - name: "{{ aap_prefix }}-compute-instance-operations-is"
     organization: "{{ aap_organization_name }}"
     source: scm
     source_project: "{{ aap_prefix }}"
     source_path: "inventory/localhost.yml"
-    inventory: "{{ aap_prefix }}-vm-operations"
+    inventory: "{{ aap_prefix }}-compute-instance-operations"
     overwrite: true
     overwrite_vars: true
     update_cache_timeout: 0
@@ -500,7 +500,7 @@ controller_instance_groups: # noqa: var-naming[no-role-prefix]
   - name: "{{ aap_prefix }}-create-hosted-cluster-post-install-ig"
     is_container_group: true
 
-  - name: "{{ aap_prefix }}-vm-operations-ig"
+  - name: "{{ aap_prefix }}-compute-instance-operations-ig"
     is_container_group: true
     pod_spec_override: |
       apiVersion: v1
@@ -536,7 +536,7 @@ controller_instance_groups: # noqa: var-naming[no-role-prefix]
               - secretRef:
                   name: cluster-fulfillment-ig
             env:
-              - name: CLOUDKIT_VM_OPERATIONS_NAMESPACE_DEFAULT
+              - name: CLOUDKIT_COMPUTE_INSTANCE_OPERATIONS_NAMESPACE_DEFAULT
                 valueFrom:
                   fieldRef:
                     fieldPath: metadata.namespace

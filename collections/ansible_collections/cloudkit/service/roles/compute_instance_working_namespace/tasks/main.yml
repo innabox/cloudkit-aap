@@ -1,0 +1,20 @@
+---
+- name: Retrieve working compute instance namespace unless it is already set
+  when: compute_instance_working_namespace is not defined
+  block:
+  - name: Retrieve tenant
+    kubernetes.core.k8s_info:
+      api_version: cloudkit.openshift.io/v1alpha1
+      kind: Tenant
+      name: "{{ compute_instance_order.status.tenantReference.name }}"
+      namespace: "{{ compute_instance_order.status.tenantReference.namespace }}"
+    register: compute_instance_working_namespace_tenant
+
+  - name: Check if the tenant is found
+    ansible.builtin.fail:
+      msg: "Tenant namespace was not found. ({{ compute_instance_working_namespace_tenant.resources | length }} were found.)"
+    when: compute_instance_working_namespace_tenant.resources | length != 1
+
+  - name: Set working compute instance namespace as result
+    ansible.builtin.set_fact:
+      compute_instance_working_namespace: "{{ compute_instance_working_namespace_tenant.resources[0].status.namespace }}"
