@@ -5,12 +5,17 @@
     namespace: "{{ manage_agent_pool_namespace }}"
   register: initial_agents
 
-- name: Extract available agents
+- name: Extract available agents with matching resource class
   ansible.builtin.set_fact:
     available_agent_names: >-
       {{
         initial_agents.resources |
         selectattr('status.debugInfo.state', 'equalto', 'known-unbound') |
+        rejectattr('metadata.labels["cloudkit.openshift.io/clusterorder"]',
+                   'defined') |
+        selectattr('metadata.labels["esi.nerc.mghpcc.org/resource_class"]',
+                   'equalto',
+                   manage_agent_pool_resource_class) |
         map(attribute='spec.hostname') |
         list |
         upper
@@ -26,15 +31,18 @@
   when: available_agent_names | length < desired_number_of_agents
   block:
     - name: Get nodes list
-      openstack.cloud.baremetal_node_info:
-      register: all_nodes
+      ansible.builtin.include_role:
+        name: massopencloud.esi.node
+        tasks_from: get_nodes
+    # set_fact: node_info_list
 
     - name: Extract available nodes
       ansible.builtin.set_fact:
         available_node_names: >-
           {{
-            all_nodes.baremetal_nodes |
+            node_info_list |
             selectattr('provision_state', 'equalto', 'available') |
+            selectattr('resource_class', 'equalto', manage_agent_pool_resource_class) |
             map(attribute='name') |
             list
           }}

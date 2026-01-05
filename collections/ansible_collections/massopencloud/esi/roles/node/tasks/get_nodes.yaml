@@ -10,6 +10,7 @@
     node_infos: "{{ node_info_result.baremetal_nodes }}"
 
 - name: Filter nodes by node_filter_names
+  when: node_filter_names is defined
   ansible.builtin.set_fact:
     node_infos: >-
       {{
