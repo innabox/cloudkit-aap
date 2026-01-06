@@ -2,10 +2,10 @@
   when: >-
     template_id is not defined
   ansible.builtin.set_fact:
-    template_id: "{{ compute_instance_order.spec.templateID }}"
+    template_id: "{{ compute_instance.spec.templateID }}"
 
 - name: Extract template parameters
   when: >-
     template_parameters is not defined
   ansible.builtin.set_fact:
-    template_parameters: "{{ compute_instance_order.spec.templateParameters | from_json }}"
+    template_parameters: "{{ compute_instance.spec.templateParameters | from_json }}"

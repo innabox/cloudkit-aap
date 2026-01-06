@@ -1,11 +1,11 @@
 ---
-- name: Delete a compute instance from a ComputeInstance order
+- name: Delete a compute instance from a ComputeInstance
   hosts: localhost
   gather_facts: false
 
   vars:
-    compute_instance_order: "{{ ansible_eda.event.payload }}"
-    compute_instance_order_name: "{{ ansible_eda.event.payload.metadata.name }}"
+    compute_instance: "{{ ansible_eda.event.payload }}"
+    compute_instance_name: "{{ ansible_eda.event.payload.metadata.name }}"
 
   pre_tasks:
     - name: Extract compute instance template info
@@ -20,7 +20,7 @@
     - name: Display compute instance deletion information
       ansible.builtin.debug:
         msg:
-          - "Deleting compute instance order: {{ compute_instance_order_name }}"
+          - "Deleting compute instance: {{ compute_instance_name }}"
           - "Compute instance working namespace: {{ compute_instance_working_namespace }}"
           - "Template ID: {{ template_id }}"
 
@@ -29,7 +29,7 @@
         name: "{{ template_id }}"
         tasks_from: "delete"
 
-    - name: "Remove the finalizer on the Cloudkit compute instance {{ compute_instance_order.metadata.name }}"
+    - name: "Remove the finalizer on the Cloudkit compute instance {{ compute_instance.metadata.name }}"
       ansible.builtin.include_role:
         name: cloudkit.service.finalizer
       vars:
@@ -38,5 +38,5 @@
         finalizer_target:
           api_version: cloudkit.openshift.io/v1alpha1
           kind: ComputeInstance
-          namespace: "{{ compute_instance_order.metadata.namespace }}"
-          name: "{{ compute_instance_order_name }}"
+          namespace: "{{ compute_instance.metadata.namespace }}"
+          name: "{{ compute_instance_name }}"

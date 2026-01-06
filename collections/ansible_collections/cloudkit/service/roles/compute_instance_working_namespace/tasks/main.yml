@@ -6,8 +6,8 @@
     kubernetes.core.k8s_info:
       api_version: cloudkit.openshift.io/v1alpha1
       kind: Tenant
-      name: "{{ compute_instance_order.status.tenantReference.name }}"
-      namespace: "{{ compute_instance_order.status.tenantReference.namespace }}"
+      name: "{{ compute_instance.status.tenantReference.name }}"
+      namespace: "{{ compute_instance.status.tenantReference.namespace }}"
     register: compute_instance_working_namespace_tenant
 
   - name: Check if the tenant is found
