@@ -21,18 +21,18 @@
           name: "{{ job_template_prefix }}-delete-hosted-cluster-workflow"
           organization: "{{ job_template_organization }}"
 
-    - name: Create virtual machine
-      condition: event.meta.endpoint == "create-vm"
+    - name: Create compute instance
+      condition: event.meta.endpoint == "create-compute-instance"
       action:
         run_job_template:
-          name: "{{ job_template_prefix }}-create-vm"
+          name: "{{ job_template_prefix }}-create-compute-instance"
           organization: "{{ job_template_organization }}"
 
-    - name: Delete virtual machine
-      condition: event.meta.endpoint == "delete-vm"
+    - name: Delete compute instance
+      condition: event.meta.endpoint == "delete-compute-instance"
       action:
         run_job_template:
-          name: "{{ job_template_prefix }}-delete-vm"
+          name: "{{ job_template_prefix }}-delete-compute-instance"
           organization: "{{ job_template_organization }}"
 
     - name: Create host pool
