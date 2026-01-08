@@ -3,5 +3,5 @@ title: Simple VM Template
 description: >
   Simple VM
 
-# Specify this is a VM template (not a cluster template)
-template_type: vm
+# Specify this is a ComputeInstance template (not a cluster template)
+template_type: compute_instance
