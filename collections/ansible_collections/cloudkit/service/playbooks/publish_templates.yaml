@@ -33,9 +33,9 @@
       ansible.builtin.debug:
         var: cloudkit_cluster_templates
 
-    - name: Print vm templates found.
+    - name: Print ComputeInstance templates found.
       ansible.builtin.debug:
-        var: cloudkit_vm_templates
+        var: cloudkit_compute_instance_templates
 
     - name: Publish templates
       ansible.builtin.include_role:

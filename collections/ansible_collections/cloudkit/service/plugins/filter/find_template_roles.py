@@ -167,7 +167,7 @@ class NodeSet(Base):
 
 class TemplateTypeEnum(StrEnum):
     cluster = "cluster"
-    vm = "vm"
+    compute_instance = "compute_instance"
 
 
 class Metadata(Base):
@@ -329,20 +329,20 @@ def find_cluster_template_roles_filter(requested: list[str]):
     ]
 
 
-def find_vm_template_roles_filter(requested: list[str]):
+def find_compute_instance_template_roles_filter(requested: list[str]):
     """Transform the return values from find_template_roles into something
-    that makes Ansible happy, but only for VM templates."""
+    that makes Ansible happy, but only for ComputeInstance templates."""
     return [
         role.model_dump(by_alias=True, exclude_none=True)
         for role in find_template_roles(requested)
-        if role.template_type == TemplateTypeEnum.vm
+        if role.template_type == TemplateTypeEnum.compute_instance
     ]
 
 class FilterModule:
     def filters(self):
         return {
             "find_cluster_template_roles": find_cluster_template_roles_filter,
-            "find_vm_template_roles": find_vm_template_roles_filter,
+            "find_compute_instance_template_roles": find_compute_instance_template_roles_filter,
         }
 
 
