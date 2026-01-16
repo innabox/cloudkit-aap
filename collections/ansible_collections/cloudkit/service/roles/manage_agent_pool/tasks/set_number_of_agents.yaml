@@ -1,0 +1,95 @@
+- name: Get list of existing agents
+  kubernetes.core.k8s_info:
+    kind: Agent
+    api_version: agent-install.openshift.io/v1beta1
+    namespace: "{{ manage_agent_pool_namespace }}"
+  register: initial_agents
+
+- name: Extract available agents with matching resource class
+  ansible.builtin.set_fact:
+    available_agent_names: >-
+      {{
+        initial_agents.resources |
+        selectattr('status.debugInfo.state', 'equalto', 'known-unbound') |
+        rejectattr('metadata.labels["cloudkit.openshift.io/clusterorder"]',
+                   'defined') |
+        selectattr('metadata.labels["esi.nerc.mghpcc.org/resource_class"]',
+                   'equalto',
+                   manage_agent_pool_resource_class) |
+        map(attribute='spec.hostname') |
+        list |
+        upper
+      }}
+
+- name: Show number of initial number agents
+  ansible.builtin.debug:
+    msg:
+      - "current number of available agents: {{ available_agent_names | length }}"
+      - "desired number of agents: {{ desired_number_of_agents }}"
+
+- name: Import nodes to be agents in the hostpool
+  when: available_agent_names | length < desired_number_of_agents
+  block:
+    - name: Get nodes list
+      ansible.builtin.include_role:
+        name: massopencloud.esi.node
+        tasks_from: get_nodes
+    # set_fact: node_info_list
+
+    - name: Extract available nodes
+      ansible.builtin.set_fact:
+        available_node_names: >-
+          {{
+            node_info_list |
+            selectattr('provision_state', 'equalto', 'available') |
+            selectattr('resource_class', 'equalto', manage_agent_pool_resource_class) |
+            map(attribute='name') |
+            list
+          }}
+
+    - name: Show the number of available nodes
+      ansible.builtin.debug:
+        msg:
+          - "number of available nodes: {{ available_node_names | length }}"
+
+    - name: Assert there are enough available nodes
+      ansible.builtin.assert:
+        that:
+          - available_node_names | length >= desired_number_of_agents - available_agent_names | length
+        quiet: true
+
+    - name: Truncate list
+      ansible.builtin.set_fact:
+        node_names: "{{ available_node_names[: (desired_number_of_agents - available_agent_names | length)] }}"
+
+    - name: Import nodes
+      ansible.builtin.include_role:
+        name: manage_agents
+        tasks_from: import_agents
+      vars:
+        manage_agents_node_names: "{{ node_names }}"
+        manage_agents_idle_agents_network: "{{ manage_agent_pool_idle_agents_network }}"
+        manage_agents_namespace: "{{ manage_agent_pool_namespace }}"
+        manage_agents_provisioning_network_name: "{{ manage_agent_pool_provisioning_network_name }}"
+        manage_agents_infraenv_name: "{{ manage_agent_pool_infraenv_name }}"
+
+- name: Remove agents from the hostpool
+  when: available_agent_names | length > desired_number_of_agents
+  block:
+    - name: Assert desired number of agents is not negative
+      ansible.builtin.assert:
+        that:
+          - desired_number_of_agents > 0
+        quiet: true
+
+    - name: Truncate list
+      ansible.builtin.set_fact:
+        node_names: "{{ available_agent_names[: (available_agent_names | length - desired_number_of_agents)] }}"
+
+    - name: Remove agents
+      ansible.builtin.include_role:
+        name: manage_agents
+        tasks_from: remove_agents
+      vars:
+        manage_agents_node_names: "{{ node_names }}"
+        manage_agents_namespace: "{{ manage_agent_pool_namespace }}"

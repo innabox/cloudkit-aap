@@ -1,0 +1,13 @@
+---
+argument_specs:
+  set_number_of_agents:
+    options:
+      desired_number_of_agents:
+        type: int
+        required: true
+      manage_agent_pool_idle_agents_network:
+        type: str
+        required: true
+      manage_agent_pool_resource_class:
+        type: str
+        required: true
