@@ -2,24 +2,24 @@
   kubernetes.core.k8s_info:
     api_version: kubevirt.io/v1
     kind: VirtualMachine
-    name: "{{ compute_instance_order_name }}"
-    namespace: "{{ vm_working_namespace }}"
+    name: "{{ compute_instance_name }}"
+    namespace: "{{ compute_instance_working_namespace }}"
   register: vm_info
 
 - name: Check if VM instance exists
   kubernetes.core.k8s_info:
     api_version: kubevirt.io/v1
     kind: VirtualMachineInstance
-    name: "{{ compute_instance_order_name }}"
-    namespace: "{{ vm_working_namespace }}"
+    name: "{{ compute_instance_name }}"
+    namespace: "{{ compute_instance_working_namespace }}"
   register: vm_exists
 
 - name: Stop VirtualMachine
   kubernetes.core.k8s:
     api_version: kubevirt.io/v1
     kind: VirtualMachine
-    name: "{{ compute_instance_order_name }}"
-    namespace: "{{ vm_working_namespace }}"
+    name: "{{ compute_instance_name }}"
+    namespace: "{{ compute_instance_working_namespace }}"
     state: present
     definition:
       spec:
@@ -30,8 +30,8 @@
   kubernetes.core.k8s_info:
     api_version: kubevirt.io/v1
     kind: VirtualMachine
-    name: "{{ compute_instance_order_name }}"
-    namespace: "{{ vm_working_namespace }}"
+    name: "{{ compute_instance_name }}"
+    namespace: "{{ compute_instance_working_namespace }}"
     wait: true
     wait_condition:
       type: Ready
@@ -43,8 +43,8 @@
   kubernetes.core.k8s:
     api_version: kubevirt.io/v1
     kind: VirtualMachine
-    name: "{{ compute_instance_order_name }}"
-    namespace: "{{ vm_working_namespace }}"
+    name: "{{ compute_instance_name }}"
+    namespace: "{{ compute_instance_working_namespace }}"
     state: absent
     wait: true
     wait_timeout: 300
@@ -53,24 +53,24 @@
   kubernetes.core.k8s:
     api_version: v1
     kind: Service
-    name: "{{ compute_instance_order_name }}-service"
-    namespace: "{{ vm_working_namespace }}"
+    name: "{{ compute_instance_name }}-service"
+    namespace: "{{ compute_instance_working_namespace }}"
     state: absent
 
 - name: Delete VM load balancer service
   kubernetes.core.k8s:
     api_version: v1
     kind: Service
-    name: "{{ compute_instance_order_name }}-load-balancer"
-    namespace: "{{ vm_working_namespace }}"
+    name: "{{ compute_instance_name }}-load-balancer"
+    namespace: "{{ compute_instance_working_namespace }}"
     state: absent
 
 - name: Delete root disk DataVolume
   kubernetes.core.k8s:
     api_version: cdi.kubevirt.io/v1beta1
     kind: DataVolume
-    name: "{{ compute_instance_order_name }}-root-disk"
-    namespace: "{{ vm_working_namespace }}"
+    name: "{{ compute_instance_name }}-root-disk"
+    namespace: "{{ compute_instance_working_namespace }}"
     state: absent
     wait: true
     wait_timeout: 300
@@ -79,8 +79,8 @@
   kubernetes.core.k8s:
     api_version: v1
     kind: Secret
-    name: "{{ compute_instance_order_name }}-cloud-init"
-    namespace: "{{ vm_working_namespace }}"
+    name: "{{ compute_instance_name }}-cloud-init"
+    namespace: "{{ compute_instance_working_namespace }}"
     state: absent
   register: delete_cloud_init_secret
   failed_when:
@@ -92,8 +92,8 @@
   kubernetes.core.k8s:
     api_version: v1
     kind: Secret
-    name: "{{ compute_instance_order_name }}-ssh-public-key"
-    namespace: "{{ vm_working_namespace }}"
+    name: "{{ compute_instance_name }}-ssh-public-key"
+    namespace: "{{ compute_instance_working_namespace }}"
     state: absent
   register: delete_ssh_secret
   failed_when:
@@ -104,6 +104,6 @@
 - name: Display deletion status
   ansible.builtin.debug:
     msg:
-      - "Virtual Machine '{{ compute_instance_order_name }}' deletion completed"
-      - "Namespace: {{ vm_working_namespace }}"
+      - "Virtual Machine '{{ compute_instance_name }}' deletion completed"
+      - "Namespace: {{ compute_instance_working_namespace }}"
       - "All associated resources have been removed"

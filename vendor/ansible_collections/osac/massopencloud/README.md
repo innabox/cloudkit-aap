@@ -64,7 +64,7 @@ Deploy virtual machines on OpenShift Virtualization with automated floating IP a
         name: osac.massopencloud.ocp_virt_vm
         tasks_from: create
       vars:
-        compute_instance_order:
+        compute_instance:
           metadata:
             name: my-vm
             namespace: default

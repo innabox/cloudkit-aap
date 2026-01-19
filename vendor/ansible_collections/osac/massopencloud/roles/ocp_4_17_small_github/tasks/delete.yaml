@@ -6,14 +6,14 @@
   kubernetes.core.k8s:
     api_version: v1
     kind: Service
-    name: "{{ compute_instance_order_name }}-service"
-    namespace: "{{ vm_working_namespace }}"
+    name: "{{ compute_instance_name }}-service"
+    namespace: "{{ compute_instance_working_namespace }}"
     state: absent
 
 - name: Delete VM load balancer service
   kubernetes.core.k8s:
     api_version: v1
     kind: Service
-    name: "{{ compute_instance_order_name }}-load-balancer"
-    namespace: "{{ vm_working_namespace }}"
+    name: "{{ compute_instance_name }}-load-balancer"
+    namespace: "{{ compute_instance_working_namespace }}"
     state: absent

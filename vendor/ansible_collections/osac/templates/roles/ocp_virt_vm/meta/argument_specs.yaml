@@ -1,7 +1,7 @@
 argument_specs:
   main:
     options:
-      compute_instance_order:
+      compute_instance:
         type: dict
         required: true
         description: ComputeInstance configuration

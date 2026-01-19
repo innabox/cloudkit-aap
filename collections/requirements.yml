@@ -21,9 +21,9 @@ collections:
     version: "3.4.1"
   - name: osac.templates
     type: git
-    source: https://github.com/tzvatot/osac-templates
-    version: chore/rename-vm-order-to-compute-instance-order
+    source: https://github.com/akshaynadkarni/osac-templates
+    version: fix/correct-variable-naming
   - name: osac.massopencloud
     type: git
-    source: https://github.com/tzvatot/osac-massopencloud-templates
-    version: chore/rename-vm-order-to-compute-instance-order
+    source: https://github.com/akshaynadkarni/osac-massopencloud-templates
+    version: fix/correct-variable-naming
