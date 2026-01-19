@@ -135,9 +135,9 @@ Templates integrate with OSAC through a well-defined interface:
 4. OSAC monitors cluster status and provides kubeconfig access
 5. On deletion, template cleans up all resources
 
-### VM Template Lifecycle
-1. OSAC creates a dedicated namespace for the VM
-2. OSAC receives `vm_order` and `template_parameters` variables
+### ComputeInstance Template Lifecycle
+1. OSAC creates a dedicated namespace for the ComputeInstance
+2. OSAC receives `compute_instance_order` and `template_parameters` variables
 3. OSAC delegeates to template id role for provisioning
 4. OSAC assigns floating IP and configures port forwarding
 5. On deletion, template removes all resources in order

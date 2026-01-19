@@ -1,7 +1,7 @@
-# The VM Create Playbook in osac-aap pass in the following variables:
-# vm_order: Payload from EDA
-# vm_order_name: Name for the order.
-# vm_working_namespace: Private namespace created for the VM
+# The ComputeInstance Create Playbook in osac-aap pass in the following variables:
+# compute_instance_order: Payload from EDA
+# compute_instance_order_name: Name for the order.
+# vm_working_namespace: Private namespace created for the ComputeInstance
 # template_id: Template Id string.
 # template_parameters: All template variables passed.  Defined in arguement_specs.yaml
 # default_arg_specs: default values for arguement_specs
@@ -60,11 +60,11 @@
       volumes:
         - name: root-disk
           dataVolume:
-            name: "{{ vm_order_name }}-root-disk"
+            name: "{{ compute_instance_order_name }}-root-disk"
         - name: cloud-init-disk
           cloudInitNoCloud:
             secretRef:
-              name: "{{ vm_order_name }}-cloud-init"
+              name: "{{ compute_instance_order_name }}-cloud-init"
 
 - name: Create cloud-init secret
   kubernetes.core.k8s:
@@ -72,7 +72,7 @@
       apiVersion: v1
       kind: Secret
       metadata:
-        name: "{{ vm_order_name }}-cloud-init"
+        name: "{{ compute_instance_order_name }}-cloud-init"
         namespace: "{{ vm_working_namespace }}"
         labels: "{{ default_vm_labels }}"
       type: Opaque
@@ -90,7 +90,7 @@
           apiVersion: v1
           kind: Secret
           metadata:
-            name: "{{ vm_order_name }}-ssh-public-key"
+            name: "{{ compute_instance_order_name }}-ssh-public-key"
             namespace: "{{ vm_working_namespace }}"
             labels: "{{ default_vm_labels }}"
           data:
@@ -106,7 +106,7 @@
             - sshPublicKey:
                 source:
                   secret:
-                    secretName: "{{ vm_order_name }}-ssh-public-key"
+                    secretName: "{{ compute_instance_order_name }}-ssh-public-key"
                 propagationMethod:
                   noCloud: {}
 
@@ -139,7 +139,7 @@
       apiVersion: cdi.kubevirt.io/v1beta1
       kind: DataVolume
       metadata:
-        name: "{{ vm_order_name }}-root-disk"
+        name: "{{ compute_instance_order_name }}-root-disk"
         labels: "{{ default_vm_labels }}"
         namespace: "{{ vm_working_namespace }}"
       spec:
@@ -162,7 +162,7 @@
       apiVersion: kubevirt.io/v1
       kind: VirtualMachine
       metadata:
-        name: "{{ vm_order_name }}"
+        name: "{{ compute_instance_order_name }}"
         namespace: "{{ vm_working_namespace }}"
         labels: "{{ default_vm_labels }}"
       spec:
@@ -175,13 +175,13 @@
 
 - name: Show VM Namespace and VM Name
   ansible.builtin.debug:
-    msg: "Namespace {{ vm_working_namespace }} - Name: {{ vm_order_name }}"
+    msg: "Namespace {{ vm_working_namespace }} - Name: {{ compute_instance_order_name }}"
 
 - name: Wait for VM to be ready
   kubernetes.core.k8s_info:
     api_version: kubevirt.io/v1
     kind: VirtualMachine
-    name: "{{ vm_order_name }}"
+    name: "{{ compute_instance_order_name }}"
     namespace: "{{ vm_working_namespace }}"
     wait: true
     wait_condition:
@@ -193,26 +193,26 @@
   kubernetes.core.k8s:
     api_version: cloudkit.openshift.io/v1alpha1
     kind: VirtualMachine
-    name: "{{ vm_order_name }}"
-    namespace: "{{ vm_order.metadata.namespace }}"
+    name: "{{ compute_instance_order_name }}"
+    namespace: "{{ compute_instance_order.metadata.namespace }}"
     state: present
     definition:
       metadata:
         annotations:
-          cloudkit.openshift.io/reconciled-config-version: "{{ vm_order.status.desiredConfigVersion | default('unknown') }}"
+          cloudkit.openshift.io/reconciled-config-version: "{{ compute_instance_order.status.desiredConfigVersion | default('unknown') }}"
 
 - name: Get VM status
   kubernetes.core.k8s_info:
     api_version: kubevirt.io/v1
     kind: VirtualMachine
-    name: "{{ vm_order_name }}"
+    name: "{{ compute_instance_order_name }}"
     namespace: "{{ vm_working_namespace }}"
   register: vm_status
 
 - name: Display VM information
   ansible.builtin.debug:
     msg:
-      - "Virtual Machine '{{ vm_order_name }}' created successfully"
+      - "Virtual Machine '{{ compute_instance_order_name }}' created successfully"
       - "Namespace: {{ vm_working_namespace }}"
       - "Image: {{ params.image_source }}"
       - "CPU Cores: {{ params.cpu_cores }}/Memory: {{ params.memory }}"

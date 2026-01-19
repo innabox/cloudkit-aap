@@ -71,13 +71,6 @@
    "format": 1
   },
   {
-   "name": "README.md",
-   "ftype": "file",
-   "chksum_type": "sha256",
-   "chksum_sha256": "98f3eeeeaef7cf10531a3c337f931e913cc7cd21596435ee0110414a724e0141",
-   "format": 1
-  },
-  {
    "name": "meta",
    "ftype": "dir",
    "chksum_type": null,
@@ -270,7 +263,7 @@
    "name": "roles/ocp_virt_vm/defaults/main.yaml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "678ca4042a1682558261a53fab1e29ff2881105905074ec2acba3029a9584447",
+   "chksum_sha256": "06995ccc2f7ff24987c020bc0b1a17c86fcd324f9c75c68c12867f4542d587f0",
    "format": 1
   },
   {
@@ -281,17 +274,17 @@
    "format": 1
   },
   {
-   "name": "roles/ocp_virt_vm/meta/argument_specs.yaml",
-   "ftype": "file",
-   "chksum_type": "sha256",
-   "chksum_sha256": "cb48f91b845715b6960fb9039c1c72830e81e4e7362c85dc559514dd1664abdd",
-   "format": 1
-  },
-  {
    "name": "roles/ocp_virt_vm/meta/cloudkit.yaml",
    "ftype": "file",
    "chksum_type": "sha256",
    "chksum_sha256": "4acf04f387f75c7df72f4b2beaa02fee600bf8de4db1a0310e800d55c0ad295e",
+   "format": 1
+  },
+  {
+   "name": "roles/ocp_virt_vm/meta/argument_specs.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "b52ab53dedb673a0752d78af20b64a09687601236ea9e0b95b6bc2d1bdd7cf00",
    "format": 1
   },
   {
@@ -305,14 +298,21 @@
    "name": "roles/ocp_virt_vm/tasks/create.yaml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "b7a51e957762372c7febec94775c7a4c36fc1cbf0544e3236425b9dc4786e816",
+   "chksum_sha256": "6077c209c09a37a1f29c62b306887e05c5435739dfa6b6bd9b26a30273de1498",
    "format": 1
   },
   {
    "name": "roles/ocp_virt_vm/tasks/delete.yaml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "bbd4e8d9e10dcd18f79a52a139c777183f87cd3152c55547b9543737b7573438",
+   "chksum_sha256": "525f00d97e5591140ecbea83960f0a4da481e368524b5b3873ab1912da59f15e",
+   "format": 1
+  },
+  {
+   "name": "README.md",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "4c5e8d0671f2524c590c214ab52ee53d19f2f8fc2f6c6f8007eec97458e1f8d2",
    "format": 1
   }
  ],

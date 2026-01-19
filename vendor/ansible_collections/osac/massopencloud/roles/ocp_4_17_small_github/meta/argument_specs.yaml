@@ -1,0 +1,64 @@
+argument_specs:
+  main:
+    options:
+      cluster_order:
+        type: dict
+        required: true
+      cluster_working_namespace:
+        type: str
+        required: true
+      node_requests:
+        type: list
+        elements: dict
+        options:
+          numberOfNodes:
+            type: int
+            required: true
+          resourceClass:
+            type: str
+            required: true
+      template_parameters:
+        type: dict
+        options:
+          pull_secret:
+            description: >
+              The pull secret contains credentials for authenticating to image repositories.
+            type: str
+            required: true
+          ssh_public_key:
+            description: >
+              A public ssh key that will be installed into the `authorized_keys` file
+              of the `core` user on cluster worker nodes.
+            type: str
+          github_client_id:
+            description: >
+              GitHub Oauth client id
+            type: str
+            required: true
+          github_client_secret:
+            description: >
+              GitHub Oauth client secret
+            type: str
+            required: true
+          github_teams:
+            description: |
+              A list of GitHub teams that should be allowed to authenticate to the cluster.
+            type: list
+            elements: str
+          github_organizations:
+            description: |
+              A list of GitHub organizations that should be allowed to authenticate to the cluster.
+            type: list
+            elements: str
+          github_mapping_method:
+            description: |
+              Configure how OpenShift oauth will map GitHub identities to GitHub users. See
+              [the OpenShift documentation][docs] for more information.
+
+              [docs]: https://docs.redhat.com/en/documentation/openshift_container_platform/4.18/html/authentication_and_authorization/understanding-identity-provider#removing-kubeadmin_understanding-identity-provider
+            type: str
+            choices:
+            - claim
+            - lookup
+            - add
+            default: claim

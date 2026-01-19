@@ -1,10 +1,10 @@
 argument_specs:
   main:
     options:
-      vm_order:
+      compute_instance_order:
         type: dict
         required: true
-        description: VM configuration
+        description: ComputeInstance configuration
       template_parameters:
         type: dict
         description: VM configuration parameters

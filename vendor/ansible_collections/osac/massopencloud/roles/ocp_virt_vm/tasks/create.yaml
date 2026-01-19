@@ -9,11 +9,68 @@
     name: massopencloud.esi.floating_ip
   vars:
     floating_ip_state: present
-    floating_ip_name: "{{ vm_order_name }}-floating-ip"
+    floating_ip_name: "{{ compute_instance_order_name }}-floating-ip"
     floating_ip_properties:
-      vm: "{{ vm_order_name }}"
-      instance: "{{ vm_order.metadata.namespace }}"
+      vm: "{{ compute_instance_order_name }}"
+      instance: "{{ compute_instance_order.metadata.namespace }}"
       purpose: "o-sac"
+
+- name: Build Kubernetes service ports from exposed_ports
+  ansible.builtin.set_fact:
+    vm_service_ports: >
+      {{ vm_service_ports | default([]) + [{'name': port_name, 'port': port_number, 'targetPort': port_number, 'protocol': port_protocol}] }}
+  vars:
+    port_number: "{{ item.split('/')[0] | int }}"
+    port_protocol: "{{ item.split('/')[1] | upper }}"
+    port_name: "{{ port_protocol | lower }}-{{ port_number }}"
+  loop: "{{ params.exposed_ports.split(',') }}"
+
+- name: Create external LoadBalancer for VM
+  kubernetes.core.k8s:
+    state: present
+    apply: true
+    definition:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: "{{ compute_instance_order_name }}-load-balancer"
+        namespace: "{{ vm_working_namespace }}"
+        labels: "{{ default_vm_labels }}"
+      spec:
+        type: LoadBalancer
+        selector: "{{ default_vm_labels }}"
+        ports: "{{ vm_service_ports }}"
+
+- name: Get LoadBalancer IP
+  kubernetes.core.k8s_info:
+    api_version: v1
+    kind: Service
+    name: "{{ compute_instance_order_name }}-load-balancer"
+    namespace: "{{ vm_working_namespace }}"
+  register: load_balancer
+  until: load_balancer.resources[0].status.loadBalancer.ingress is defined
+  retries: 30
+  delay: 10
+
+- name: Get VirtualMachine Instance to find the node
+  kubernetes.core.k8s_info:
+    api_version: kubevirt.io/v1
+    kind: VirtualMachineInstance
+    name: "{{ compute_instance_order_name }}"
+    namespace: "{{ vm_working_namespace }}"
+  register: vmi_info
+
+- name: Get Node information for the VM
+  kubernetes.core.k8s_info:
+    api_version: v1
+    kind: Node
+    name: "{{ vmi_info.resources[0].status.nodeName }}"
+  register: node_info
+
+- name: Build port mappings list
+  ansible.builtin.set_fact:
+    port_mappings: "{{ port_mappings | default([]) + [item.port | string + ':' + item.nodePort | string] }}"
+  loop: "{{ load_balancer.resources[0].spec.ports }}"
 
 - name: Create floating IP port forwarding to VM node NodePorts
   ansible.builtin.include_role:
@@ -22,18 +79,19 @@
   vars:
     internal_ip: "{{ node_info.resources[0].status.addresses | selectattr('type', 'equalto', 'InternalIP') | map(attribute='address') | first }}"
     floating_ip: "{{ allocate_floating_ip_result }}"
-    internal_network: "{{ vm_internal_network }}"
+    internal_network: "{{ default_vm_internal_network }}"
     ports: "{{ port_mappings }}"
-    description: "{{ vm_name }}-nodeport"
+    description: "{{ compute_instance_order_name }}-nodeport"
 
-- name: Annotate VirtualMachine with floating IP address
+- name: Annotate VirtualMachine with floating IP address and config hash
   kubernetes.core.k8s:
     api_version: cloudkit.openshift.io/v1alpha1
     kind: VirtualMachine
-    name: "{{ vm_name }}"
-    namespace: "{{ vm_order.metadata.namespace }}"
+    name: "{{ compute_instance_order_name }}"
+    namespace: "{{ compute_instance_order.metadata.namespace }}"
     state: present
     definition:
       metadata:
         annotations:
           cloudkit.openshift.io/floating-ip-address: "{{ allocate_floating_ip_result }}"
+          cloudkit.openshift.io/reconciled-config-version: "{{ compute_instance_order.status.desiredConfigVersion | default('unknown') }}"

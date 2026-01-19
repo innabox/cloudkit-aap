@@ -1,7 +1,7 @@
 ---
 default_vm_internal_network: "hypershift"
 default_vm_storage_class: "nfs-client"
-default_vm_labels: "{{ {vm_order_label: vm_order_name} }}"
+default_vm_labels: "{{ {compute_instance_order_label: compute_instance_order_name} }}"
 
 # Setup the defaults described in the arg_specs.
 default_arg_specs:

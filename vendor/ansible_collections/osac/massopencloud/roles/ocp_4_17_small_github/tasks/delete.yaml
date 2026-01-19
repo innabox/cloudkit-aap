@@ -1,0 +1,19 @@
+- name: Delete cluster
+  ansible.builtin.import_role:
+    name: osac.templates.ocp_4_17_small
+
+- name: Delete VM service (if it exists)
+  kubernetes.core.k8s:
+    api_version: v1
+    kind: Service
+    name: "{{ compute_instance_order_name }}-service"
+    namespace: "{{ vm_working_namespace }}"
+    state: absent
+
+- name: Delete VM load balancer service
+  kubernetes.core.k8s:
+    api_version: v1
+    kind: Service
+    name: "{{ compute_instance_order_name }}-load-balancer"
+    namespace: "{{ vm_working_namespace }}"
+    state: absent
