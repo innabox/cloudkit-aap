@@ -21,9 +21,9 @@ collections:
     version: "3.4.1"
   - name: osac.templates
     type: git
-    source: https://github.com/akshaynadkarni/osac-templates
-    version: fix/correct-variable-naming
+    source: https://github.com/innabox/osac-templates
+    version: main
   - name: osac.massopencloud
     type: git
-    source: https://github.com/akshaynadkarni/osac-massopencloud-templates
-    version: fix/correct-variable-naming
+    source: https://github.com/innabox/osac-massopencloud-templates
+    version: main

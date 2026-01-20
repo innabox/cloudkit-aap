@@ -43,6 +43,13 @@
    "format": 1
   },
   {
+   "name": ".gitignore",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "14645fbec1b8d42fead94337a95415c9e2342c990742f628a10f36deea811dfd",
+   "format": 1
+  },
+  {
    "name": ".pre-commit-config.yaml",
    "ftype": "file",
    "chksum_type": "sha256",
@@ -61,6 +68,13 @@
    "ftype": "file",
    "chksum_type": "sha256",
    "chksum_sha256": "1f6965e2598002fb0a2a96bd586d884b64d4c2bcb890d901a777418dbe143d4b",
+   "format": 1
+  },
+  {
+   "name": "README.md",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "f8ffb3ef6599b0e7f8a97f185cb3dbe0510ba1b1db928f77ba9f96cc976ff1cb",
    "format": 1
   },
   {
@@ -204,6 +218,13 @@
    "format": 1
   },
   {
+   "name": "roles/ocp_4_17_small_github/tasks/delete.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "7c1d0ec85dd2655faded3ad028b39c93d40b91eda9d77e5ca25fefa224dbcd11",
+   "format": 1
+  },
+  {
    "name": "roles/ocp_4_17_small_github/tasks/install.yaml",
    "ftype": "file",
    "chksum_type": "sha256",
@@ -215,13 +236,6 @@
    "ftype": "file",
    "chksum_type": "sha256",
    "chksum_sha256": "cb6f7b708d5bc7b243142766b950261106a79e703cdbf4f63dc2d9fdd797acf9",
-   "format": 1
-  },
-  {
-   "name": "roles/ocp_4_17_small_github/tasks/delete.yaml",
-   "ftype": "file",
-   "chksum_type": "sha256",
-   "chksum_sha256": "7c1d0ec85dd2655faded3ad028b39c93d40b91eda9d77e5ca25fefa224dbcd11",
    "format": 1
   },
   {
@@ -253,17 +267,17 @@
    "format": 1
   },
   {
-   "name": "roles/ocp_virt_vm/meta/cloudkit.yaml",
-   "ftype": "file",
-   "chksum_type": "sha256",
-   "chksum_sha256": "4acf04f387f75c7df72f4b2beaa02fee600bf8de4db1a0310e800d55c0ad295e",
-   "format": 1
-  },
-  {
    "name": "roles/ocp_virt_vm/meta/argument_specs.yaml",
    "ftype": "file",
    "chksum_type": "sha256",
    "chksum_sha256": "0fe552286e9f5d114d0ce19bad97842990852667d565d751c5a810d9c014e697",
+   "format": 1
+  },
+  {
+   "name": "roles/ocp_virt_vm/meta/cloudkit.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "4acf04f387f75c7df72f4b2beaa02fee600bf8de4db1a0310e800d55c0ad295e",
    "format": 1
   },
   {
@@ -277,7 +291,7 @@
    "name": "roles/ocp_virt_vm/tasks/create.yaml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "bed524348d50bbf51a418fa1c17f619db3b89c653f7eb7716591f6f679884d4e",
+   "chksum_sha256": "bec0f83ac68ed9434516d51f8dae08ba0277035f2095e5db2e9f83ac21e1b37e",
    "format": 1
   },
   {
@@ -285,13 +299,6 @@
    "ftype": "file",
    "chksum_type": "sha256",
    "chksum_sha256": "b730064632024e78aefa485fed4e6499393475aa7c9a0defae2766e775b81b2a",
-   "format": 1
-  },
-  {
-   "name": "README.md",
-   "ftype": "file",
-   "chksum_type": "sha256",
-   "chksum_sha256": "f8c1a2f620a439d72914a6331b612bee2b85a53b2284be5590b773e24614508a",
    "format": 1
   }
  ],

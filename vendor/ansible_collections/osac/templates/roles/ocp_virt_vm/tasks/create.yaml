@@ -195,7 +195,7 @@
     kind: ComputeInstance
     name: "{{ compute_instance_name }}"
     namespace: "{{ compute_instance.metadata.namespace }}"
-    state: patched
+    state: present
     definition:
       metadata:
         annotations:

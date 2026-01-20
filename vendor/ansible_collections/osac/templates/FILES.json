@@ -43,6 +43,13 @@
    "format": 1
   },
   {
+   "name": ".gitignore",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "14645fbec1b8d42fead94337a95415c9e2342c990742f628a10f36deea811dfd",
+   "format": 1
+  },
+  {
    "name": ".pre-commit-config.yaml",
    "ftype": "file",
    "chksum_type": "sha256",
@@ -68,6 +75,13 @@
    "ftype": "file",
    "chksum_type": "sha256",
    "chksum_sha256": "1f6965e2598002fb0a2a96bd586d884b64d4c2bcb890d901a777418dbe143d4b",
+   "format": 1
+  },
+  {
+   "name": "README.md",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "2e14173195d337decf93c6ea3fc4f3642c9143316cbfd1a8af6bf846495aad30",
    "format": 1
   },
   {
@@ -274,17 +288,17 @@
    "format": 1
   },
   {
-   "name": "roles/ocp_virt_vm/meta/cloudkit.yaml",
-   "ftype": "file",
-   "chksum_type": "sha256",
-   "chksum_sha256": "4acf04f387f75c7df72f4b2beaa02fee600bf8de4db1a0310e800d55c0ad295e",
-   "format": 1
-  },
-  {
    "name": "roles/ocp_virt_vm/meta/argument_specs.yaml",
    "ftype": "file",
    "chksum_type": "sha256",
    "chksum_sha256": "cb4d1e7077198db3424f4ab7ce7f9e6c57937f5aa27908efbee1ffc83f3dd1b9",
+   "format": 1
+  },
+  {
+   "name": "roles/ocp_virt_vm/meta/cloudkit.yaml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "4acf04f387f75c7df72f4b2beaa02fee600bf8de4db1a0310e800d55c0ad295e",
    "format": 1
   },
   {
@@ -298,7 +312,7 @@
    "name": "roles/ocp_virt_vm/tasks/create.yaml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "1970d404f2516182efaef2300b7b89e2554745a67b37abe6928ac00ed6158bca",
+   "chksum_sha256": "a0d4133163bcf93eba75728b37fb7aacea132f7211793f99ad043e1adf98b21d",
    "format": 1
   },
   {
@@ -306,13 +320,6 @@
    "ftype": "file",
    "chksum_type": "sha256",
    "chksum_sha256": "0dbe6b082ad10a8daae5217f17ef29c16a65f1e354b0b563914a7c3103d4f318",
-   "format": 1
-  },
-  {
-   "name": "README.md",
-   "ftype": "file",
-   "chksum_type": "sha256",
-   "chksum_sha256": "2e14173195d337decf93c6ea3fc4f3642c9143316cbfd1a8af6bf846495aad30",
    "format": 1
   }
  ],

@@ -66,7 +66,7 @@ Deploy virtual machines on OpenShift Virtualization with automated floating IP a
       vars:
         compute_instance:
           metadata:
-            name: my-vm
+            name: my-compute-instance
             namespace: default
         template_parameters:
           cpu_cores: 4
