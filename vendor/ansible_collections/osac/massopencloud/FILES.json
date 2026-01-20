@@ -277,7 +277,7 @@
    "name": "roles/ocp_virt_vm/tasks/create.yaml",
    "ftype": "file",
    "chksum_type": "sha256",
-   "chksum_sha256": "3d22b41df9fad1fc2d13156c6045e931c34d6e74c66035ee1fd6d3dc34f71389",
+   "chksum_sha256": "bed524348d50bbf51a418fa1c17f619db3b89c653f7eb7716591f6f679884d4e",
    "format": 1
   },
   {

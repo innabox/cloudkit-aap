@@ -192,10 +192,10 @@
 - name: Annotate the reconciledConfigVerion
   kubernetes.core.k8s:
     api_version: cloudkit.openshift.io/v1alpha1
-    kind: VirtualMachine
+    kind: ComputeInstance
     name: "{{ compute_instance_name }}"
     namespace: "{{ compute_instance.metadata.namespace }}"
-    state: present
+    state: patched
     definition:
       metadata:
         annotations:
