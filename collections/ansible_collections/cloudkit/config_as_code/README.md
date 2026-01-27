@@ -289,7 +289,7 @@ spec:
   template:
     spec:
       containers:
-        - image: ghcr.io/innabox/cloudkit-aap:latest
+        - image: ghcr.io/osac-project/osac-aap:latest
           name: bootstrap
           args:
             - ansible-playbook
